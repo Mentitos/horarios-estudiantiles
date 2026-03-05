@@ -20,9 +20,7 @@ class HorarioProvider extends ChangeNotifier {
 
     try {
       horario = await _repository.obtenerHorario();
-      if (horario == null) {
-        horario = await _repository.crearHorarioVacio('Mi Horario');
-      }
+      horario ??= await _repository.crearHorarioVacio('Mi Horario');
     } catch (e) {
       error = e.toString();
     } finally {

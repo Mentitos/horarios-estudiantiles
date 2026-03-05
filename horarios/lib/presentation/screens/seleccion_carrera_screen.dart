@@ -1,45 +1,14 @@
 import 'package:flutter/material.dart';
+
+import '../../utils/carreras_grupos.dart';
 import 'seleccion_materia_screen.dart';
 
 class SeleccionCarreraScreen extends StatelessWidget {
   const SeleccionCarreraScreen({super.key});
 
-  final Map<String, List<String>> grupos = const {
-    'Ingeniería': ['Electromecanica', 'Industrial', 'Quimica'],
-    'Licenciatura': [
-      'Administracion De Empresas',
-      'Administracion Publica',
-      'Comunicaciones',
-      'Cultura Y Lenguajes Artisticos',
-      'Ecologia',
-      'Economia Industrial',
-      'Economia Politica',
-      'Educacion',
-      'Estudios Politicos',
-      'Politica Social',
-      'Sistemas',
-      'Urbanismos',
-    ],
-    'Profesorado': [
-      'Filosofia',
-      'Fisica',
-      'Geografia',
-      'Historia',
-      'Literatura',
-      'Matematica',
-      'Prof Economia',
-    ],
-    'Tecnicatura': [
-      'Automatizacion Y Control',
-      'Informatica',
-      'Sist. De Info. Geografica',
-      'Tec. Quimica',
-    ],
-  };
-
   @override
   Widget build(BuildContext context) {
-    final tipos = grupos.keys.toList();
+    final tipos = gruposCarreras.keys.toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -50,7 +19,7 @@ class SeleccionCarreraScreen extends StatelessWidget {
         itemCount: tipos.length,
         itemBuilder: (context, index) {
           final tipo = tipos[index];
-          final carrerasInfo = grupos[tipo]!;
+          final carrerasInfo = gruposCarreras[tipo]!;
 
           return ExpansionTile(
             title: Text(

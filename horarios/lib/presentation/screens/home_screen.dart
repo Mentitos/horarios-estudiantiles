@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'horario_screen.dart';
+import 'calendario_eventos_screen.dart';
 import 'ajustes_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,7 +18,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: IndexedStack(
         index: _currentIndex,
-        children: const [HorarioScreen(), AjustesScreen()],
+        children: const <Widget>[
+          HorarioScreen(),
+          CalendarioEventosScreen(),
+          AjustesScreen(),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
@@ -27,9 +32,10 @@ class _HomeScreenState extends State<HomeScreen> {
           });
         },
         items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
-            label: 'Mi Horario',
+            label: 'Calendario',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Ajustes'),
         ],

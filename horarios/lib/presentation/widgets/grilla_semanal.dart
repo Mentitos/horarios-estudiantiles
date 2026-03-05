@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/models/horario_usuario.dart';
 
-class GrillaSemanal extends StatelessWidget {
+class GrillaSemanal extends StatefulWidget {
   final HorarioUsuario horario;
   final bool modoExportacion;
 
@@ -11,18 +11,62 @@ class GrillaSemanal extends StatelessWidget {
     this.modoExportacion = false,
   });
 
+  @override
+  State<GrillaSemanal> createState() => _GrillaSemanalState();
+}
+
+class _GrillaSemanalState extends State<GrillaSemanal> {
   static const double _alturaFranja = 52.0;
-  static const int _horaInicio = 7;
-  static const int _horaFin = 22;
+  static const int _horaInicio = 0;
+  static const int _horaFin = 24;
   static const int _totalFranjas = _horaFin - _horaInicio;
 
   static const List<String> _diasSemana = [
+    'Domingo',
     'Lunes',
     'Martes',
     'Miércoles',
     'Jueves',
     'Viernes',
+    'Sábado',
   ];
+
+  final ScrollController _headerScrollController = ScrollController();
+  final ScrollController _bodyScrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _headerScrollController.addListener(() {
+      if (_headerScrollController.hasClients &&
+          _bodyScrollController.hasClients) {
+        if (_headerScrollController.offset != _bodyScrollController.offset) {
+          _bodyScrollController.jumpTo(_headerScrollController.offset);
+        }
+      }
+    });
+    _bodyScrollController.addListener(() {
+      if (_headerScrollController.hasClients &&
+          _bodyScrollController.hasClients) {
+        if (_bodyScrollController.offset != _headerScrollController.offset) {
+          _headerScrollController.jumpTo(_bodyScrollController.offset);
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _headerScrollController.dispose();
+    _bodyScrollController.dispose();
+    super.dispose();
+  }
+
+  String _abreviarDia(String dia) {
+    if (dia == 'Miércoles') return 'Mié';
+    if (dia == 'Sábado') return 'Sáb';
+    return dia.substring(0, 3);
+  }
 
   int _parseMinutosDesdeInicio(String horaAAMM) {
     if (horaAAMM.isEmpty) return 0;
@@ -39,11 +83,10 @@ class GrillaSemanal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Si estamos en modo exportación, usamos un tema claro forzado
-    final ThemeData theme = modoExportacion
+    final ThemeData theme = widget.modoExportacion
         ? ThemeData.light().copyWith(
             scaffoldBackgroundColor: Colors.white,
-            cardTheme: const CardTheme(
+            cardTheme: const CardThemeData(
               elevation: 0,
               margin: EdgeInsets.zero,
               color: Colors.white,
@@ -51,150 +94,179 @@ class GrillaSemanal extends StatelessWidget {
           )
         : Theme.of(context);
 
-    final bgColor = modoExportacion
+    final bgColor = widget.modoExportacion
         ? Colors.white
         : theme.scaffoldBackgroundColor;
-    final borderColor = modoExportacion
+    final borderColor = widget.modoExportacion
         ? Colors.grey[300]!
         : theme.dividerColor;
-    final textColor = modoExportacion
+    final textColor = widget.modoExportacion
         ? Colors.black87
         : theme.textTheme.bodyMedium?.color ?? Colors.black;
 
-    return Container(
-      color: bgColor,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          if (modoExportacion)
-            Padding(
-              padding: const EdgeInsets.only(top: 24.0, bottom: 16.0),
-              child: Text(
-                horario.titulo ?? 'Mi Horario',
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double minDayWidth = 100.0;
+        final double totalDaysWidth = _diasSemana.length * minDayWidth;
+        final double availableWidth = constraints.maxWidth - 60;
+        final bool shouldScrollHorizontally = availableWidth < totalDaysWidth;
 
-          // Header de Días
-          Row(
+        final double dayWidth = shouldScrollHorizontally
+            ? minDayWidth
+            : availableWidth / _diasSemana.length;
+
+        return Container(
+          color: bgColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Columna vacía arriba de la columna de horas
-              const SizedBox(width: 50),
-              // Días
-              ..._diasSemana.map(
-                (dia) => Expanded(
-                  child: Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: borderColor),
-                        left: BorderSide(color: borderColor),
+              if (widget.modoExportacion)
+                Padding(
+                  padding: const EdgeInsets.only(top: 24.0, bottom: 16.0),
+                  child: Text(
+                    widget.horario.titulo ?? 'Mi Horario',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+
+              Row(
+                children: [
+                  const SizedBox(width: 60),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      controller: _headerScrollController,
+                      physics: const ClampingScrollPhysics(),
+                      child: Row(
+                        children: _diasSemana.map((dia) {
+                          return Container(
+                            width: dayWidth,
+                            alignment: Alignment.center,
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(color: borderColor),
+                                left: BorderSide(color: borderColor),
+                              ),
+                            ),
+                            child: Text(
+                              _abreviarDia(dia),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: textColor,
+                                fontSize: widget.modoExportacion ? 14 : 13,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList(),
                       ),
                     ),
-                    child: Text(
-                      dia,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: textColor,
-                        fontSize: modoExportacion ? 14 : 12,
-                      ),
+                  ),
+                ],
+              ),
+
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: widget.modoExportacion
+                      ? const NeverScrollableScrollPhysics()
+                      : const ClampingScrollPhysics(),
+                  child: SizedBox(
+                    height: (_totalFranjas + 1) * _alturaFranja,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(
+                          width: 60,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: List.generate(_totalFranjas + 1, (index) {
+                              if (index == _totalFranjas)
+                                return const SizedBox.shrink();
+
+                              final horaStr =
+                                  '${(_horaInicio + index).toString().padLeft(2, '0')}:00';
+                              return Positioned(
+                                top: index * _alturaFranja,
+                                left: 0,
+                                right: 0,
+                                child: Transform.translate(
+                                  offset: const Offset(0, -8),
+                                  child: Container(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: Text(
+                                      horaStr,
+                                      textAlign: TextAlign.right,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                        color: textColor.withValues(alpha: 0.7),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }),
+                          ),
+                        ),
+
+                        Expanded(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            controller: _bodyScrollController,
+                            physics: const ClampingScrollPhysics(),
+                            child: Row(
+                              children: _diasSemana.map((dia) {
+                                return Container(
+                                  width: dayWidth,
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      left: BorderSide(color: borderColor),
+                                    ),
+                                  ),
+                                  child: Stack(
+                                    clipBehavior: Clip.hardEdge,
+                                    children: [
+                                      ...List.generate(
+                                        _totalFranjas,
+                                        (index) => Positioned(
+                                          top: (index + 1) * _alturaFranja,
+                                          left: 0,
+                                          right: 0,
+                                          child: Container(
+                                            height: 1,
+                                            color: borderColor.withValues(
+                                              alpha: 0.5,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+
+                                      ..._buildBloquesDelDia(
+                                        dia,
+                                        widget.horario.materiasSeleccionadas,
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
             ],
           ),
-
-          // Cuerpo de la grilla (Horas + Stacks de Días)
-          Expanded(
-            child: SingleChildScrollView(
-              physics: modoExportacion
-                  ? const NeverScrollableScrollPhysics()
-                  : null,
-              child: IntrinsicHeight(
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Columna Y: Horas
-                    SizedBox(
-                      width: 50,
-                      child: Stack(
-                        children: List.generate(_totalFranjas + 1, (index) {
-                          final horaStr =
-                              '${(_horaInicio + index).toString().padLeft(2, '0')}:00';
-                          return Positioned(
-                            top: index * _alturaFranja,
-                            left: 0,
-                            right: 0,
-                            child: Transform.translate(
-                              // Subimos el texto un poquito para que el medio del texto
-                              // quede apoyando sobre la linea separadora.
-                              offset: const Offset(0, -8),
-                              child: Text(
-                                horaStr,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: textColor.withValues(alpha: 255 * 0.6),
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
-                      ),
-                    ),
-
-                    // Columnas de cada día
-                    ..._diasSemana.map(
-                      (dia) => Expanded(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            border: Border(
-                              left: BorderSide(color: borderColor),
-                            ),
-                          ),
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              // Líneas horizontales de fondo
-                              ...List.generate(
-                                _totalFranjas,
-                                (index) => Positioned(
-                                  top: (index + 1) * _alturaFranja,
-                                  left: 0,
-                                  right: 0,
-                                  child: Container(
-                                    height: 1,
-                                    color: borderColor.withValues(
-                                      alpha: 255 * 0.5,
-                                    ),
-                                  ),
-                                ),
-                              ),
-
-                              // Bloques de las materias de este día
-                              ..._buildBloquesDelDia(
-                                dia,
-                                horario.materiasSeleccionadas,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -202,7 +274,6 @@ class GrillaSemanal extends StatelessWidget {
     String dia,
     List<MateriaSeleccionada> materias,
   ) {
-    // 1. Extraer los bloques que corresponden a este día
     List<Map<String, dynamic>> bloquesDia = [];
 
     for (var materia in materias) {
@@ -217,7 +288,6 @@ class GrillaSemanal extends StatelessWidget {
       }
     }
 
-    // 2. Mapearlos a Positioned
     return bloquesDia.map((info) {
       final BloqueHorario b = info['bloque'];
 
@@ -227,7 +297,7 @@ class GrillaSemanal extends StatelessWidget {
       final double top = (minInicio / 60.0) * _alturaFranja;
       double height = ((minFin - minInicio) / 60.0) * _alturaFranja;
 
-      if (height <= 0) height = _alturaFranja; // Failsafe mínimo
+      if (height <= 0) height = _alturaFranja;
 
       return Positioned(
         top: top,
@@ -238,13 +308,13 @@ class GrillaSemanal extends StatelessWidget {
           decoration: BoxDecoration(
             color: info['color'],
             borderRadius: BorderRadius.circular(4),
-            boxShadow: modoExportacion
+            boxShadow: widget.modoExportacion
                 ? null
                 : [
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 2,
-                      offset: Offset(0, 1),
+                    const BoxShadow(
+                      color: Colors.black26,
+                      blurRadius: 3,
+                      offset: Offset(1, 2),
                     ),
                   ],
           ),
@@ -257,7 +327,7 @@ class GrillaSemanal extends StatelessWidget {
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: modoExportacion ? 11 : 10,
+                  fontSize: widget.modoExportacion ? 11 : 10,
                 ),
                 maxLines: height < 40 ? 1 : 2,
                 overflow: TextOverflow.ellipsis,
@@ -268,7 +338,7 @@ class GrillaSemanal extends StatelessWidget {
                   'Aula: ${b.aula}',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 255 * 0.9),
-                    fontSize: modoExportacion ? 10 : 9,
+                    fontSize: widget.modoExportacion ? 10 : 9,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

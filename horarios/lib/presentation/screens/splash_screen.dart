@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/horario_provider.dart';
 import '../../providers/materias_provider.dart';
+import '../../providers/perfil_provider.dart';
 import 'home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -21,10 +22,12 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<void> _initApp() async {
     final materiasProvider = context.read<MateriasProvider>();
     final horarioProvider = context.read<HorarioProvider>();
+    final perfilProvider = context.read<PerfilProvider>();
 
     await Future.wait([
       materiasProvider.inicializar(),
       horarioProvider.inicializar(),
+      perfilProvider.inicializar(),
     ]);
 
     if (mounted) {

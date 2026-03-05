@@ -124,8 +124,9 @@ class HorarioRepository {
     final indiceMateria = rHorario.materiasSeleccionadas.indexWhere(
       (m) => m.materiaId == materiaId,
     );
-    if (indiceMateria == -1)
+    if (indiceMateria == -1) {
       throw Exception('Materia \$materiaId no está en este horario');
+    }
 
     for (var mat in rHorario.materiasSeleccionadas) {
       for (var b in mat.bloques) {
@@ -163,8 +164,9 @@ class HorarioRepository {
     final indiceMateria = rHorario.materiasSeleccionadas.indexWhere(
       (m) => m.materiaId == materiaId,
     );
-    if (indiceMateria == -1)
+    if (indiceMateria == -1) {
       throw Exception('Materia \$materiaId no está en este horario');
+    }
 
     final materiaUpdate = rHorario.materiasSeleccionadas[indiceMateria];
     materiaUpdate.bloques = List.from(materiaUpdate.bloques)

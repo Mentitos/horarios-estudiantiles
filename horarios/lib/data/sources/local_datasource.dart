@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import '../models/materia.dart';
 import '../models/carrera.dart';
 import '../models/horario_usuario.dart';
+import '../models/perfil_usuario.dart';
 
 class LocalDatasource {
   static const String _isFetchedKey = 'datos_cargados';
@@ -24,6 +25,7 @@ class LocalDatasource {
       MateriaSchema,
       CarreraSchema,
       HorarioUsuarioSchema,
+      PerfilUsuarioSchema,
     ], directory: dir.path);
   }
 
@@ -65,6 +67,11 @@ class LocalDatasource {
   Future<List<Carrera>> leerTodasLasCarreras() async {
     final isar = await db;
     return await isar.carreras.where().findAll();
+  }
+
+  Future<Carrera?> leerCarreraPorNombre(String nombre) async {
+    final isar = await db;
+    return await isar.carreras.where().nombreEqualTo(nombre).findFirst();
   }
 
   Future<Materia?> leerMateriaPorId(String idMateria) async {

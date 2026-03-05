@@ -21,7 +21,6 @@ class MateriasProvider extends ChangeNotifier {
       await _repository.cargarDatosIniciales();
       carreras = await _repository.getCarreras();
 
-      // Ordenamos las carreras alfabéticamente
       carreras.sort((a, b) => (a.nombre ?? '').compareTo(b.nombre ?? ''));
     } catch (e) {
       error = e.toString();

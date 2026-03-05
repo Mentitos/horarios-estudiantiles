@@ -1,0 +1,32 @@
+const Map<String, List<String>> gruposCarreras = {
+  'Ingeniería': ['Electromecanica', 'Industrial', 'Quimica'],
+  'Licenciatura': [
+    'Administracion De Empresas',
+    'Administracion Publica',
+    'Comunicaciones',
+    'Cultura Y Lenguajes Artisticos',
+    'Ecologia',
+    'Economia Industrial',
+    'Economia Politica',
+    'Educacion',
+    'Estudios Politicos',
+    'Politica Social',
+    'Sistemas',
+    'Urbanismos',
+  ],
+  'Profesorado': [
+    'Filosofia',
+    'Fisica',
+    'Geografia',
+    'Historia',
+    'Literatura',
+    'Matematica',
+    'Prof Economia',
+  ],
+  'Tecnicatura': [
+    'Automatizacion Y Control',
+    'Informatica',
+    'Sist. De Info. Geografica',
+    'Tec. Quimica',
+  ],
+};

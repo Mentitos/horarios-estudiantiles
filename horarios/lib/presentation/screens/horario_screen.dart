@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../data/models/horario_usuario.dart';
 import '../../providers/horario_provider.dart';
+import '../../providers/perfil_provider.dart';
 import 'seleccion_carrera_screen.dart';
-import 'vista_previa_grilla_screen.dart';
+import 'seleccion_materia_screen.dart';
+import '../widgets/grilla_semanal.dart';
 
 class HorarioScreen extends StatelessWidget {
   const HorarioScreen({super.key});
@@ -140,7 +142,7 @@ class HorarioScreen extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: diaSeleccionado,
+                      initialValue: diaSeleccionado,
                       items:
                           [
                                 'Lunes',
@@ -149,6 +151,7 @@ class HorarioScreen extends StatelessWidget {
                                 'Jueves',
                                 'Viernes',
                                 'Sábado',
+                                'Domingo',
                               ]
                               .map(
                                 (d) =>
@@ -156,8 +159,9 @@ class HorarioScreen extends StatelessWidget {
                               )
                               .toList(),
                       onChanged: (val) {
-                        if (val != null)
+                        if (val != null) {
                           setStateDialog(() => diaSeleccionado = val);
+                        }
                       },
                       decoration: const InputDecoration(labelText: 'Día'),
                     ),
@@ -233,86 +237,222 @@ class HorarioScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mi Horario'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          Consumer<HorarioProvider>(
-            builder: (context, provider, child) {
-              final tieneMaterias =
-                  (provider.horario?.materiasSeleccionadas.isNotEmpty) ?? false;
-              if (!tieneMaterias) return const SizedBox.shrink();
-
-              return IconButton(
-                icon: const Icon(Icons.grid_on),
-                tooltip: 'Ver grilla horaria',
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => const VistaPreviaGrillaScreen(),
-                    ),
-                  );
-                },
-              );
-            },
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Mi Horario'),
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Gestor de Clases'),
+              Tab(text: 'Calendario Semanal'),
+            ],
           ),
-        ],
-      ),
-      body: Consumer<HorarioProvider>(
-        builder: (context, provider, child) {
-          if (provider.cargando) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final horario = provider.horario;
-          if (horario == null || horario.materiasSeleccionadas.isEmpty) {
-            return const Center(
-              child: Text(
-                'Agregá materias con el botón +',
-                style: TextStyle(fontSize: 18),
-              ),
-            );
-          }
-
-          return ListView.builder(
-            itemCount: horario.materiasSeleccionadas.length,
-            itemBuilder: (context, index) {
-              final materia = horario.materiasSeleccionadas[index];
-              final color = Color(materia.colorARGB ?? 0xFF000000);
-
-              return Dismissible(
-                key: Key(materia.materiaId!),
-                background: Container(
-                  color: Colors.red,
-                  alignment: Alignment.centerRight,
-                  padding: const EdgeInsets.only(right: 20),
-                  child: const Icon(Icons.delete, color: Colors.white),
-                ),
-                direction: DismissDirection.endToStart,
-                onDismissed: (_) {
-                  provider.eliminarMateria(materia.materiaId!);
-                },
-                child: ListTile(
-                  leading: CircleAvatar(backgroundColor: color),
-                  title: Text(materia.materiaNombre ?? ''),
-                  subtitle: Text(
-                    '${materia.bloques.length} bloques configurados',
-                  ),
-                  onTap: () => _mostrarBottomSheetBloques(context, materia),
-                ),
-              );
-            },
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const SeleccionCarreraScreen()),
-          );
-        },
-        child: const Icon(Icons.add),
+        ),
+        body: TabBarView(
+          children: [
+            _buildGestorDeClases(context),
+            _buildCalendarioSemanal(context),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: const Icon(Icons.add),
+          onPressed: () => _iniciarFlujoAgregarMateria(context),
+        ),
       ),
     );
+  }
+
+  Widget _buildGestorDeClases(BuildContext context) {
+    return Consumer<HorarioProvider>(
+      builder: (context, provider, child) {
+        if (provider.cargando) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final horario = provider.horario;
+        if (horario == null || horario.materiasSeleccionadas.isEmpty) {
+          return const Center(
+            child: Text(
+              'Tocá el + para configurar tus materias',
+              style: TextStyle(fontSize: 18),
+            ),
+          );
+        }
+
+        final materias = horario.materiasSeleccionadas;
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: materias.length,
+          itemBuilder: (context, index) {
+            final materia = materias[index];
+            final color = Color(materia.colorARGB ?? 0xFF000000);
+            final textColor = color.computeLuminance() > 0.5
+                ? Colors.black
+                : Colors.white;
+
+            return Card(
+              color: color,
+              margin: const EdgeInsets.only(bottom: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      materia.materiaNombre ?? 'Materia',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    if (materia.bloques.isEmpty)
+                      Text(
+                        'Sin horarios configurados',
+                        style: TextStyle(
+                          color: textColor.withOpacity(0.8),
+                          fontStyle: FontStyle.italic,
+                        ),
+                      )
+                    else
+                      ...materia.bloques.map((b) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 4.0),
+                          child: Text(
+                            '${b.dia} ${b.horaInicio} - ${b.horaFin}${b.aula?.isNotEmpty == true ? ' • Aula ${b.aula}' : ''}',
+                            style: TextStyle(color: textColor, fontSize: 16),
+                          ),
+                        );
+                      }),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        _buildActionButton(
+                          icon: Icons.edit,
+                          label: 'Editar',
+                          textColor: textColor,
+                          onPressed: () =>
+                              _mostrarBottomSheetBloques(context, materia),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildActionButton(
+                          icon: Icons.delete,
+                          label: 'Eliminar',
+                          textColor: textColor,
+                          onPressed: () =>
+                              provider.eliminarMateria(materia.materiaId!),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required Color textColor,
+    required VoidCallback onPressed,
+  }) {
+    return InkWell(
+      onTap: onPressed,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.3),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: Colors.white),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCalendarioSemanal(BuildContext context) {
+    return Consumer<HorarioProvider>(
+      builder: (context, provider, child) {
+        if (provider.cargando) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        final horario = provider.horario;
+        if (horario == null || horario.materiasSeleccionadas.isEmpty) {
+          return const Center(
+            child: Text(
+              'Aún no hay materias para mostrar',
+              style: TextStyle(fontSize: 18),
+            ),
+          );
+        }
+        return GrillaSemanal(horario: horario);
+      },
+    );
+  }
+
+  void _iniciarFlujoAgregarMateria(BuildContext context) {
+    final perfilProvider = context.read<PerfilProvider>();
+    final carreras = perfilProvider.carrerasSeleccionadas;
+
+    if (carreras.isEmpty) {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute(builder: (_) => const SeleccionCarreraScreen()));
+    } else if (carreras.length == 1) {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => SeleccionMateriaScreen(nombreCarrera: carreras[0]),
+        ),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Seleccionar carrera'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: carreras
+                .map(
+                  (c) => ListTile(
+                    title: Text(c),
+                    onTap: () {
+                      Navigator.pop(ctx);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              SeleccionMateriaScreen(nombreCarrera: c),
+                        ),
+                      );
+                    },
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+      );
+    }
   }
 }
