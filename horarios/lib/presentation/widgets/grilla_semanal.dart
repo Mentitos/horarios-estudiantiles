@@ -33,23 +33,32 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
 
   final ScrollController _headerScrollController = ScrollController();
   final ScrollController _bodyScrollController = ScrollController();
+  final ScrollController _verticalScrollController = ScrollController();
+
+  bool _isSyncing = false;
 
   @override
   void initState() {
     super.initState();
     _headerScrollController.addListener(() {
+      if (_isSyncing) return;
       if (_headerScrollController.hasClients &&
           _bodyScrollController.hasClients) {
         if (_headerScrollController.offset != _bodyScrollController.offset) {
+          _isSyncing = true;
           _bodyScrollController.jumpTo(_headerScrollController.offset);
+          _isSyncing = false;
         }
       }
     });
     _bodyScrollController.addListener(() {
+      if (_isSyncing) return;
       if (_headerScrollController.hasClients &&
           _bodyScrollController.hasClients) {
         if (_bodyScrollController.offset != _headerScrollController.offset) {
+          _isSyncing = true;
           _headerScrollController.jumpTo(_bodyScrollController.offset);
+          _isSyncing = false;
         }
       }
     });
@@ -59,6 +68,7 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
   void dispose() {
     _headerScrollController.dispose();
     _bodyScrollController.dispose();
+    _verticalScrollController.dispose();
     super.dispose();
   }
 
@@ -141,7 +151,7 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       controller: _headerScrollController,
-                      physics: const ClampingScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       child: Row(
                         children: _diasSemana.map((dia) {
                           return Container(
@@ -173,9 +183,10 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
 
               Expanded(
                 child: SingleChildScrollView(
+                  controller: _verticalScrollController,
                   physics: widget.modoExportacion
                       ? const NeverScrollableScrollPhysics()
-                      : const ClampingScrollPhysics(),
+                      : const AlwaysScrollableScrollPhysics(),
                   child: SizedBox(
                     height: (_totalFranjas + 1) * _alturaFranja,
                     child: Row(
@@ -219,7 +230,7 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             controller: _bodyScrollController,
-                            physics: const ClampingScrollPhysics(),
+                            physics: const AlwaysScrollableScrollPhysics(),
                             child: Row(
                               children: _diasSemana.map((dia) {
                                 return Container(
