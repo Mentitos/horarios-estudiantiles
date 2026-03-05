@@ -82,7 +82,7 @@ class _ListaMateriasAprobadasState extends State<_ListaMateriasAprobadas> {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Error: \${snapshot.error}'));
+          return Center(child: Text('Error: ${snapshot.error}'));
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return const Center(child: Text('No se encontraron materias'));

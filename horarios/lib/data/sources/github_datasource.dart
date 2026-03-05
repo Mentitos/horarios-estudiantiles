@@ -24,9 +24,15 @@ class GithubDatasource {
       final carrerasResponse = responses[1];
 
       final materiasJsonList =
-          jsonDecode(materiasResponse.data) as List<dynamic>;
+          (materiasResponse.data is String
+                  ? jsonDecode(materiasResponse.data)
+                  : materiasResponse.data)
+              as List<dynamic>;
       final carrerasJsonList =
-          jsonDecode(carrerasResponse.data) as List<dynamic>;
+          (carrerasResponse.data is String
+                  ? jsonDecode(carrerasResponse.data)
+                  : carrerasResponse.data)
+              as List<dynamic>;
 
       List<Materia> materias = [];
       for (var jsonMateria in materiasJsonList) {
