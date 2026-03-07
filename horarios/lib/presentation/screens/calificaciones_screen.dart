@@ -18,29 +18,70 @@ class CalificacionesScreen extends StatefulWidget {
   State<CalificacionesScreen> createState() => _CalificacionesScreenState();
 }
 
-class _CalificacionesScreenState extends State<CalificacionesScreen> {
+class _CalificacionesScreenState extends State<CalificacionesScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  bool _showFab = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+      initialIndex: widget.initialIndex,
+    );
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) {
+        setState(() {
+          _showFab = _tabController.index == 0;
+        });
+      }
+    });
+    _showFab = widget.initialIndex == 0;
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      initialIndex: widget.initialIndex,
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 0,
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Clasificaciones'),
-              Tab(text: 'Materias'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            _buildCalificacionesTab(context),
-            _buildMateriasTab(context),
+    return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 0,
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Clasificaciones'),
+            Tab(text: 'Materias'),
           ],
         ),
       ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildCalificacionesTab(context),
+          _buildMateriasTab(context),
+        ],
+      ),
+      floatingActionButton: _showFab
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AgregarCalificacionScreen(),
+                    fullscreenDialog: true,
+                  ),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Agregar'),
+            )
+          : null,
     );
   }
 
@@ -55,95 +96,80 @@ class _CalificacionesScreenState extends State<CalificacionesScreen> {
 
         if (notas.isEmpty) return _buildEmptyState(context);
 
-        return Scaffold(
-          body: ListView.builder(
-            padding: const EdgeInsets.all(16),
-            itemCount: notas.length,
-            itemBuilder: (ctx, i) {
-              final nota = notas[i];
-              return Card(
-                margin: const EdgeInsets.only(bottom: 12),
-                elevation: 0,
-                color: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                child: ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primaryContainer,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.emoji_events,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    ),
-                  ),
-                  title: Text(
-                    nota.nombreMateria,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                  subtitle: Text(
-                    '${nota.tipoEvaluacion} • ${nota.valorPorcentual > 0 ? nota.valorPorcentual : 0}%',
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        nota.titulo,
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      if (provider.modoArchivadoVisible) ...[
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(Icons.inventory_2_outlined),
-                          onPressed: () {
-                            provider.toggleArchivar(nota.id);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Calificación archivada'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          },
-                          tooltip: 'Archivar',
-                        ),
-                      ],
-                    ],
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            DetalleCalificacionScreen(calificacionId: nota.id),
-                      ),
-                    );
-                  },
-                ),
-              );
-            },
-          ),
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.push(
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: notas.length,
+          itemBuilder: (ctx, i) {
+            final nota = notas[i];
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              elevation: 0,
+              color: Theme.of(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const AgregarCalificacionScreen(),
-                  fullscreenDialog: true,
+              ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+              child: ListTile(
+                leading: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.emoji_events,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  ),
                 ),
-              );
-            },
-            icon: const Icon(Icons.add),
-            label: const Text('Agregar'),
-          ),
+                title: Text(
+                  nota.nombreMateria,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                subtitle: Text(
+                  '${nota.tipoEvaluacion} • ${nota.valorPorcentual > 0 ? nota.valorPorcentual : 0}%',
+                ),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      nota.titulo,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    if (provider.modoArchivadoVisible) ...[
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.inventory_2_outlined),
+                        onPressed: () {
+                          provider.toggleArchivar(nota.id);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Calificación archivada'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        tooltip: 'Archivar',
+                      ),
+                    ],
+                  ],
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          DetalleCalificacionScreen(calificacionId: nota.id),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
         );
       },
     );
@@ -276,7 +302,9 @@ class _CalificacionesScreenState extends State<CalificacionesScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],

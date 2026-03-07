@@ -5,6 +5,8 @@ import '../../data/models/horario_usuario.dart';
 import '../../providers/calificaciones_provider.dart';
 import '../../providers/horario_provider.dart';
 
+import 'agregar_calificacion_screen.dart';
+
 //  Ayer no pude dormir hasta las 9 de la mañana pq me costaba respirar
 //  Pude comprar unas curitas que se ponen en la nariz para abrirla
 //  Que bien que dormi dios mio, seguramente compre los internos que duran mas
@@ -175,6 +177,20 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
               ),
             ],
           ),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    AgregarCalificacionScreen(initialMateria: widget.materia),
+                fullscreenDialog: true,
+              ),
+            );
+          },
+          icon: const Icon(Icons.add_chart_rounded),
+          label: const Text('Añadir Calificación'),
         ),
       ),
     );
