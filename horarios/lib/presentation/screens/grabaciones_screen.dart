@@ -408,10 +408,12 @@ class GrabacionesScreen extends StatelessWidget {
   void _compartirGrabacion(Grabacion grabacion) async {
     try {
       final xFile = XFile(grabacion.pathArchivo);
-      await Share.shareXFiles(
-        [xFile],
-        text:
-            'Escucha esta clase grabada el ${_formatearFechaTexto(grabacion.fecha)}',
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [xFile],
+          text:
+              'Escucha esta clase grabada el ${_formatearFechaTexto(grabacion.fecha)}',
+        ),
       );
     } catch (e) {
       debugPrint("Error al compartir: $e");

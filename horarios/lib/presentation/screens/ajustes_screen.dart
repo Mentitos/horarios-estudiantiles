@@ -275,7 +275,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                '${aprobadasCount} / ${totalMaterias} aprobadas (${percentageText}%)',
+                                '$aprobadasCount / $totalMaterias aprobadas ($percentageText%)',
                               ),
                               const SizedBox(height: 16),
                             ],
@@ -349,6 +349,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                               );
 
                               if (hayOcultas) {
+                                if (!context.mounted) return;
                                 final restaurar = await showDialog<bool>(
                                   context: context,
                                   builder: (ctx) => AlertDialog(
@@ -643,9 +644,13 @@ class _AjustesScreenState extends State<AjustesScreen> {
     );
 
     if (confirmed == true && context.mounted) {
-      await context.read<HorarioProvider>().formatear();
-      await context.read<EventosProvider>().formatear();
-      await context.read<PerfilProvider>().formatear();
+      final horarioProv = context.read<HorarioProvider>();
+      final eventosProv = context.read<EventosProvider>();
+      final perfilProv = context.read<PerfilProvider>();
+
+      await horarioProv.formatear();
+      await eventosProv.formatear();
+      await perfilProv.formatear();
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('onboarding_done');
       if (context.mounted) {

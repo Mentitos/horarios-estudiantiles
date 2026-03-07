@@ -19,7 +19,7 @@ class _GestionarMateriasLocalesScreenState
     extends State<GestionarMateriasLocalesScreen> {
   final LocalDatasource _localDatasource = LocalDatasource();
   String? _carreraSeleccionada;
-  List<Materia> _materiasOriginales = [];
+  final List<Materia> _materiasOriginales = [];
   List<MateriaCustom> _materiasCustom = [];
   bool _cargando = true;
 
@@ -203,7 +203,7 @@ class _GestionarMateriasLocalesScreenState
 
       await _localDatasource.guardarMateriaCustom(customParaGuardar);
 
-      if (context.mounted) {
+      if (mounted) {
         final horarioProvider = context.read<HorarioProvider>();
         final horario = horarioProvider.horario;
         if (horario != null) {
@@ -272,7 +272,7 @@ class _GestionarMateriasLocalesScreenState
         await _localDatasource.eliminarMateriaCustom(item['id']);
       }
 
-      if (context.mounted) {
+      if (mounted) {
         final horarioProvider = context.read<HorarioProvider>();
         await horarioProvider.eliminarMateria(item['id']);
       }

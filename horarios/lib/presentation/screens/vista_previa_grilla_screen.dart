@@ -46,7 +46,9 @@ class _VistaPreviaGrillaScreenState extends State<VistaPreviaGrillaScreen> {
       final file = File(tempPath);
       await file.writeAsBytes(pngBytes);
 
-      await Share.shareXFiles([XFile(tempPath)], text: 'Mi horario de la UNGS');
+      await SharePlus.instance.share(
+        ShareParams(files: [XFile(tempPath)], text: 'Mi horario de la UNGS'),
+      );
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(

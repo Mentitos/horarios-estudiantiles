@@ -145,7 +145,7 @@ class HorarioScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<String>(
-                        value:
+                        initialValue:
                             materiasDisponibles.any((m) => m.nombre == nombre)
                             ? nombre
                             : null,
@@ -188,7 +188,7 @@ class HorarioScreen extends StatelessWidget {
                             children: [
                               Expanded(
                                 child: DropdownButtonFormField<String>(
-                                  value:
+                                  initialValue:
                                       profesores.any(
                                         (p) => p.nombreCompleto == valProf,
                                       )
@@ -563,7 +563,7 @@ class HorarioScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     DropdownButtonFormField<String>(
-                      value: diaSeleccionado,
+                      initialValue: diaSeleccionado,
                       decoration: const InputDecoration(
                         labelText: 'Día',
                         border: OutlineInputBorder(),
@@ -1033,7 +1033,8 @@ class HorarioScreen extends StatelessWidget {
     BuildContext context,
     Color colorInicial,
   ) async {
-    String initialHex = colorInicial.value
+    String initialHex = colorInicial
+        .toARGB32()
         .toRadixString(16)
         .padLeft(8, '0')
         .substring(2)
@@ -1064,7 +1065,8 @@ class HorarioScreen extends StatelessWidget {
                         if (context.mounted) {
                           setState(() {
                             currentColor = color;
-                            String hex = color.value
+                            String hex = color
+                                .toARGB32()
                                 .toRadixString(16)
                                 .padLeft(8, '0')
                                 .substring(2)

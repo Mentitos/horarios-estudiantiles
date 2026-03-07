@@ -132,9 +132,8 @@ class HorarioRepository {
     for (var mat in rHorario.materiasSeleccionadas) {
       for (var b in mat.bloques) {
         if (_seSolapan(b, nuevoBloque)) {
-          final nomMateriaChoca = mat.materiaNombre ?? 'Desconocida';
           throw Exception(
-            'Solapamiento detectado el \${b.dia} con "\$nomMateriaChoca" de \${b.horaInicio} a \${b.horaFin}',
+            'Solapamiento detectado el ${b.dia} con "${mat.materiaNombre ?? 'Desconocida'}" de ${b.horaInicio} a ${b.horaFin}',
           );
         }
       }
@@ -176,9 +175,8 @@ class HorarioRepository {
 
         final b = mat.bloques[i];
         if (_seSolapan(b, nuevoBloque)) {
-          final nomMateriaChoca = mat.materiaNombre ?? 'Desconocida';
           throw Exception(
-            'Solapamiento detectado el ${b.dia} con "$nomMateriaChoca" de ${b.horaInicio} a ${b.horaFin}',
+            'Solapamiento detectado el ${b.dia} con "${mat.materiaNombre ?? 'Desconocida'}" de ${b.horaInicio} a ${b.horaFin}',
           );
         }
       }

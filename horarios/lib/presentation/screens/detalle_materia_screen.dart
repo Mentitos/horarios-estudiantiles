@@ -85,45 +85,13 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
     }
   }
 
-  double _calcularPromedio(CalificacionesProvider provider) {
-    final notasMateria = provider.calificacionesActivas
-        .where((c) => c.materiaId == widget.materia.materiaId)
-        .toList();
-
-    if (notasMateria.isEmpty) return 0.0;
-
-    double sumaPuntosPonderados = 0;
-    double sumaPesos = 0;
-    double sumaSimple = 0;
-    int countSimple = 0;
-
-    for (var n in notasMateria) {
-      final valor = double.tryParse(n.titulo);
-      if (valor != null) {
-        if (n.valorPorcentual > 0) {
-          sumaPuntosPonderados += (valor * n.valorPorcentual / 100);
-          sumaPesos += n.valorPorcentual;
-        } else {
-          sumaSimple += valor;
-          countSimple++;
-        }
-      }
-    }
-
-    if (sumaPesos > 0) {
-      return sumaPuntosPonderados;
-    }
-
-    return countSimple > 0 ? sumaSimple / countSimple : 0.0;
-  }
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return PopScope(
       canPop: true,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (_debounce?.isActive ?? false) {
           _debounce!.cancel();
         }
@@ -183,7 +151,9 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                  color: colorScheme.surfaceContainerHighest.withValues(
+                    alpha: 0.3,
+                  ),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: colorScheme.outlineVariant),
                 ),
@@ -308,7 +278,9 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: colorScheme.onPrimaryContainer.withValues(alpha: 0.1),
+                    color: colorScheme.onPrimaryContainer.withValues(
+                      alpha: 0.1,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -319,8 +291,8 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
                           Text(
                             'Porcentaje usado:',
                             style: TextStyle(
-                              color: colorScheme.onPrimaryContainer.withOpacity(
-                                0.8,
+                              color: colorScheme.onPrimaryContainer.withValues(
+                                alpha: 0.8,
                               ),
                               fontSize: 13,
                             ),
@@ -349,7 +321,9 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
                   'Basado en tus calificaciones registradas',
                   style: TextStyle(
                     fontSize: 12,
-                    color: colorScheme.onPrimaryContainer.withValues(alpha: 0.6),
+                    color: colorScheme.onPrimaryContainer.withValues(
+                      alpha: 0.6,
+                    ),
                   ),
                 ),
             ],

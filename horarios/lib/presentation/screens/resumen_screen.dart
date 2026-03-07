@@ -223,7 +223,9 @@ class _SectionHeader extends StatelessWidget {
             trailing!,
             style: TextStyle(
               fontSize: 12,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
       ],
@@ -298,7 +300,9 @@ class _EmptyCard extends StatelessWidget {
             Icon(
               icon,
               size: 36,
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.7),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.7),
             ),
             const SizedBox(width: 16),
             Column(
@@ -544,10 +548,13 @@ class _ProgresoCard extends StatelessWidget {
         final total = carrera.materiasIds.length;
         for (var mId in carrera.materiasIds) {
           if (mId.contains(':')) {
-            if (mId.split(':').any((p) => perfilProvider.estaAprobada(p)))
+            if (mId.split(':').any((p) => perfilProvider.estaAprobada(p))) {
               aprobadas++;
+            }
           } else {
-            if (perfilProvider.estaAprobada(mId)) aprobadas++;
+            if (perfilProvider.estaAprobada(mId)) {
+              aprobadas++;
+            }
           }
         }
         final pct = total > 0 ? aprobadas / total : 0.0;
