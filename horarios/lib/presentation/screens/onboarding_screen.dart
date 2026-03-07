@@ -18,8 +18,6 @@ Future<void> markOnboardingDone() async {
   await prefs.setBool(_kOnboardingDone, true);
 }
 
-// ── OnboardingScreen ─────────────────────────────────────────────────────────
-
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -65,7 +63,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // ── Progress dots ─────────────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Row(
@@ -88,7 +85,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
 
-            // ── Pages ────────────────────────────────────────────
             Expanded(
               child: PageView(
                 controller: _pageController,
@@ -108,7 +104,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
 
-            // ── Bottom buttons ────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
               child: Row(
@@ -144,8 +139,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 }
-
-// ── Página 1: Selección de carrera ──────────────────────────────────────────
 
 class _PaginaCarrera extends StatefulWidget {
   final List<String> seleccionadas;
@@ -187,7 +180,6 @@ class _PaginaCarreraState extends State<_PaginaCarrera> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ── Header con padding ──────────────────────────────────
         Padding(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
           child: Column(
@@ -217,7 +209,6 @@ class _PaginaCarreraState extends State<_PaginaCarrera> {
           ),
         ),
 
-        // ── Lista edge-to-edge ──────────────────────────────────
         Expanded(
           child: ListView(
             children: gruposCarreras.entries.map((entry) {
@@ -237,8 +228,6 @@ class _PaginaCarreraState extends State<_PaginaCarrera> {
     );
   }
 }
-
-// ── _GrupoCarrera: colapsable con Row puro (alineación perfecta) ─────────────
 
 class _GrupoCarrera extends StatefulWidget {
   final String titulo;
@@ -301,7 +290,6 @@ class _GrupoCarreraState extends State<_GrupoCarrera>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // ── Header ─────────────────────────────────────────────
         InkWell(
           onTap: _toggleExpand,
           child: Padding(
@@ -329,7 +317,6 @@ class _GrupoCarreraState extends State<_GrupoCarrera>
           ),
         ),
 
-        // ── Items (mismo padding horizontal que el header) ─────
         AnimatedSize(
           duration: const Duration(milliseconds: 200),
           curve: Curves.easeInOut,
@@ -354,8 +341,6 @@ class _GrupoCarreraState extends State<_GrupoCarrera>
                                 ),
                               ),
                             ),
-                            // Mismo ancho que el icono de flecha (24dp)
-                            // para garantizar alineación exacta
                             SizedBox(
                               width: 24,
                               height: 24,
@@ -379,8 +364,6 @@ class _GrupoCarreraState extends State<_GrupoCarrera>
     );
   }
 }
-
-// ── Página 2: Materias aprobadas ─────────────────────────────────────────────
 
 class _PaginaAprobadas extends StatelessWidget {
   final List<String> carreras;
@@ -470,8 +453,6 @@ class _PaginaAprobadas extends StatelessWidget {
     );
   }
 }
-
-// ── _ListaAprobadasOnboarding ─────────────────────────────────────────────────
 
 class _ListaAprobadasOnboarding extends StatefulWidget {
   final String nombreCarrera;

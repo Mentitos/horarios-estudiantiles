@@ -5,6 +5,7 @@ import 'providers/materias_provider.dart';
 import 'providers/perfil_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/eventos_provider.dart';
+import 'providers/calificaciones_provider.dart';
 import 'presentation/screens/splash_screen.dart';
 
 void main() async {
@@ -17,6 +18,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => PerfilProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => EventosProvider()),
+        ChangeNotifierProvider(create: (_) => CalificacionesProvider()),
       ],
       child: const MyApp(),
     ),

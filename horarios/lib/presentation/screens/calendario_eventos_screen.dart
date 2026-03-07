@@ -11,10 +11,10 @@ class CalendarioEventosScreen extends StatefulWidget {
 
   @override
   State<CalendarioEventosScreen> createState() =>
-      _CalendarioEventosScreenState();
+      CalendarioEventosScreenState();
 }
 
-class _CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
+class CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
   DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
   DateTime? _selectedDay;
 
@@ -22,6 +22,14 @@ class _CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
   void initState() {
     super.initState();
     _selectedDay = DateTime.now();
+  }
+
+  void irAHoy() {
+    setState(() {
+      final now = DateTime.now();
+      _focusedMonth = DateTime(now.year, now.month);
+      _selectedDay = now;
+    });
   }
 
   bool _isSameDay(DateTime a, DateTime b) =>
@@ -143,7 +151,7 @@ class _CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
 
           final dias = _daysInMonth(_focusedMonth);
           final primerDia = dias.first;
-          // Offset: Monday = 0 ... Sunday = 6
+
           final offset = (primerDia.weekday - 1) % 7;
 
           final eventosDelDia = _selectedDay != null
@@ -152,20 +160,38 @@ class _CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
 
           return Column(
             children: [
-              // ── Month header ──────────────────────────────────────────
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                child: Stack(
+                  alignment: Alignment.center,
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.chevron_left),
-                      onPressed: () => setState(() {
-                        _focusedMonth = DateTime(
-                          _focusedMonth.year,
-                          _focusedMonth.month - 1,
-                        );
-                      }),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.chevron_left),
+                          onPressed: () => setState(() {
+                            _focusedMonth = DateTime(
+                              _focusedMonth.year,
+                              _focusedMonth.month - 1,
+                            );
+                          }),
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.chevron_right),
+                              onPressed: () => setState(() {
+                                _focusedMonth = DateTime(
+                                  _focusedMonth.year,
+                                  _focusedMonth.month + 1,
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                     Text(
                       _monthLabel(_focusedMonth),
@@ -174,19 +200,10 @@ class _CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.chevron_right),
-                      onPressed: () => setState(() {
-                        _focusedMonth = DateTime(
-                          _focusedMonth.year,
-                          _focusedMonth.month + 1,
-                        );
-                      }),
-                    ),
                   ],
                 ),
               ),
-              // ── Day-of-week labels ────────────────────────────────────
+
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
@@ -201,7 +218,7 @@ class _CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
                   ],
                 ),
               ),
-              // ── Calendar grid ────────────────────────────────────────
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: GridView.builder(
@@ -273,7 +290,7 @@ class _CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
                 ),
               ),
               const Divider(),
-              // ── Events for selected day ───────────────────────────────
+
               Expanded(
                 child: eventosDelDia.isEmpty
                     ? Center(

@@ -57,7 +57,6 @@ class ResumenScreen extends StatelessWidget {
                       .toList() ??
                   [];
 
-              // Próximos eventos (próximos 7 días)
               final ahora = DateTime.now();
               final eventos7dias =
                   eventosProvider.eventos
@@ -79,7 +78,6 @@ class ResumenScreen extends StatelessWidget {
                   vertical: 8,
                 ),
                 children: [
-                  // ── Chips de acceso rápido ──────────────────────────────
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -106,7 +104,6 @@ class ResumenScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Clases de hoy ────────────────────────────────────────
                   _SectionHeader(title: 'Hoy • $diaHoy', trailing: _fechaHoy()),
                   const SizedBox(height: 8),
 
@@ -138,7 +135,6 @@ class ResumenScreen extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  // ── Próximos eventos ─────────────────────────────────────
                   const _SectionHeader(title: 'Próximos eventos'),
                   const SizedBox(height: 8),
 
@@ -167,7 +163,6 @@ class ResumenScreen extends StatelessWidget {
 
                   const SizedBox(height: 20),
 
-                  // ── Progreso académico ───────────────────────────────────
                   if (perfilProvider.carrerasSeleccionadas.isNotEmpty) ...[
                     const _SectionHeader(title: 'Progreso académico'),
                     const SizedBox(height: 8),
@@ -190,8 +185,6 @@ class ResumenScreen extends StatelessWidget {
     onNavigate?.call(index);
   }
 }
-
-// ── Widgets internos ─────────────────────────────────────────────────────────
 
 class _SectionHeader extends StatelessWidget {
   final String title;

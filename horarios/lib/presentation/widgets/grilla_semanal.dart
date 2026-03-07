@@ -20,14 +20,11 @@ class GrillaSemanal extends StatefulWidget {
 }
 
 class _GrillaSemanalState extends State<GrillaSemanal> {
-  // Altura de franja como estado configurable (pinch-to-zoom vertical)
   double _alturaFranja = 52.0;
   static const double _alturaMin = 28.0;
   static const double _alturaMax = 100.0;
-  double _alturaBase = 52.0; // guarda el valor al inicio del gesto
+  double _alturaBase = 52.0;
 
-  // _horaInicio = 0 para que el bloque de 00:00 exista como espacio vacío.
-  // El label "00:00" no se muestra (igual que "24:00" al final).
   static const int _horaInicio = 0;
   static const int _horaFin = 24;
   static const int _totalFranjas = _horaFin - _horaInicio;
@@ -94,7 +91,6 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
       builder: (context, constraints) {
         const double horasColWidth = 60.0;
         final int numDias = _diasSemana.length;
-        // Ancho calculado para que todos los días entren sin scroll horizontal
         final double dayWidth =
             (constraints.maxWidth - horasColWidth) / numDias;
 
@@ -103,7 +99,6 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Título en modo exportación
               if (widget.modoExportacion)
                 Padding(
                   padding: const EdgeInsets.only(top: 24, bottom: 16),
@@ -118,7 +113,6 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
                   ),
                 ),
 
-              // ── Encabezado de días ──────────────────────────────
               Row(
                 children: [
                   SizedBox(width: horasColWidth),
@@ -147,7 +141,6 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
                 ],
               ),
 
-              // ── Cuerpo scrolleable verticalmente + pinch-to-zoom ─────
               Expanded(
                 child: GestureDetector(
                   onScaleStart: (_) {
@@ -171,7 +164,6 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // Columna de horas
                           SizedBox(
                             width: horasColWidth,
                             child: Stack(
@@ -179,7 +171,6 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
                               children: List.generate(_totalFranjas + 1, (
                                 index,
                               ) {
-                                // No mostrar la etiqueta final ni la de 00:00
                                 if (index == _totalFranjas || index == 0) {
                                   return const SizedBox.shrink();
                                 }
@@ -212,7 +203,6 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
                             ),
                           ),
 
-                          // Columnas de días — sin scroll horizontal
                           ...List.generate(_diasSemana.length, (i) {
                             final dia = _diasSemana[i];
                             return Container(
@@ -225,7 +215,6 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
                               child: Stack(
                                 clipBehavior: Clip.hardEdge,
                                 children: [
-                                  // Líneas de hora
                                   ...List.generate(_totalFranjas, (idx) {
                                     return Positioned(
                                       top: (idx + 1) * _alturaFranja,
@@ -239,7 +228,6 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
                                       ),
                                     );
                                   }),
-                                  // Bloques de materias
                                   ..._buildBloquesDelDia(
                                     dia,
                                     widget.horario.materiasSeleccionadas,

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/calificaciones_provider.dart';
 import 'resumen_screen.dart';
 import 'horario_screen.dart';
 import 'calendario_eventos_screen.dart';
 import 'ajustes_screen.dart';
+import 'calificaciones_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,10 +16,13 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-
   // Opciones del calendario semanal
   bool _mostrarSabado = false;
   bool _mostrarDomingo = false;
+
+  // Llave para acceder al estado del calendario y su método irAHoy
+  final GlobalKey<CalendarioEventosScreenState> _calendarioKey =
+      GlobalKey<CalendarioEventosScreenState>();
 
   void navigateTo(int index) {
     setState(() => _currentIndex = index);
@@ -26,13 +32,25 @@ class HomeScreenState extends State<HomeScreen> {
     'Resumen',
     'Horario',
     'Calendario',
+    'Calificaciones',
+    'Profesores',
+    'Grabaciones',
     'Ajustes',
   ];
 
-  static const List<_DrawerItem> _drawerItems = [
+  static const List<_DrawerItem> _drawerItemsMain = [
     _DrawerItem(icon: Icons.home_rounded, label: 'Resumen'),
     _DrawerItem(icon: Icons.grid_view_rounded, label: 'Horario'),
     _DrawerItem(icon: Icons.calendar_month_rounded, label: 'Calendario'),
+  ];
+
+  static const List<_DrawerItem> _drawerItemsStudy = [
+    _DrawerItem(icon: Icons.note_alt_rounded, label: 'Calificaciones'),
+    _DrawerItem(icon: Icons.person_search_rounded, label: 'Profesores'),
+    _DrawerItem(icon: Icons.mic_rounded, label: 'Grabaciones'),
+  ];
+
+  static const List<_DrawerItem> _drawerItemsSettings = [
     _DrawerItem(icon: Icons.settings_rounded, label: 'Ajustes'),
   ];
 
@@ -45,7 +63,13 @@ class HomeScreenState extends State<HomeScreen> {
         mostrarSabado: _mostrarSabado,
         mostrarDomingo: _mostrarDomingo,
       ),
-      const CalendarioEventosScreen(),
+      CalendarioEventosScreen(key: _calendarioKey),
+      const CalificacionesScreen(),
+      const PlaceholderScreen(
+        title: 'Profesores',
+        icon: Icons.person_search_rounded,
+      ),
+      const PlaceholderScreen(title: 'Grabaciones', icon: Icons.mic_rounded),
       const AjustesScreen(),
     ];
 
@@ -56,32 +80,7 @@ class HomeScreenState extends State<HomeScreen> {
         surfaceTintColor: colorScheme.surfaceTint,
         elevation: 0,
         scrolledUnderElevation: 2,
-        // ── Botón ⋮ solo en la pestaña Horario ─────────────────
-        actions: _currentIndex == 1
-            ? [
-                PopupMenuButton<String>(
-                  icon: const Icon(Icons.more_vert),
-                  itemBuilder: (_) => [
-                    CheckedPopupMenuItem<String>(
-                      value: 'domingo',
-                      checked: _mostrarDomingo,
-                      child: const Text('Mostrar Domingo'),
-                    ),
-                    CheckedPopupMenuItem<String>(
-                      value: 'sabado',
-                      checked: _mostrarSabado,
-                      child: const Text('Mostrar Sábado'),
-                    ),
-                  ],
-                  onSelected: (val) {
-                    setState(() {
-                      if (val == 'sabado') _mostrarSabado = !_mostrarSabado;
-                      if (val == 'domingo') _mostrarDomingo = !_mostrarDomingo;
-                    });
-                  },
-                ),
-              ]
-            : null,
+        actions: _buildAppBarActions(),
       ),
       drawer: NavigationDrawer(
         selectedIndex: _currentIndex,
@@ -113,7 +112,25 @@ class HomeScreenState extends State<HomeScreen> {
           ),
           const Divider(indent: 28, endIndent: 28),
           const SizedBox(height: 8),
-          for (final item in _drawerItems)
+
+          for (final item in _drawerItemsMain)
+            NavigationDrawerDestination(
+              icon: Icon(item.icon),
+              label: Text(item.label),
+            ),
+
+          const Divider(indent: 28, endIndent: 28),
+          const SizedBox(height: 8),
+
+          for (final item in _drawerItemsStudy)
+            NavigationDrawerDestination(
+              icon: Icon(item.icon),
+              label: Text(item.label),
+            ),
+
+          const Divider(indent: 28, endIndent: 28),
+          const SizedBox(height: 8),
+          for (final item in _drawerItemsSettings)
             NavigationDrawerDestination(
               icon: Icon(item.icon),
               label: Text(item.label),
@@ -123,10 +140,102 @@ class HomeScreenState extends State<HomeScreen> {
       body: IndexedStack(index: _currentIndex, children: screens),
     );
   }
+
+  List<Widget>? _buildAppBarActions() {
+    // 1 = Horario
+    if (_currentIndex == 1) {
+      return [
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert),
+          itemBuilder: (_) => [
+            CheckedPopupMenuItem<String>(
+              value: 'domingo',
+              checked: _mostrarDomingo,
+              child: const Text('Mostrar Domingo'),
+            ),
+            CheckedPopupMenuItem<String>(
+              value: 'sabado',
+              checked: _mostrarSabado,
+              child: const Text('Mostrar Sábado'),
+            ),
+          ],
+          onSelected: (val) {
+            setState(() {
+              if (val == 'sabado') _mostrarSabado = !_mostrarSabado;
+              if (val == 'domingo') _mostrarDomingo = !_mostrarDomingo;
+            });
+          },
+        ),
+      ];
+    }
+    // 2 = Calendario
+    else if (_currentIndex == 2) {
+      return [
+        IconButton(
+          icon: const Icon(Icons.calendar_today_rounded),
+          tooltip: 'Ir a hoy',
+          onPressed: () {
+            _calendarioKey.currentState?.irAHoy();
+          },
+        ),
+      ];
+    }
+    // 3 = Calificaciones
+    else if (_currentIndex == 3) {
+      return [
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.sort_rounded),
+          itemBuilder: (_) => [
+            const PopupMenuItem(value: 'materia', child: Text('Por materia')),
+            const PopupMenuItem(value: 'reciente', child: Text('Más reciente')),
+            const PopupMenuItem(value: 'antigua', child: Text('Más antigua')),
+            const PopupMenuItem(value: 'alta', child: Text('Nota más alta')),
+            const PopupMenuItem(value: 'baja', child: Text('Nota más baja')),
+          ],
+          onSelected: (val) {
+            context.read<CalificacionesProvider>().ordenarPor(val);
+          },
+        ),
+        IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
+      ];
+    }
+    return null;
+  }
 }
 
 class _DrawerItem {
   final IconData icon;
   final String label;
   const _DrawerItem({required this.icon, required this.label});
+}
+
+class PlaceholderScreen extends StatelessWidget {
+  final String title;
+  final IconData icon;
+
+  const PlaceholderScreen({super.key, required this.title, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 64,
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Próximamente: $title',
+            style: TextStyle(
+              fontSize: 18,
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
