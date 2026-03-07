@@ -147,6 +147,33 @@ class GrabacionesProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> actualizarGrabacion(
+    String id, {
+    String? nuevoNombre,
+    String? nuevaMateriaId,
+  }) async {
+    try {
+      final index = _grabaciones.indexWhere((g) => g.id == id);
+      if (index != -1) {
+        final grabacionAnterior = _grabaciones[index];
+        final grabacionActualizada = Grabacion(
+          id: grabacionAnterior.id,
+          pathArchivo: grabacionAnterior.pathArchivo,
+          fecha: grabacionAnterior.fecha,
+          duracion: grabacionAnterior.duracion,
+          nombre: nuevoNombre ?? grabacionAnterior.nombre,
+          materiaId: nuevaMateriaId ?? grabacionAnterior.materiaId,
+        );
+
+        _grabaciones[index] = grabacionActualizada;
+        await _repository.guardarGrabaciones(_grabaciones);
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("Error al actualizar grabación: $e");
+    }
+  }
+
   @override
   void dispose() {
     _audioRecorder.dispose();

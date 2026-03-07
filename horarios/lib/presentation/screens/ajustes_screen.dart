@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -466,7 +467,83 @@ class _AjustesScreenState extends State<AjustesScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Datos: github.com/Mentitos/materiasungsporcentaje',
+                    'Proyecto Open Source. Podés ver el código libre en el repositorio:',
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: FilledButton.tonalIcon(
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                      ),
+                      onPressed: () => _abrirLink(
+                        'https://github.com/Mentitos/horarios-estudiantiles',
+                      ),
+                      icon: const Icon(Icons.code_rounded, size: 18),
+                      label: const Text(
+                        'Ir al repositorio en GitHub',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 24),
+                  const Text(
+                    'Apoyar el proyecto',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Esta app es sin fines de lucro. Podés ayudar donando a mi alias:',
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'ARDOR.BICHO.PILOTO',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.1,
+                          ),
+                        ),
+                        IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          icon: const Icon(Icons.copy, size: 20),
+                          tooltip: 'Copiar alias',
+                          onPressed: () async {
+                            await Clipboard.setData(
+                              const ClipboardData(text: 'ARDOR.BICHO.PILOTO'),
+                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Alias copiado al portapapeles.',
+                                  ),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                   const Divider(height: 24),
                   const Text(
