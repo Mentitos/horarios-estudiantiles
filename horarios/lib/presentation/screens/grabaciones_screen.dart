@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'dart:io';
 import '../../providers/grabaciones_provider.dart';
 import '../../providers/horario_provider.dart';
 import '../../data/models/grabacion.dart';
@@ -200,6 +201,12 @@ class GrabacionesScreen extends StatelessWidget {
     }
 
     String subtitle = _formatearFechaTexto(grabacion.fecha);
+
+    final sizeStr = _obtenerTamanoArchivo(grabacion.pathArchivo);
+    if (sizeStr != null) {
+      subtitle += ' • $sizeStr';
+    }
+
     if (nombreMateria != null) {
       subtitle += ' • $nombreMateria';
     }
@@ -273,7 +280,26 @@ class GrabacionesScreen extends StatelessWidget {
 
   String _formatearFechaTexto(DateTime fecha) {
     Intl.defaultLocale = 'es';
-    return DateFormat('d \'de\' MMMM \'de\' yyyy').format(fecha);
+    return DateFormat("E d 'de' MMMM yyyy, HH:mm", 'es_ES').format(fecha);
+  }
+
+  String? _obtenerTamanoArchivo(String path) {
+    try {
+      final file = File(path);
+      if (file.existsSync()) {
+        final bytes = file.lengthSync();
+        if (bytes < 1024) {
+          return '$bytes B';
+        }
+        if (bytes < 1024 * 1024) {
+          return '${(bytes / 1024).toStringAsFixed(1)} KB';
+        }
+        return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+      }
+    } catch (e) {
+      debugPrint("Error obteniendo tamaño: $e");
+    }
+    return null;
   }
 
   void _mostrarDialogoRenombrar(BuildContext context, Grabacion grabacion) {
