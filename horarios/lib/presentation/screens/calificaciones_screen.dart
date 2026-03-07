@@ -21,7 +21,6 @@ class CalificacionesScreen extends StatefulWidget {
 class _CalificacionesScreenState extends State<CalificacionesScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _showFab = true;
 
   @override
   void initState() {
@@ -31,20 +30,10 @@ class _CalificacionesScreenState extends State<CalificacionesScreen>
       vsync: this,
       initialIndex: widget.initialIndex,
     );
-    _tabController.addListener(_handleTabSelection);
-    _showFab = _tabController.index == 0;
-  }
-
-  void _handleTabSelection() {
-    if (_tabController.indexIsChanging) return;
-    setState(() {
-      _showFab = _tabController.index == 0;
-    });
   }
 
   @override
   void dispose() {
-    _tabController.removeListener(_handleTabSelection);
     _tabController.dispose();
     super.dispose();
   }
@@ -69,21 +58,19 @@ class _CalificacionesScreenState extends State<CalificacionesScreen>
           _buildMateriasTab(context),
         ],
       ),
-      floatingActionButton: _showFab
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AgregarCalificacionScreen(),
-                    fullscreenDialog: true,
-                  ),
-                );
-              },
-              icon: const Icon(Icons.add),
-              label: const Text('Agregar'),
-            )
-          : null,
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AgregarCalificacionScreen(),
+              fullscreenDialog: true,
+            ),
+          );
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('Agregar'),
+      ),
     );
   }
 
