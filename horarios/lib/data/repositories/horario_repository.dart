@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 
 import '../models/materia.dart';
@@ -50,25 +49,15 @@ class HorarioRepository {
   }
 
   Future<HorarioUsuario?> obtenerHorario() async {
-    if (kIsWeb) {
-      return _webMockHorario;
-    }
     final isar = await _localDatasource.db!;
     return await isar.horarioUsuarios.where().findFirst();
   }
-
-  static HorarioUsuario? _webMockHorario;
 
   Future<HorarioUsuario> crearHorarioVacio(String titulo) async {
     final nuevoHorario = HorarioUsuario()
       ..titulo = titulo
       ..fechaActualizacion = DateTime.now()
       ..materiasSeleccionadas = [];
-
-    if (kIsWeb) {
-      _webMockHorario = nuevoHorario;
-      return nuevoHorario;
-    }
 
     final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
@@ -101,11 +90,6 @@ class HorarioRepository {
       ..add(seleccionada);
     rHorario.fechaActualizacion = DateTime.now();
 
-    if (kIsWeb) {
-      _webMockHorario = rHorario;
-      return;
-    }
-
     final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario!);
@@ -120,11 +104,6 @@ class HorarioRepository {
         .where((m) => m.materiaId != materiaId)
         .toList();
     rHorario.fechaActualizacion = DateTime.now();
-
-    if (kIsWeb) {
-      _webMockHorario = rHorario;
-      return;
-    }
 
     final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
@@ -162,11 +141,6 @@ class HorarioRepository {
     rHorario.materiasSeleccionadas = List.from(rHorario.materiasSeleccionadas);
     rHorario.materiasSeleccionadas[indiceMateria] = materiaUpdate;
     rHorario.fechaActualizacion = DateTime.now();
-
-    if (kIsWeb) {
-      _webMockHorario = rHorario;
-      return;
-    }
 
     final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
@@ -211,11 +185,6 @@ class HorarioRepository {
     rHorario.materiasSeleccionadas[indiceMateria] = materiaUpdate;
     rHorario.fechaActualizacion = DateTime.now();
 
-    if (kIsWeb) {
-      _webMockHorario = rHorario;
-      return;
-    }
-
     final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
@@ -241,11 +210,6 @@ class HorarioRepository {
     rHorario.materiasSeleccionadas[indiceMateria] = materiaUpdate;
     rHorario.fechaActualizacion = DateTime.now();
 
-    if (kIsWeb) {
-      _webMockHorario = rHorario;
-      return;
-    }
-
     final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
@@ -253,10 +217,6 @@ class HorarioRepository {
   }
 
   Future<void> eliminarHorario() async {
-    if (kIsWeb) {
-      _webMockHorario = null;
-      return;
-    }
     final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.clear();
@@ -288,11 +248,6 @@ class HorarioRepository {
     rHorario.materiasSeleccionadas[indice] = materiaAActualizar;
     rHorario.fechaActualizacion = DateTime.now();
 
-    if (kIsWeb) {
-      _webMockHorario = rHorario;
-      return;
-    }
-
     final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
@@ -311,15 +266,13 @@ class HorarioRepository {
       ultimaActualizacion: DateTime.now(),
     );
 
-    if (!kIsWeb) {
-      final isar = await _localDatasource.db!;
-      final existente = await isar.materiaNotas
-          .where()
-          .materiaIdEqualTo(materiaId)
-          .findFirst();
-      if (existente != null) {
-        notas.id = existente.id;
-      }
+    final isar = await _localDatasource.db!;
+    final existente = await isar.materiaNotas
+        .where()
+        .materiaIdEqualTo(materiaId)
+        .findFirst();
+    if (existente != null) {
+      notas.id = existente.id;
     }
 
     await _localDatasource.guardarNotasMateria(notas);
@@ -356,11 +309,6 @@ class HorarioRepository {
 
     rHorario.materiasSeleccionadas = nuevasMaterias;
     rHorario.fechaActualizacion = DateTime.now();
-
-    if (kIsWeb) {
-      _webMockHorario = rHorario;
-      return;
-    }
 
     final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {

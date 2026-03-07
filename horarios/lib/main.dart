@@ -21,9 +21,7 @@ void main() async {
   await initializeDateFormatting('es', null);
 
   final localDatasource = LocalDatasource();
-  if (kIsWeb) {
-    await localDatasource.prepopulateDemoData();
-  }
+  await localDatasource.prepopulateDemoData();
 
   runApp(
     MultiProvider(
