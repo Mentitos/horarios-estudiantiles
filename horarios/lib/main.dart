@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'providers/horario_provider.dart';
@@ -9,6 +10,8 @@ import 'providers/eventos_provider.dart';
 import 'providers/calificaciones_provider.dart';
 import 'providers/profesores_provider.dart';
 import 'providers/grabaciones_provider.dart';
+import 'data/sources/local_datasource.dart';
+import 'data/repositories/horario_repository.dart';
 import 'presentation/screens/splash_screen.dart';
 
 //  Me gusta mucho mi mujer, si bien este proyecto esta ampliamente
@@ -17,11 +20,20 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es', null);
 
+  final localDatasource = LocalDatasource();
+  if (kIsWeb) {
+    await localDatasource.prepopulateDemoData();
+  }
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => MateriasProvider()),
-        ChangeNotifierProvider(create: (_) => HorarioProvider()),
+        ChangeNotifierProvider(
+          create: (_) => HorarioProvider(
+            repository: HorarioRepository(localDatasource: localDatasource),
+          ),
+        ),
         ChangeNotifierProvider(create: (_) => PerfilProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => EventosProvider()),

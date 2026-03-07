@@ -32,9 +32,11 @@ void main() {
 
     if (text != newText) {
       file.writeAsStringSync(newText);
+      // ignore: avoid_print
       print('Patched ${file.path}');
       count++;
     }
   }
+  // ignore: avoid_print
   print('Patching complete. Modified $count files.');
 }

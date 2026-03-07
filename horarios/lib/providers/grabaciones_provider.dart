@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -6,8 +5,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../data/models/grabacion.dart';
 import '../data/repositories/grabaciones_repository.dart';
-//  Recuerdo que para Finanzas Libre una señora me pidio que se pueda poner cosas con voz
-//  Y bueno, aca estamos, haciendo lo mismo pero para horarios pero para profesores
+
+import '../utils/file_utils.dart' as file_utils;
 
 class GrabacionesProvider extends ChangeNotifier {
   final GrabacionesRepository _repository;
@@ -58,6 +57,7 @@ class GrabacionesProvider extends ChangeNotifier {
   }
 
   Future<bool> _verificarPermisoMicrofono() async {
+    if (kIsWeb) return true; // Browser handles this via prompt
     final estado = await Permission.microphone.request();
     return estado.isGranted;
   }
@@ -65,14 +65,18 @@ class GrabacionesProvider extends ChangeNotifier {
   Future<void> iniciarGrabacion() async {
     try {
       if (await _verificarPermisoMicrofono()) {
-        final Directory appDir = await getApplicationDocumentsDirectory();
-        final String nombreArchivo =
-            'grabacion_${DateTime.now().millisecondsSinceEpoch}.m4a';
-        final String path = '${appDir.path}/$nombreArchivo';
+        String? path;
+
+        if (!kIsWeb) {
+          final appDir = await getApplicationDocumentsDirectory();
+          final String nombreArchivo =
+              'grabacion_${DateTime.now().millisecondsSinceEpoch}.m4a';
+          path = '${appDir.path}/$nombreArchivo';
+        }
 
         await _audioRecorder.start(
           const RecordConfig(encoder: AudioEncoder.aacLc),
-          path: path,
+          path: path ?? '',
         );
 
         _isRecording = true;
@@ -116,7 +120,11 @@ class GrabacionesProvider extends ChangeNotifier {
         _playingId = null;
       } else {
         await _audioPlayer.stop();
-        await _audioPlayer.play(DeviceFileSource(grabacion.pathArchivo));
+        if (kIsWeb) {
+          await _audioPlayer.play(UrlSource(grabacion.pathArchivo));
+        } else {
+          await _audioPlayer.play(DeviceFileSource(grabacion.pathArchivo));
+        }
         _playingId = grabacion.id;
       }
       notifyListeners();
@@ -134,9 +142,8 @@ class GrabacionesProvider extends ChangeNotifier {
 
       final grabacion = _grabaciones.firstWhere((g) => g.id == id);
 
-      final file = File(grabacion.pathArchivo);
-      if (await file.exists()) {
-        await file.delete();
+      if (!kIsWeb) {
+        await file_utils.eliminarArchivo(grabacion.pathArchivo);
       }
 
       _grabaciones.removeWhere((g) => g.id == id);

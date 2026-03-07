@@ -1,5 +1,6 @@
 import 'package:isar/isar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../models/materia.dart';
@@ -8,6 +9,7 @@ import '../models/horario_usuario.dart';
 import '../models/perfil_usuario.dart';
 import '../models/materia_notas.dart';
 import '../models/materia_custom.dart';
+import 'github_datasource.dart';
 
 class LocalDatasource {
   static const String _isFetchedKey = 'datos_cargados';
@@ -20,6 +22,17 @@ class LocalDatasource {
   Future<Isar> _initDb() async {
     if (Isar.instanceNames.isNotEmpty) {
       return Isar.getInstance()!;
+    }
+
+    if (kIsWeb) {
+      return await Isar.open([
+        MateriaSchema,
+        CarreraSchema,
+        HorarioUsuarioSchema,
+        PerfilUsuarioSchema,
+        MateriaNotasSchema,
+        MateriaCustomSchema,
+      ], directory: '');
     }
 
     final dir = await getApplicationDocumentsDirectory();
@@ -130,5 +143,20 @@ class LocalDatasource {
       }
       await isar.materiaCustoms.putAll(ocultas);
     });
+  }
+
+  Future<void> prepopulateDemoData() async {
+    if (await datosFueronCargados()) return;
+
+    final github = GithubDatasource();
+    try {
+      final datos = await github.fetchDatos();
+      await guardarMaterias(datos.materias);
+      await guardarCarreras(datos.carreras);
+      await marcarDatosCargados();
+      debugPrint('Datos de demo pre-cargados exitosamente.');
+    } catch (e) {
+      debugPrint('Error al pre-cargar datos de demo: $e');
+    }
   }
 }
