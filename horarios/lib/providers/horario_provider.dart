@@ -3,10 +3,6 @@ import '../data/models/horario_usuario.dart';
 import '../data/models/materia.dart';
 import '../data/repositories/horario_repository.dart';
 
-//  Muchas veces me pregunto si todo esto tiene sentido
-//  Seria tan facil solamente rendirse ante las aplicaciones con anuncios
-//  Pero no, hay que seguir adelante, es una lucha por la socializacion del trabajo?
-// Lo hago por mi y por a quienes mas se les pueda ayudar
 class HorarioProvider extends ChangeNotifier {
   final HorarioRepository _repository;
 
@@ -34,9 +30,8 @@ class HorarioProvider extends ChangeNotifier {
   }
 
   Future<void> agregarMateria(Materia materia) async {
-    if (horario == null) return;
     try {
-      await _repository.agregarMateria(horario!.id, materia);
+      await _repository.agregarMateria(materia);
       horario = await _repository.obtenerHorario();
       notifyListeners();
     } catch (e) {
@@ -47,9 +42,8 @@ class HorarioProvider extends ChangeNotifier {
   }
 
   Future<void> eliminarMateria(String materiaId) async {
-    if (horario == null) return;
     try {
-      await _repository.eliminarMateria(horario!.id, materiaId);
+      await _repository.eliminarMateria(materiaId);
       horario = await _repository.obtenerHorario();
       notifyListeners();
     } catch (e) {
@@ -60,9 +54,8 @@ class HorarioProvider extends ChangeNotifier {
   }
 
   Future<void> agregarBloque(String materiaId, BloqueHorario bloque) async {
-    if (horario == null) return;
     try {
-      await _repository.agregarBloque(horario!.id, materiaId, bloque);
+      await _repository.agregarBloque(materiaId, bloque);
       horario = await _repository.obtenerHorario();
       notifyListeners();
     } catch (e) {
@@ -73,9 +66,8 @@ class HorarioProvider extends ChangeNotifier {
   }
 
   Future<void> eliminarBloque(String materiaId, int indice) async {
-    if (horario == null) return;
     try {
-      await _repository.eliminarBloque(horario!.id, materiaId, indice);
+      await _repository.eliminarBloque(materiaId, indice);
       horario = await _repository.obtenerHorario();
       notifyListeners();
     } catch (e) {
@@ -90,14 +82,8 @@ class HorarioProvider extends ChangeNotifier {
     int indice,
     BloqueHorario nuevoBloque,
   ) async {
-    if (horario == null) return;
     try {
-      await _repository.actualizarBloque(
-        horario!.id,
-        materiaId,
-        indice,
-        nuevoBloque,
-      );
+      await _repository.actualizarBloque(materiaId, indice, nuevoBloque);
       horario = await _repository.obtenerHorario();
       notifyListeners();
     } catch (e) {
@@ -130,10 +116,8 @@ class HorarioProvider extends ChangeNotifier {
     String? nuevoAula,
     int nuevoColorARGB,
   ) async {
-    if (horario == null) return;
     try {
       await _repository.actualizarMateria(
-        horario!.id,
         materiaId,
         nuevoNombre,
         nuevosProfesores,
@@ -161,19 +145,9 @@ class HorarioProvider extends ChangeNotifier {
     String materiaId,
     String nuevasNotas,
   ) async {
-    if (horario == null) return;
     try {
-      await _repository.actualizarNotasMateria(
-        horario!.id,
-        materiaId,
-        nuevasNotas,
-      );
-      final index = horario!.materiasSeleccionadas.indexWhere(
-        (m) => m.materiaId == materiaId,
-      );
-      if (index != -1) {
-        horario!.materiasSeleccionadas[index].notas = nuevasNotas;
-      }
+      await _repository.actualizarNotasMateria(materiaId, nuevasNotas);
+      horario = await _repository.obtenerHorario();
       notifyListeners();
     } catch (e) {
       error = e.toString();

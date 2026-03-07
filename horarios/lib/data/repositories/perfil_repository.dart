@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
+import 'package:isar/isar.dart';
+
 import '../models/perfil_usuario.dart';
 import '../sources/local_datasource.dart';
-import 'package:isar/isar.dart';
 
 class PerfilRepository {
   final LocalDatasource _localDatasource;
@@ -8,15 +10,25 @@ class PerfilRepository {
   PerfilRepository({LocalDatasource? localDatasource})
     : _localDatasource = localDatasource ?? LocalDatasource();
 
+  static PerfilUsuario? _webMockPerfil;
+
   Future<PerfilUsuario?> obtenerPerfil() async {
-    final isar = await _localDatasource.db;
+    if (kIsWeb) {
+      return _webMockPerfil;
+    }
+    final isar = await _localDatasource.db!;
     return await isar.perfilUsuarios.where().findFirst();
   }
 
   Future<PerfilUsuario> crearPerfilVacio() async {
-    final isar = await _localDatasource.db;
     final nuevoPerfil = PerfilUsuario();
 
+    if (kIsWeb) {
+      _webMockPerfil = nuevoPerfil;
+      return nuevoPerfil;
+    }
+
+    final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.perfilUsuarios.put(nuevoPerfil);
     });
@@ -25,19 +37,23 @@ class PerfilRepository {
   }
 
   Future<void> setCarreras(List<String> carreras) async {
-    final isar = await _localDatasource.db;
     var perfil = await obtenerPerfil();
     perfil ??= await crearPerfilVacio();
 
     perfil.carrerasSeleccionadas = carreras;
 
+    if (kIsWeb) {
+      _webMockPerfil = perfil;
+      return;
+    }
+
+    final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.perfilUsuarios.put(perfil!);
     });
   }
 
   Future<void> toggleMateriaAprobada(String materiaId) async {
-    final isar = await _localDatasource.db;
     var perfil = await obtenerPerfil();
     perfil ??= await crearPerfilVacio();
 
@@ -51,6 +67,12 @@ class PerfilRepository {
 
     perfil.materiasAprobadas = aprobadas;
 
+    if (kIsWeb) {
+      _webMockPerfil = perfil;
+      return;
+    }
+
+    final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.perfilUsuarios.put(perfil!);
     });
@@ -63,10 +85,16 @@ class PerfilRepository {
   }
 
   Future<void> limpiarMateriasAprobadas() async {
-    final isar = await _localDatasource.db;
     var perfil = await obtenerPerfil();
     perfil ??= await crearPerfilVacio();
     perfil.materiasAprobadas = [];
+
+    if (kIsWeb) {
+      _webMockPerfil = perfil;
+      return;
+    }
+
+    final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.perfilUsuarios.put(perfil!);
     });

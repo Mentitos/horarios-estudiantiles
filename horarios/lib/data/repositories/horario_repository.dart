@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 
 import '../models/materia.dart';
@@ -49,18 +50,27 @@ class HorarioRepository {
   }
 
   Future<HorarioUsuario?> obtenerHorario() async {
-    final isar = await _localDatasource.db;
+    if (kIsWeb) {
+      return _webMockHorario;
+    }
+    final isar = await _localDatasource.db!;
     return await isar.horarioUsuarios.where().findFirst();
   }
 
-  Future<HorarioUsuario> crearHorarioVacio(String titulo) async {
-    final isar = await _localDatasource.db;
+  static HorarioUsuario? _webMockHorario;
 
+  Future<HorarioUsuario> crearHorarioVacio(String titulo) async {
     final nuevoHorario = HorarioUsuario()
       ..titulo = titulo
       ..fechaActualizacion = DateTime.now()
       ..materiasSeleccionadas = [];
 
+    if (kIsWeb) {
+      _webMockHorario = nuevoHorario;
+      return nuevoHorario;
+    }
+
+    final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(nuevoHorario);
     });
@@ -68,11 +78,11 @@ class HorarioRepository {
     return nuevoHorario;
   }
 
-  Future<void> agregarMateria(int horarioId, Materia materia) async {
-    final isar = await _localDatasource.db;
-    final rHorario = await isar.horarioUsuarios.get(horarioId);
-
-    if (rHorario == null) throw Exception('Horario no encontrado');
+  Future<void> agregarMateria(Materia materia) async {
+    var rHorario = await obtenerHorario();
+    if (rHorario == null) {
+      rHorario = await crearHorarioVacio('Mi Horario');
+    }
 
     final existe = rHorario.materiasSeleccionadas.any(
       (m) => m.materiaId == materia.materiaId,
@@ -91,42 +101,49 @@ class HorarioRepository {
       ..add(seleccionada);
     rHorario.fechaActualizacion = DateTime.now();
 
+    if (kIsWeb) {
+      _webMockHorario = rHorario;
+      return;
+    }
+
+    final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
-      await isar.horarioUsuarios.put(rHorario);
+      await isar.horarioUsuarios.put(rHorario!);
     });
   }
 
-  Future<void> eliminarMateria(int horarioId, String materiaId) async {
-    final isar = await _localDatasource.db;
-    final rHorario = await isar.horarioUsuarios.get(horarioId);
-
-    if (rHorario == null) throw Exception('Horario no encontrado');
+  Future<void> eliminarMateria(String materiaId) async {
+    final rHorario = await obtenerHorario();
+    if (rHorario == null) return;
 
     rHorario.materiasSeleccionadas = rHorario.materiasSeleccionadas
         .where((m) => m.materiaId != materiaId)
         .toList();
     rHorario.fechaActualizacion = DateTime.now();
 
+    if (kIsWeb) {
+      _webMockHorario = rHorario;
+      return;
+    }
+
+    final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
     });
   }
 
   Future<void> agregarBloque(
-    int horarioId,
     String materiaId,
     BloqueHorario nuevoBloque,
   ) async {
-    final isar = await _localDatasource.db;
-    final rHorario = await isar.horarioUsuarios.get(horarioId);
-
+    final rHorario = await obtenerHorario();
     if (rHorario == null) throw Exception('Horario no encontrado');
 
     final indiceMateria = rHorario.materiasSeleccionadas.indexWhere(
       (m) => m.materiaId == materiaId,
     );
     if (indiceMateria == -1) {
-      throw Exception('Materia \$materiaId no está en este horario');
+      throw Exception('Materia $materiaId no está en este horario');
     }
 
     for (var mat in rHorario.materiasSeleccionadas) {
@@ -146,20 +163,23 @@ class HorarioRepository {
     rHorario.materiasSeleccionadas[indiceMateria] = materiaUpdate;
     rHorario.fechaActualizacion = DateTime.now();
 
+    if (kIsWeb) {
+      _webMockHorario = rHorario;
+      return;
+    }
+
+    final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
     });
   }
 
   Future<void> actualizarBloque(
-    int horarioId,
     String materiaId,
     int indiceBloque,
     BloqueHorario nuevoBloque,
   ) async {
-    final isar = await _localDatasource.db;
-    final rHorario = await isar.horarioUsuarios.get(horarioId);
-
+    final rHorario = await obtenerHorario();
     if (rHorario == null) throw Exception('Horario no encontrado');
 
     final indiceMateria = rHorario.materiasSeleccionadas.indexWhere(
@@ -191,19 +211,19 @@ class HorarioRepository {
     rHorario.materiasSeleccionadas[indiceMateria] = materiaUpdate;
     rHorario.fechaActualizacion = DateTime.now();
 
+    if (kIsWeb) {
+      _webMockHorario = rHorario;
+      return;
+    }
+
+    final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
     });
   }
 
-  Future<void> eliminarBloque(
-    int horarioId,
-    String materiaId,
-    int indiceBloqueLocal,
-  ) async {
-    final isar = await _localDatasource.db;
-    final rHorario = await isar.horarioUsuarios.get(horarioId);
-
+  Future<void> eliminarBloque(String materiaId, int indiceBloqueLocal) async {
+    final rHorario = await obtenerHorario();
     if (rHorario == null) throw Exception('Horario no encontrado');
 
     final indiceMateria = rHorario.materiasSeleccionadas.indexWhere(
@@ -221,29 +241,36 @@ class HorarioRepository {
     rHorario.materiasSeleccionadas[indiceMateria] = materiaUpdate;
     rHorario.fechaActualizacion = DateTime.now();
 
+    if (kIsWeb) {
+      _webMockHorario = rHorario;
+      return;
+    }
+
+    final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
     });
   }
 
   Future<void> eliminarHorario() async {
-    final isar = await _localDatasource.db;
+    if (kIsWeb) {
+      _webMockHorario = null;
+      return;
+    }
+    final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.clear();
     });
   }
 
   Future<void> actualizarMateria(
-    int horarioId,
     String materiaId,
     String nuevoNombre,
     List<String> nuevosProfesores,
     String nuevoAula,
     int nuevoColorARGB,
   ) async {
-    final isar = await _localDatasource.db;
-
-    final rHorario = await isar.horarioUsuarios.get(horarioId);
+    final rHorario = await obtenerHorario();
     if (rHorario == null) throw Exception('Horario no encontrado');
 
     final indice = rHorario.materiasSeleccionadas.indexWhere(
@@ -261,78 +288,82 @@ class HorarioRepository {
     rHorario.materiasSeleccionadas[indice] = materiaAActualizar;
     rHorario.fechaActualizacion = DateTime.now();
 
+    if (kIsWeb) {
+      _webMockHorario = rHorario;
+      return;
+    }
+
+    final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
     });
   }
 
   Future<String> obtenerNotasMateria(String materiaId) async {
-    final isar = await _localDatasource.db;
-    final notas = await isar.materiaNotas
-        .where()
-        .materiaIdEqualTo(materiaId)
-        .findFirst();
+    final notas = await _localDatasource.leerNotasPorMateriaId(materiaId);
     return notas?.contenido ?? '';
   }
 
   Future<void> guardarNotasMateria(String materiaId, String contenido) async {
-    final isar = await _localDatasource.db;
-
-    final existente = await isar.materiaNotas
-        .where()
-        .materiaIdEqualTo(materiaId)
-        .findFirst();
-
     final notas = MateriaNotas(
       materiaId: materiaId,
       contenido: contenido,
       ultimaActualizacion: DateTime.now(),
     );
 
-    if (existente != null) {
-      notas.id = existente.id;
+    if (!kIsWeb) {
+      final isar = await _localDatasource.db!;
+      final existente = await isar.materiaNotas
+          .where()
+          .materiaIdEqualTo(materiaId)
+          .findFirst();
+      if (existente != null) {
+        notas.id = existente.id;
+      }
     }
 
-    await isar.writeTxn(() async {
-      await isar.materiaNotas.put(notas);
-    });
+    await _localDatasource.guardarNotasMateria(notas);
   }
 
   Future<void> actualizarNotasMateria(
-    int horarioId,
     String materiaId,
     String nuevasNotas,
   ) async {
     await guardarNotasMateria(materiaId, nuevasNotas);
 
-    final isar = await _localDatasource.db;
+    final rHorario = await obtenerHorario();
+    if (rHorario == null) return;
+
+    final index = rHorario.materiasSeleccionadas.indexWhere(
+      (m) => m.materiaId == materiaId,
+    );
+    if (index == -1) return;
+
+    final original = rHorario.materiasSeleccionadas[index];
+    final nuevaMateria = MateriaSeleccionada()
+      ..materiaId = original.materiaId
+      ..materiaNombre = original.materiaNombre
+      ..colorARGB = original.colorARGB
+      ..profesores = List.from(original.profesores)
+      ..aula = original.aula
+      ..bloques = List.from(original.bloques)
+      ..notas = nuevasNotas;
+
+    final nuevasMaterias = List<MateriaSeleccionada>.from(
+      rHorario.materiasSeleccionadas,
+    );
+    nuevasMaterias[index] = nuevaMateria;
+
+    rHorario.materiasSeleccionadas = nuevasMaterias;
+    rHorario.fechaActualizacion = DateTime.now();
+
+    if (kIsWeb) {
+      _webMockHorario = rHorario;
+      return;
+    }
+
+    final isar = await _localDatasource.db!;
     await isar.writeTxn(() async {
-      final rHorario = await isar.horarioUsuarios.get(horarioId);
-      if (rHorario == null) return;
-
-      final index = rHorario.materiasSeleccionadas.indexWhere(
-        (m) => m.materiaId == materiaId,
-      );
-      if (index == -1) return;
-
-      final original = rHorario.materiasSeleccionadas[index];
-      final nuevaMateria = MateriaSeleccionada()
-        ..materiaId = original.materiaId
-        ..materiaNombre = original.materiaNombre
-        ..colorARGB = original.colorARGB
-        ..profesores = List.from(original.profesores)
-        ..aula = original.aula
-        ..bloques = List.from(original.bloques)
-        ..notas = nuevasNotas;
-
-      final nuevasMaterias = List<MateriaSeleccionada>.from(
-        rHorario.materiasSeleccionadas,
-      );
-      nuevasMaterias[index] = nuevaMateria;
-
-      rHorario.materiasSeleccionadas = nuevasMaterias;
-      rHorario.fechaActualizacion = DateTime.now();
-
       await isar.horarioUsuarios.put(rHorario);
     });
   }
