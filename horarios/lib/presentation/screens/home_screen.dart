@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/calificaciones_provider.dart';
@@ -25,6 +26,8 @@ class HomeScreenState extends State<HomeScreen> {
   bool _mostrarSabado = false;
   bool _mostrarDomingo = false;
 
+  final List<int> _history = [0];
+
   final GlobalKey<CalendarioEventosScreenState> _calendarioKey =
       GlobalKey<CalendarioEventosScreenState>();
 
@@ -48,7 +51,12 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   void navigateTo(int index) {
-    setState(() => _currentIndex = index);
+    if (_currentIndex != index) {
+      setState(() {
+        _currentIndex = index;
+        _history.add(index);
+      });
+    }
   }
 
   static const List<String> _titles = [
@@ -105,7 +113,12 @@ class HomeScreenState extends State<HomeScreen> {
       drawer: NavigationDrawer(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {
-          setState(() => _currentIndex = index);
+          if (_currentIndex != index) {
+            setState(() {
+              _currentIndex = index;
+              _history.add(index);
+            });
+          }
           Navigator.pop(context);
         },
         children: [
@@ -157,7 +170,51 @@ class HomeScreenState extends State<HomeScreen> {
             ),
         ],
       ),
-      body: IndexedStack(index: _currentIndex, children: screens),
+      body: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) return;
+
+          if (_history.length > 1) {
+            setState(() {
+              _history.removeLast();
+              _currentIndex = _history.last;
+            });
+          } else if (_currentIndex != 0) {
+            setState(() {
+              _currentIndex = 0;
+              _history.clear();
+              _history.add(0);
+            });
+          } else {
+            final confirm = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: const Text('¿Cerrar aplicación?'),
+                content: const Text('¿Estás seguro de que querés salir?'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                    child: const Text('Cancelar'),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(ctx).colorScheme.error,
+                      foregroundColor: Theme.of(ctx).colorScheme.onError,
+                    ),
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    child: const Text('Salir'),
+                  ),
+                ],
+              ),
+            );
+            if (confirm == true) {
+              SystemNavigator.pop();
+            }
+          }
+        },
+        child: IndexedStack(index: _currentIndex, children: screens),
+      ),
     );
   }
 
@@ -303,7 +360,9 @@ class PlaceholderScreen extends StatelessWidget {
             'Próximamente: $title',
             style: TextStyle(
               fontSize: 18,
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
