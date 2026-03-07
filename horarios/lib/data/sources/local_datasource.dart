@@ -7,6 +7,7 @@ import '../models/carrera.dart';
 import '../models/horario_usuario.dart';
 import '../models/perfil_usuario.dart';
 import '../models/materia_notas.dart';
+import '../models/materia_custom.dart';
 
 class LocalDatasource {
   static const String _isFetchedKey = 'datos_cargados';
@@ -28,6 +29,7 @@ class LocalDatasource {
       HorarioUsuarioSchema,
       PerfilUsuarioSchema,
       MateriaNotasSchema,
+      MateriaCustomSchema,
     ], directory: dir.path);
   }
 
@@ -93,6 +95,40 @@ class LocalDatasource {
     final isar = await db;
     await isar.writeTxn(() async {
       await isar.materiaNotas.put(notas);
+    });
+  }
+
+  Future<List<MateriaCustom>> leerMateriasCustom() async {
+    final isar = await db;
+    return await isar.materiaCustoms.where().findAll();
+  }
+
+  Future<void> guardarMateriaCustom(MateriaCustom custom) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      await isar.materiaCustoms.put(custom);
+    });
+  }
+
+  Future<void> eliminarMateriaCustom(String materiaId) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      await isar.materiaCustoms.where().materiaIdEqualTo(materiaId).deleteAll();
+    });
+  }
+
+  Future<void> limpiarMateriasOcultas() async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      final ocultas = await isar.materiaCustoms
+          .where()
+          .filter()
+          .estaOcultaEqualTo(true)
+          .findAll();
+      for (var oculta in ocultas) {
+        oculta.estaOculta = false;
+      }
+      await isar.materiaCustoms.putAll(ocultas);
     });
   }
 }

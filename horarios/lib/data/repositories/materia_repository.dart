@@ -49,6 +49,7 @@ class MateriaRepository {
     );
 
     List<dynamic> materiasCruzadas = [];
+    final customs = await _localDatasource.leerMateriasCustom();
 
     for (String materiaIdCompuesto in carrera.materiasIds) {
       if (materiaIdCompuesto.contains(':')) {
@@ -58,6 +59,17 @@ class MateriaRepository {
         for (String idPart in idsInvolucrados) {
           final materia = await _localDatasource.leerMateriaPorId(idPart);
           if (materia != null) {
+            final customMatch = customs
+                .where((c) => c.materiaId == materia.materiaId)
+                .firstOrNull;
+            if (customMatch?.estaOculta == true) {
+              continue;
+            }
+            if (customMatch != null &&
+                customMatch.nombrePersonalizado != null &&
+                customMatch.nombrePersonalizado!.isNotEmpty) {
+              materia.nombre = customMatch.nombrePersonalizado;
+            }
             grupoMaterias.add(materia);
           }
         }
@@ -70,9 +82,33 @@ class MateriaRepository {
           materiaIdCompuesto,
         );
         if (materia != null) {
+          final customMatch = customs
+              .where((c) => c.materiaId == materia.materiaId)
+              .firstOrNull;
+          if (customMatch?.estaOculta == true) {
+            continue;
+          }
+          if (customMatch != null &&
+              customMatch.nombrePersonalizado != null &&
+              customMatch.nombrePersonalizado!.isNotEmpty) {
+            materia.nombre = customMatch.nombrePersonalizado;
+          }
           materiasCruzadas.add(materia);
         }
       }
+    }
+
+    final materiasLocalesNuevas = customs
+        .where(
+          (c) => c.esAgregadaLocalmente && c.carreraAsociada == nombreCarrera,
+        )
+        .toList();
+    for (var custom in materiasLocalesNuevas) {
+      materiasCruzadas.add(
+        Materia()
+          ..materiaId = custom.materiaId
+          ..nombre = custom.nombrePersonalizado ?? 'Sin nombre local',
+      );
     }
 
     return materiasCruzadas;

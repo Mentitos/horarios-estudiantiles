@@ -10,14 +10,20 @@ import '../../providers/perfil_provider.dart';
 import '../../utils/carreras_grupos.dart';
 import '../../data/sources/local_datasource.dart';
 import 'materias_aprobadas_screen.dart';
+import 'gestionar_materias_locales_screen.dart' as file_gestionar;
 
 //   Solo con que ayude a alguien a sobrellevar sus estudios me siento realizado
 //   Mucha gente llego a usar Finanzas Libre, tuve mensajes de gente desconocida
 //   Agradeciendo el que la haya creado, escucho sugerencias e implemento segun
 //   Mi criterio y el de los usuarios
-class AjustesScreen extends StatelessWidget {
+class AjustesScreen extends StatefulWidget {
   const AjustesScreen({super.key});
 
+  @override
+  State<AjustesScreen> createState() => _AjustesScreenState();
+}
+
+class _AjustesScreenState extends State<AjustesScreen> {
   Future<void> _mostrarDialogoSeleccionarCarreras(BuildContext context) async {
     final perfilProvider = context.read<PerfilProvider>();
     final carrerasActuales = List<String>.from(
@@ -218,27 +224,28 @@ class AjustesScreen extends StatelessWidget {
                       nombreCarrera,
                     ) {
                       return FutureBuilder(
-                        future: LocalDatasource().leerCarreraPorNombre(
-                          nombreCarrera,
-                        ),
+                        future: context
+                            .read<MateriasProvider>()
+                            .getMateriasDeCarrera(nombreCarrera),
                         builder: (context, snapshot) {
                           if (!snapshot.hasData) {
                             return const LinearProgressIndicator();
                           }
 
-                          final carrera = snapshot.data!;
+                          final materiasMixtas = snapshot.data as List<dynamic>;
                           int aprobadasCount = 0;
-                          final totalMaterias = carrera.materiasIds.length;
+                          int totalMaterias = 0;
 
-                          for (var mIdRaw in carrera.materiasIds) {
-                            if (mIdRaw.contains(':')) {
-                              final parts = mIdRaw.split(':');
-                              bool estaAprobada = parts.any(
-                                (p) => perfilProvider.estaAprobada(p),
+                          for (var item in materiasMixtas) {
+                            if (item is List) {
+                              totalMaterias++;
+                              bool estaAprobada = item.any(
+                                (m) => perfilProvider.estaAprobada(m.materiaId),
                               );
                               if (estaAprobada) aprobadasCount++;
                             } else {
-                              if (perfilProvider.estaAprobada(mIdRaw)) {
+                              totalMaterias++;
+                              if (perfilProvider.estaAprobada(item.materiaId)) {
                                 aprobadasCount++;
                               }
                             }
@@ -278,12 +285,27 @@ class AjustesScreen extends StatelessWidget {
                     ElevatedButton.icon(
                       icon: const Icon(Icons.check_circle_outline),
                       label: const Text('Gestionar materias aprobadas'),
-                      onPressed: () {
-                        Navigator.of(context).push(
+                      onPressed: () async {
+                        await Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => const MateriasAprobadasScreen(),
                           ),
                         );
+                        if (context.mounted) setState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.edit_note),
+                      label: const Text('Gestionar materias'),
+                      onPressed: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const file_gestionar.GestionarMateriasLocalesScreen(),
+                          ),
+                        );
+                        if (context.mounted) setState(() {});
                       },
                     ),
                   ],
@@ -317,12 +339,60 @@ class AjustesScreen extends StatelessWidget {
                               await context
                                   .read<MateriasProvider>()
                                   .refrescar();
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Actualizadas!'),
+                              if (!context.mounted) return;
+
+                              final locales = await LocalDatasource()
+                                  .leerMateriasCustom();
+                              final hayOcultas = locales.any(
+                                (c) => c.estaOculta,
+                              );
+
+                              if (hayOcultas) {
+                                final restaurar = await showDialog<bool>(
+                                  context: context,
+                                  builder: (ctx) => AlertDialog(
+                                    title: const Text('Datos actualizados'),
+                                    content: const Text(
+                                      'Se descargaron los datos correctamente. Tienes materias oficiales que ocultaste previamente, ¿deseas restaurarlas y volver a verlas?',
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.of(ctx).pop(false),
+                                        child: const Text('No'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () =>
+                                            Navigator.of(ctx).pop(true),
+                                        child: const Text('Restaurar'),
+                                      ),
+                                    ],
                                   ),
                                 );
+
+                                if (restaurar == true) {
+                                  await LocalDatasource()
+                                      .limpiarMateriasOcultas();
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'Planillas restauradas correctamente.',
+                                        ),
+                                      ),
+                                    );
+                                    setState(() {});
+                                  }
+                                }
+                              } else {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Actualizadas!'),
+                                    ),
+                                  );
+                                  setState(() {});
+                                }
                               }
                             } catch (e) {
                               if (context.mounted) {

@@ -4,6 +4,9 @@ import '../../data/models/materia.dart';
 import '../../providers/horario_provider.dart';
 import '../../providers/materias_provider.dart';
 import '../../providers/perfil_provider.dart';
+import '../../data/models/materia_custom.dart';
+import '../../data/sources/local_datasource.dart';
+import 'package:uuid/uuid.dart';
 
 //   Ojala algun dia la gente se de cuenta de que muchas cosas no tienen sentido mantenerlas
 class SeleccionMateriaScreen extends StatefulWidget {
@@ -33,6 +36,11 @@ class _SeleccionMateriaScreenState extends State<SeleccionMateriaScreen> {
       appBar: AppBar(
         title: Text(widget.nombreCarrera),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _agregarMateriaLocal,
+        icon: const Icon(Icons.add),
+        label: const Text('Crear Materia'),
       ),
       body: FutureBuilder<List<dynamic>>(
         future: _futureMaterias,
@@ -185,5 +193,50 @@ class _SeleccionMateriaScreenState extends State<SeleccionMateriaScreen> {
         },
       ),
     );
+  }
+
+  Future<void> _agregarMateriaLocal() async {
+    final controller = TextEditingController();
+
+    final nombre = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Crear Materia Personalizada'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Nombre de la materia',
+            hintText: 'Ej: Taller de Tesis',
+          ),
+          textCapitalization: TextCapitalization.words,
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(null),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            child: const Text('Crear'),
+          ),
+        ],
+      ),
+    );
+
+    if (nombre != null && nombre.isNotEmpty) {
+      final nuevaCustom = MateriaCustom()
+        ..materiaId = const Uuid().v4()
+        ..nombrePersonalizado = nombre
+        ..esAgregadaLocalmente = true
+        ..carreraAsociada = widget.nombreCarrera;
+
+      await LocalDatasource().guardarMateriaCustom(nuevaCustom);
+      setState(() {
+        _futureMaterias = context.read<MateriasProvider>().getMateriasDeCarrera(
+          widget.nombreCarrera,
+        );
+      });
+    }
   }
 }
