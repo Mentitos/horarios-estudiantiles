@@ -158,7 +158,8 @@ class CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
               ? eventosProvider.obtenerEventosParaDia(_selectedDay!)
               : <Evento>[];
 
-          return Column(
+          final calendarWidget = Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -289,86 +290,106 @@ class CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
                   },
                 ),
               ),
-              const Divider(),
-
-              Expanded(
-                child: eventosDelDia.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.calendar_today_outlined,
-                              size: 48,
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurface.withOpacity(0.3),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              'Sin eventos',
-                              style: TextStyle(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurface.withOpacity(0.5),
-                              ),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        itemCount: eventosDelDia.length,
-                        itemBuilder: (context, index) {
-                          final evento = eventosDelDia[index];
-                          final materiaData = context
-                              .read<HorarioProvider>()
-                              .horario
-                              ?.materiasSeleccionadas
-                              .firstWhere(
-                                (m) => m.materiaId == evento.materiaId,
-                                orElse: () => throw Exception(),
-                              );
-
-                          final Color mColor = materiaData != null
-                              ? Color(materiaData.colorARGB ?? 0xFF000000)
-                              : Colors.grey;
-
-                          return Card(
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 16.0,
-                              vertical: 4.0,
-                            ),
-                            child: ListTile(
-                              leading: CircleAvatar(
-                                backgroundColor: mColor,
-                                child: Icon(
-                                  evento.tipo == 'TP'
-                                      ? Icons.assignment
-                                      : Icons.assignment_late,
-                                  color: mColor.computeLuminance() > 0.5
-                                      ? Colors.black
-                                      : Colors.white,
-                                ),
-                              ),
-                              title: Text(evento.titulo),
-                              subtitle: Text(
-                                '${evento.tipo} - ${materiaData?.materiaNombre ?? ''}',
-                              ),
-                              trailing: IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
-                                ),
-                                onPressed: () {
-                                  eventosProvider.eliminarEvento(evento.id);
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-              ),
             ],
+          );
+
+          final listWidget = eventosDelDia.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.calendar_today_outlined,
+                        size: 48,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.3),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Sin eventos',
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.5),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  itemCount: eventosDelDia.length,
+                  itemBuilder: (context, index) {
+                    final evento = eventosDelDia[index];
+                    final materiaData = context
+                        .read<HorarioProvider>()
+                        .horario
+                        ?.materiasSeleccionadas
+                        .firstWhere(
+                          (m) => m.materiaId == evento.materiaId,
+                          orElse: () => throw Exception(),
+                        );
+
+                    final Color mColor = materiaData != null
+                        ? Color(materiaData.colorARGB ?? 0xFF000000)
+                        : Colors.grey;
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16.0,
+                        vertical: 4.0,
+                      ),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: mColor,
+                          child: Icon(
+                            evento.tipo == 'TP'
+                                ? Icons.assignment
+                                : Icons.assignment_late,
+                            color: mColor.computeLuminance() > 0.5
+                                ? Colors.black
+                                : Colors.white,
+                          ),
+                        ),
+                        title: Text(evento.titulo),
+                        subtitle: Text(
+                          '${evento.tipo} - ${materiaData?.materiaNombre ?? ''}',
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            eventosProvider.eliminarEvento(evento.id);
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                );
+
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth > 600) {
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: SingleChildScrollView(child: calendarWidget),
+                    ),
+                    const VerticalDivider(width: 1),
+                    Expanded(flex: 1, child: listWidget),
+                  ],
+                );
+              } else {
+                return Column(
+                  children: [
+                    calendarWidget,
+                    const Divider(),
+                    Expanded(child: listWidget),
+                  ],
+                );
+              }
+            },
           );
         },
       ),
