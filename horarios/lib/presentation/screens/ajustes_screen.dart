@@ -496,7 +496,6 @@ class AjustesScreen extends StatelessWidget {
       await context.read<HorarioProvider>().formatear();
       await context.read<EventosProvider>().formatear();
       await context.read<PerfilProvider>().formatear();
-      // Resetear el onboarding para que vuelva a aparecer al reiniciar
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('onboarding_done');
       if (context.mounted) {
@@ -513,8 +512,14 @@ class AjustesScreen extends StatelessWidget {
 
   Future<void> _abrirLink(String url) async {
     final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    } catch (e) {
+      debugPrint('Error al abrir link: $e');
     }
   }
 }
