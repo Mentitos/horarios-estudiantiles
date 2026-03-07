@@ -6,6 +6,7 @@ import 'horario_screen.dart';
 import 'calendario_eventos_screen.dart';
 import 'ajustes_screen.dart';
 import 'calificaciones_screen.dart';
+import 'calificaciones_archivadas_screen.dart';
 import 'profesores_screen.dart';
 import 'grabaciones_screen.dart';
 
@@ -188,7 +189,58 @@ class HomeScreenState extends State<HomeScreen> {
             context.read<CalificacionesProvider>().ordenarPor(val);
           },
         ),
-        IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
+        PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert),
+          onSelected: (val) {
+            final provider = context.read<CalificacionesProvider>();
+            if (val == 'archivadas') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const CalificacionesArchivadasScreen(),
+                ),
+              );
+            } else if (val == 'archivar_todas') {
+              provider.archivarTodasActivas();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Todas las calificaciones fueron archivadas.'),
+                ),
+              );
+            } else if (val == 'toggle_visibilidad') {
+              provider.toggleModoArchivado();
+            }
+          },
+          itemBuilder: (_) => [
+            const PopupMenuItem(
+              value: 'archivadas',
+              child: Text('Ver Archivadas'),
+            ),
+            const PopupMenuItem(
+              value: 'archivar_todas',
+              child: Text('Archivar Todas'),
+            ),
+            PopupMenuItem(
+              value: 'toggle_visibilidad',
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Archivar individualmente'),
+                  if (context
+                      .read<CalificacionesProvider>()
+                      .modoArchivadoVisible) ...[
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.check,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
       ];
     }
     return null;

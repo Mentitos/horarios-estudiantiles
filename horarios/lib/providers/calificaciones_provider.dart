@@ -7,6 +7,7 @@ class CalificacionesProvider extends ChangeNotifier {
 
   List<Calificacion> _calificaciones = [];
   bool _cargando = true;
+  bool _modoArchivadoVisible = false;
 
   List<Calificacion> get calificaciones => _calificaciones;
   List<Calificacion> get calificacionesActivas =>
@@ -15,6 +16,12 @@ class CalificacionesProvider extends ChangeNotifier {
       _calificaciones.where((c) => c.isArchivada).toList();
 
   bool get cargando => _cargando;
+  bool get modoArchivadoVisible => _modoArchivadoVisible;
+
+  void toggleModoArchivado() {
+    _modoArchivadoVisible = !_modoArchivadoVisible;
+    notifyListeners();
+  }
 
   CalificacionesProvider({CalificacionesRepository? repository})
     : _repository = repository ?? CalificacionesRepository() {
@@ -56,6 +63,20 @@ class CalificacionesProvider extends ChangeNotifier {
     final index = _calificaciones.indexWhere((c) => c.id == id);
     if (index != -1) {
       _calificaciones[index].isArchivada = !_calificaciones[index].isArchivada;
+      await _repository.guardarCalificaciones(_calificaciones);
+      notifyListeners();
+    }
+  }
+
+  Future<void> archivarTodasActivas() async {
+    bool changes = false;
+    for (var c in _calificaciones) {
+      if (!c.isArchivada) {
+        c.isArchivada = true;
+        changes = true;
+      }
+    }
+    if (changes) {
       await _repository.guardarCalificaciones(_calificaciones);
       notifyListeners();
     }

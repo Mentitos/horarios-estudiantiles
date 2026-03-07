@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import '../../providers/calificaciones_provider.dart';
 import 'agregar_calificacion_screen.dart';
 import 'detalle_calificacion_screen.dart';
-import 'calificaciones_archivadas_screen.dart';
 
 class CalificacionesScreen extends StatefulWidget {
   const CalificacionesScreen({super.key});
@@ -26,29 +25,6 @@ class _CalificacionesScreenState extends State<CalificacionesScreen> {
         final notas = provider.calificacionesActivas;
 
         return Scaffold(
-          appBar: AppBar(
-            actions: [
-              PopupMenuButton<String>(
-                icon: const Icon(Icons.more_vert),
-                onSelected: (value) {
-                  if (value == 'archivadas') {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const CalificacionesArchivadasScreen(),
-                      ),
-                    );
-                  }
-                },
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    value: 'archivadas',
-                    child: Text('Ver Archivadas'),
-                  ),
-                ],
-              ),
-            ],
-          ),
           body: notas.isEmpty
               ? _buildEmptyState(context)
               : ListView.builder(
@@ -99,20 +75,22 @@ class _CalificacionesScreenState extends State<CalificacionesScreen> {
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
-                            const SizedBox(width: 8),
-                            IconButton(
-                              icon: const Icon(Icons.inventory_2_outlined),
-                              onPressed: () {
-                                provider.toggleArchivar(nota.id);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Calificación archivada'),
-                                    duration: Duration(seconds: 2),
-                                  ),
-                                );
-                              },
-                              tooltip: 'Archivar',
-                            ),
+                            if (provider.modoArchivadoVisible) ...[
+                              const SizedBox(width: 8),
+                              IconButton(
+                                icon: const Icon(Icons.inventory_2_outlined),
+                                onPressed: () {
+                                  provider.toggleArchivar(nota.id);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Calificación archivada'),
+                                      duration: Duration(seconds: 2),
+                                    ),
+                                  );
+                                },
+                                tooltip: 'Archivar',
+                              ),
+                            ],
                           ],
                         ),
                         onTap: () {

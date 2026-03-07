@@ -56,12 +56,14 @@ class CalificacionesArchivadasScreen extends StatelessWidget {
                   leading: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       Icons.inventory_2,
-                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   title: Text(
@@ -74,15 +76,34 @@ class CalificacionesArchivadasScreen extends StatelessWidget {
                   subtitle: Text(
                     '${nota.tipoEvaluacion} • ${nota.valorPorcentual > 0 ? nota.valorPorcentual : 0}%',
                   ),
-                  trailing: Text(
-                    nota.titulo,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.primary.withOpacity(0.7),
-                    ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        nota.titulo,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.7),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(Icons.unarchive_outlined),
+                        onPressed: () {
+                          provider.toggleArchivar(nota.id);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Calificación restaurada'),
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        tooltip: 'Recuperar',
+                      ),
+                    ],
                   ),
                   onTap: () {
                     Navigator.push(
