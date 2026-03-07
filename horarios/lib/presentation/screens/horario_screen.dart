@@ -34,11 +34,10 @@ class HorarioScreen extends StatelessWidget {
 
     String? nombre = materia.materiaNombre;
     List<String> listaProfesores = List.from(materia.profesores);
-    if (listaProfesores.isEmpty) listaProfesores.add(''); // Al menos una ranura
+    if (listaProfesores.isEmpty) listaProfesores.add('');
     String? aula = materia.aula;
     int colorElegido = materia.colorARGB ?? 0xFF000000;
 
-    // Obtener materias de las carreras seleccionadas
     List<Materia> materiasDisponibles = [];
     for (String carrera in perfilProvider.carrerasSeleccionadas) {
       final mats = await materiasProvider.getMateriasDeCarrera(carrera);
@@ -56,7 +55,6 @@ class HorarioScreen extends StatelessWidget {
         }
       }
     }
-    // Eliminar duplicados por ID
     final seenIds = <String>{};
     materiasDisponibles = materiasDisponibles
         .where((m) => seenIds.add(m.materiaId ?? ''))
@@ -144,7 +142,6 @@ class HorarioScreen extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      // -- CONFIGURACIÓN GENERAL --
                       DropdownButtonFormField<String>(
                         value:
                             materiasDisponibles.any((m) => m.nombre == nombre)
@@ -274,7 +271,6 @@ class HorarioScreen extends StatelessWidget {
                           ),
                         );
                       }),
-                      // Botón para añadir más profesores
                       TextButton.icon(
                         onPressed: () {
                           setStateSheet(() {
@@ -415,57 +411,79 @@ class HorarioScreen extends StatelessWidget {
                             title: Text(
                               '${b.dia} de ${b.horaInicio} a ${b.horaFin}',
                             ),
-                            subtitle: Text(
-                              b.aula?.isNotEmpty == true
-                                  ? 'Aula: ${b.aula}'
-                                  : 'Sin aula específica',
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () async {
-                                final confirmar = await showDialog<bool>(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    title: const Text('Eliminar bloque'),
-                                    content: const Text(
-                                      '¿Estás seguro de que deseas eliminar este bloque horario?',
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(ctx, false),
-                                        child: const Text('Cancelar'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(ctx, true),
-                                        child: const Text(
-                                          'Eliminar',
-                                          style: TextStyle(color: Colors.red),
-                                        ),
-                                      ),
-                                    ],
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.blue,
                                   ),
-                                );
-
-                                if (confirmar == true) {
-                                  try {
-                                    await horarioProvider.eliminarBloque(
+                                  onPressed: () async {
+                                    await _mostrarDialogoLrBloque(
+                                      context,
                                       materiaActualizada.materiaId!,
-                                      index,
+                                      indexEdit: index,
+                                      bloqueOriginal: b,
                                     );
                                     setStateSheet(() {});
-                                  } catch (e) {
-                                    if (context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        SnackBar(content: Text(e.toString())),
-                                      );
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () async {
+                                    final confirmar = await showDialog<bool>(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: const Text('Eliminar bloque'),
+                                        content: const Text(
+                                          '¿Estás seguro de que deseas eliminar este bloque horario?',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(ctx, false),
+                                            child: const Text('Cancelar'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(ctx, true),
+                                            child: const Text(
+                                              'Eliminar',
+                                              style: TextStyle(
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                    if (confirmar == true) {
+                                      try {
+                                        await horarioProvider.eliminarBloque(
+                                          materiaActualizada.materiaId!,
+                                          index,
+                                        );
+                                        setStateSheet(() {});
+                                      } catch (e) {
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                            ),
+                                          );
+                                        }
+                                      }
                                     }
-                                  }
-                                }
-                              },
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         );
@@ -498,11 +516,27 @@ class HorarioScreen extends StatelessWidget {
 
   Future<void> _mostrarDialogoLrBloque(
     BuildContext context,
-    String materiaId,
-  ) async {
-    String diaSeleccionado = 'Lunes';
+    String materiaId, {
+    int? indexEdit,
+    BloqueHorario? bloqueOriginal,
+  }) async {
+    String diaSeleccionado = bloqueOriginal?.dia ?? 'Lunes';
+
     TimeOfDay inicio = const TimeOfDay(hour: 8, minute: 0);
     TimeOfDay fin = const TimeOfDay(hour: 10, minute: 0);
+
+    if (bloqueOriginal != null) {
+      final partesI = bloqueOriginal.horaInicio!.split(':');
+      inicio = TimeOfDay(
+        hour: int.parse(partesI[0]),
+        minute: int.parse(partesI[1]),
+      );
+      final partesF = bloqueOriginal.horaFin!.split(':');
+      fin = TimeOfDay(
+        hour: int.parse(partesF[0]),
+        minute: int.parse(partesF[1]),
+      );
+    }
 
     return showDialog(
       context: context,
@@ -516,7 +550,11 @@ class HorarioScreen extends StatelessWidget {
             }
 
             return AlertDialog(
-              title: const Text('Nuevo Bloque Horario'),
+              title: Text(
+                indexEdit == null
+                    ? 'Nuevo Bloque Horario'
+                    : 'Editar Bloque Horario',
+              ),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -567,13 +605,15 @@ class HorarioScreen extends StatelessWidget {
                         if (picked != null) {
                           setStateDialog(() {
                             inicio = picked;
-                            // Sumar 2 horas automáticamente al final
-                            int totalMinutes =
-                                (picked.hour * 60 + picked.minute + 120) % 1440;
-                            fin = TimeOfDay(
-                              hour: totalMinutes ~/ 60,
-                              minute: totalMinutes % 60,
-                            );
+                            if (indexEdit == null) {
+                              int totalMinutes =
+                                  (picked.hour * 60 + picked.minute + 120) %
+                                  1440;
+                              fin = TimeOfDay(
+                                hour: totalMinutes ~/ 60,
+                                minute: totalMinutes % 60,
+                              );
+                            }
                           });
                         }
                       },
@@ -607,13 +647,21 @@ class HorarioScreen extends StatelessWidget {
                       ..dia = diaSeleccionado
                       ..horaInicio = formatoHora(inicio)
                       ..horaFin = formatoHora(fin)
-                      ..aula = '';
+                      ..aula = bloqueOriginal?.aula ?? '';
 
                     try {
-                      await horarioProvider.agregarBloque(
-                        materiaId,
-                        nuevoBloque,
-                      );
+                      if (indexEdit == null) {
+                        await horarioProvider.agregarBloque(
+                          materiaId,
+                          nuevoBloque,
+                        );
+                      } else {
+                        await horarioProvider.actualizarBloque(
+                          materiaId,
+                          indexEdit,
+                          nuevoBloque,
+                        );
+                      }
                       if (context.mounted) Navigator.of(context).pop();
                     } catch (e) {
                       if (context.mounted) {
@@ -623,7 +671,7 @@ class HorarioScreen extends StatelessWidget {
                       }
                     }
                   },
-                  child: const Text('Guardar'),
+                  child: Text(indexEdit == null ? 'Guardar' : 'Actualizar'),
                 ),
               ],
             );

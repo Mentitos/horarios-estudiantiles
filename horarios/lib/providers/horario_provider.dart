@@ -81,6 +81,28 @@ class HorarioProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> actualizarBloque(
+    String materiaId,
+    int indice,
+    BloqueHorario nuevoBloque,
+  ) async {
+    if (horario == null) return;
+    try {
+      await _repository.actualizarBloque(
+        horario!.id,
+        materiaId,
+        indice,
+        nuevoBloque,
+      );
+      horario = await _repository.obtenerHorario();
+      notifyListeners();
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   bool tieneLaMateria(String materiaId) {
     if (horario == null) return false;
     return horario!.materiasSeleccionadas.any((m) => m.materiaId == materiaId);

@@ -167,7 +167,6 @@ class _HuePainter extends CustomPainter {
       Paint()..shader = const LinearGradient(colors: colors).createShader(rect),
     );
 
-    // Indicador
     final x = (hue / 360.0) * size.width;
     canvas.drawCircle(
       Offset(x, size.height / 2),

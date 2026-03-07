@@ -151,6 +151,52 @@ class HorarioRepository {
     });
   }
 
+  Future<void> actualizarBloque(
+    int horarioId,
+    String materiaId,
+    int indiceBloque,
+    BloqueHorario nuevoBloque,
+  ) async {
+    final isar = await _localDatasource.db;
+    final rHorario = await isar.horarioUsuarios.get(horarioId);
+
+    if (rHorario == null) throw Exception('Horario no encontrado');
+
+    final indiceMateria = rHorario.materiasSeleccionadas.indexWhere(
+      (m) => m.materiaId == materiaId,
+    );
+    if (indiceMateria == -1) {
+      throw Exception('Materia $materiaId no está en este horario');
+    }
+
+    for (var mat in rHorario.materiasSeleccionadas) {
+      for (int i = 0; i < mat.bloques.length; i++) {
+        if (mat.materiaId == materiaId && i == indiceBloque) continue;
+
+        final b = mat.bloques[i];
+        if (_seSolapan(b, nuevoBloque)) {
+          final nomMateriaChoca = mat.materiaNombre ?? 'Desconocida';
+          throw Exception(
+            'Solapamiento detectado el ${b.dia} con "$nomMateriaChoca" de ${b.horaInicio} a ${b.horaFin}',
+          );
+        }
+      }
+    }
+
+    final materiaUpdate = rHorario.materiasSeleccionadas[indiceMateria];
+    final nuevosBloques = List<BloqueHorario>.from(materiaUpdate.bloques);
+    nuevosBloques[indiceBloque] = nuevoBloque;
+    materiaUpdate.bloques = nuevosBloques;
+
+    rHorario.materiasSeleccionadas = List.from(rHorario.materiasSeleccionadas);
+    rHorario.materiasSeleccionadas[indiceMateria] = materiaUpdate;
+    rHorario.fechaActualizacion = DateTime.now();
+
+    await isar.writeTxn(() async {
+      await isar.horarioUsuarios.put(rHorario);
+    });
+  }
+
   Future<void> eliminarBloque(
     int horarioId,
     String materiaId,
@@ -165,7 +211,7 @@ class HorarioRepository {
       (m) => m.materiaId == materiaId,
     );
     if (indiceMateria == -1) {
-      throw Exception('Materia \$materiaId no está en este horario');
+      throw Exception('Materia $materiaId no está en este horario');
     }
 
     final materiaUpdate = rHorario.materiasSeleccionadas[indiceMateria];
