@@ -63,4 +63,11 @@ class EventosProvider with ChangeNotifier {
   bool isSameDay(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
+
+  Future<void> formatear() async {
+    _eventos.clear();
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('eventos_calendario');
+  }
 }

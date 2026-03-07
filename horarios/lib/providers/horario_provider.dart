@@ -85,4 +85,15 @@ class HorarioProvider extends ChangeNotifier {
     if (horario == null) return false;
     return horario!.materiasSeleccionadas.any((m) => m.materiaId == materiaId);
   }
+
+  Future<void> formatear() async {
+    try {
+      await _repository.eliminarHorario();
+      horario = await _repository.crearHorarioVacio('Mi Horario');
+      notifyListeners();
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+    }
+  }
 }

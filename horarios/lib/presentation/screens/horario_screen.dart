@@ -8,7 +8,14 @@ import 'seleccion_materia_screen.dart';
 import '../widgets/grilla_semanal.dart';
 
 class HorarioScreen extends StatelessWidget {
-  const HorarioScreen({super.key});
+  final bool mostrarSabado;
+  final bool mostrarDomingo;
+
+  const HorarioScreen({
+    super.key,
+    this.mostrarSabado = false,
+    this.mostrarDomingo = false,
+  });
 
   Future<void> _mostrarBottomSheetBloques(
     BuildContext context,
@@ -241,8 +248,8 @@ class HorarioScreen extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Mi Horario'),
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          automaticallyImplyLeading: false,
+          toolbarHeight: 0,
           bottom: const TabBar(
             tabs: [
               Tab(text: 'Gestor de Clases'),
@@ -408,7 +415,11 @@ class HorarioScreen extends StatelessWidget {
             ),
           );
         }
-        return GrillaSemanal(horario: horario);
+        return GrillaSemanal(
+          horario: horario,
+          mostrarSabado: mostrarSabado,
+          mostrarDomingo: mostrarDomingo,
+        );
       },
     );
   }

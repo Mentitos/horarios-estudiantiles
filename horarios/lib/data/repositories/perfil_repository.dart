@@ -61,4 +61,14 @@ class PerfilRepository {
     if (perfil == null) return false;
     return perfil.materiasAprobadas.contains(materiaId);
   }
+
+  Future<void> limpiarMateriasAprobadas() async {
+    final isar = await _localDatasource.db;
+    var perfil = await obtenerPerfil();
+    perfil ??= await crearPerfilVacio();
+    perfil.materiasAprobadas = [];
+    await isar.writeTxn(() async {
+      await isar.perfilUsuarios.put(perfil!);
+    });
+  }
 }

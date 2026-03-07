@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:table_calendar/table_calendar.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../data/models/evento.dart';
@@ -16,22 +15,24 @@ class CalendarioEventosScreen extends StatefulWidget {
 }
 
 class _CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
-  DateTime _focusedDay = DateTime.now();
+  DateTime _focusedMonth = DateTime(DateTime.now().year, DateTime.now().month);
   DateTime? _selectedDay;
 
   @override
   void initState() {
     super.initState();
-    _selectedDay = _focusedDay;
+    _selectedDay = DateTime.now();
   }
 
-  void _onDaySelected(DateTime selectedDay, DateTime focusedDay) {
-    if (!isSameDay(_selectedDay, selectedDay)) {
-      setState(() {
-        _selectedDay = selectedDay;
-        _focusedDay = focusedDay;
-      });
-    }
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
+
+  List<DateTime> _daysInMonth(DateTime month) {
+    final last = DateTime(month.year, month.month + 1, 0);
+    return List.generate(
+      last.day,
+      (i) => DateTime(month.year, month.month, i + 1),
+    );
   }
 
   Future<void> _mostrarDialogoAgregarEvento(BuildContext context) async {
@@ -113,7 +114,7 @@ class _CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
                     final nuevoEvento = Evento(
                       id: const Uuid().v4(),
                       titulo: titulo,
-                      fecha: _selectedDay ?? _focusedDay,
+                      fecha: _selectedDay ?? _focusedMonth,
                       materiaId: materiaId,
                       tipo: tipo,
                     );
@@ -134,89 +135,221 @@ class _CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Calendario de Exámenes'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
       body: Consumer<EventosProvider>(
         builder: (context, eventosProvider, child) {
           if (eventosProvider.cargando) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final eventosDelDia = eventosProvider.obtenerEventosParaDia(
-            _selectedDay ?? _focusedDay,
-          );
+          final dias = _daysInMonth(_focusedMonth);
+          final primerDia = dias.first;
+          // Offset: Monday = 0 ... Sunday = 6
+          final offset = (primerDia.weekday - 1) % 7;
+
+          final eventosDelDia = _selectedDay != null
+              ? eventosProvider.obtenerEventosParaDia(_selectedDay!)
+              : <Evento>[];
 
           return Column(
             children: [
-              TableCalendar<Evento>(
-                firstDay: DateTime.utc(2020, 1, 1),
-                lastDay: DateTime.utc(2030, 12, 31),
-                focusedDay: _focusedDay,
-                selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                onDaySelected: _onDaySelected,
-                eventLoader: (day) =>
-                    eventosProvider.obtenerEventosParaDia(day),
-                startingDayOfWeek: StartingDayOfWeek.monday,
-                calendarStyle: const CalendarStyle(
-                  markerDecoration: BoxDecoration(
-                    color: Colors.redAccent,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                headerStyle: const HeaderStyle(
-                  formatButtonVisible: false,
-                  titleCentered: true,
+              // ── Month header ──────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.chevron_left),
+                      onPressed: () => setState(() {
+                        _focusedMonth = DateTime(
+                          _focusedMonth.year,
+                          _focusedMonth.month - 1,
+                        );
+                      }),
+                    ),
+                    Text(
+                      _monthLabel(_focusedMonth),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.chevron_right),
+                      onPressed: () => setState(() {
+                        _focusedMonth = DateTime(
+                          _focusedMonth.year,
+                          _focusedMonth.month + 1,
+                        );
+                      }),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8.0),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: eventosDelDia.length,
-                  itemBuilder: (context, index) {
-                    final evento = eventosDelDia[index];
-                    final materiaData = context
-                        .read<HorarioProvider>()
-                        .horario
-                        ?.materiasSeleccionadas
-                        .firstWhere((m) => m.materiaId == evento.materiaId);
+              // ── Day-of-week labels ────────────────────────────────────
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  children: [
+                    _DowLabel('L'),
+                    _DowLabel('M'),
+                    _DowLabel('Mi'),
+                    _DowLabel('J'),
+                    _DowLabel('V'),
+                    _DowLabel('S'),
+                    _DowLabel('D'),
+                  ],
+                ),
+              ),
+              // ── Calendar grid ────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    childAspectRatio: 1,
+                  ),
+                  itemCount: offset + dias.length,
+                  itemBuilder: (context, i) {
+                    if (i < offset) return const SizedBox();
+                    final day = dias[i - offset];
+                    final isSelected =
+                        _selectedDay != null && _isSameDay(day, _selectedDay!);
+                    final isToday = _isSameDay(day, DateTime.now());
+                    final hasEvent = eventosProvider
+                        .obtenerEventosParaDia(day)
+                        .isNotEmpty;
+                    final colorScheme = Theme.of(context).colorScheme;
 
-                    final Color mColor = materiaData != null
-                        ? Color(materiaData.colorARGB ?? 0xFF000000)
-                        : Colors.grey;
-
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
-                        vertical: 4.0,
-                      ),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: mColor,
-                          child: Icon(
-                            evento.tipo == 'TP'
-                                ? Icons.assignment
-                                : Icons.assignment_late,
-                            color: mColor.computeLuminance() > 0.5
-                                ? Colors.black
-                                : Colors.white,
-                          ),
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedDay = day),
+                      child: Container(
+                        margin: const EdgeInsets.all(2),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? colorScheme.primary
+                              : isToday
+                              ? colorScheme.primaryContainer
+                              : null,
+                          shape: BoxShape.circle,
                         ),
-                        title: Text(evento.titulo),
-                        subtitle: Text(
-                          '${evento.tipo} - ${materiaData?.materiaNombre ?? ''}',
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            eventosProvider.eliminarEvento(evento.id);
-                          },
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Text(
+                              '${day.day}',
+                              style: TextStyle(
+                                color: isSelected
+                                    ? colorScheme.onPrimary
+                                    : isToday
+                                    ? colorScheme.onPrimaryContainer
+                                    : null,
+                                fontWeight: isToday || isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                              ),
+                            ),
+                            if (hasEvent)
+                              Positioned(
+                                bottom: 4,
+                                child: Container(
+                                  width: 5,
+                                  height: 5,
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? colorScheme.onPrimary
+                                        : colorScheme.error,
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     );
                   },
                 ),
+              ),
+              const Divider(),
+              // ── Events for selected day ───────────────────────────────
+              Expanded(
+                child: eventosDelDia.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.calendar_today_outlined,
+                              size: 48,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withOpacity(0.3),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Sin eventos',
+                              style: TextStyle(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withOpacity(0.5),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: eventosDelDia.length,
+                        itemBuilder: (context, index) {
+                          final evento = eventosDelDia[index];
+                          final materiaData = context
+                              .read<HorarioProvider>()
+                              .horario
+                              ?.materiasSeleccionadas
+                              .firstWhere(
+                                (m) => m.materiaId == evento.materiaId,
+                                orElse: () => throw Exception(),
+                              );
+
+                          final Color mColor = materiaData != null
+                              ? Color(materiaData.colorARGB ?? 0xFF000000)
+                              : Colors.grey;
+
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 16.0,
+                              vertical: 4.0,
+                            ),
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundColor: mColor,
+                                child: Icon(
+                                  evento.tipo == 'TP'
+                                      ? Icons.assignment
+                                      : Icons.assignment_late,
+                                  color: mColor.computeLuminance() > 0.5
+                                      ? Colors.black
+                                      : Colors.white,
+                                ),
+                              ),
+                              title: Text(evento.titulo),
+                              subtitle: Text(
+                                '${evento.tipo} - ${materiaData?.materiaNombre ?? ''}',
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                ),
+                                onPressed: () {
+                                  eventosProvider.eliminarEvento(evento.id);
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
               ),
             ],
           );
@@ -224,8 +357,47 @@ class _CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _mostrarDialogoAgregarEvento(context),
-        child: const Icon(Icons.add),
         tooltip: 'Agregar Examen/TP',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  String _monthLabel(DateTime d) {
+    const months = [
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre',
+    ];
+    return '${months[d.month - 1]} ${d.year}';
+  }
+}
+
+class _DowLabel extends StatelessWidget {
+  final String text;
+  const _DowLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Center(
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+          ),
+        ),
       ),
     );
   }

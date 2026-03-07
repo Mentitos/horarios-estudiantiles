@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../providers/theme_provider.dart';
 
+import '../../providers/horario_provider.dart';
+import '../../providers/eventos_provider.dart';
 import '../../providers/materias_provider.dart';
 import '../../providers/perfil_provider.dart';
 import '../../utils/carreras_grupos.dart';
@@ -95,10 +99,6 @@ class AjustesScreen extends StatelessWidget {
     final perfilProvider = context.watch<PerfilProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ajustes'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
@@ -343,18 +343,88 @@ class AjustesScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
+          // ── Avanzado ────────────────────────────────────────────
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    child: Text(
+                      'Avanzado',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.8,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.5),
+                      ),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.restore, size: 22),
+                    title: const Text('Restablecer datos'),
+                    subtitle: const Text(
+                      'Elimina horario, eventos y progreso local',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    trailing: const Icon(Icons.chevron_right, size: 20),
+                    onTap: () => _confirmarFormateo(context),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // ── Acerca de + Firma ───────────────────────────────────
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     'Acerca de',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 8),
-                  Text('Datos: github.com/Mentitos/materiasungsporcentaje'),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Datos: github.com/Mentitos/materiasungsporcentaje',
+                  ),
+                  const Divider(height: 24),
+                  const Text(
+                    'Desarrollado por',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Matias Gabriel Tello',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: FilledButton.tonalIcon(
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                      ),
+                      onPressed: () => _abrirLink(
+                        'https://mentitos.github.io/Presentacion/',
+                      ),
+                      icon: const Icon(Icons.code_rounded, size: 18),
+                      label: const Text(
+                        'mentitos.github.io/Presentacion',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -362,5 +432,56 @@ class AjustesScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _confirmarFormateo(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('¿Formatear todo?'),
+        content: const Text(
+          'Se eliminarán todos los datos locales: horario, materias aprobadas y eventos registrados.\n\nEsta acción no se puede deshacer.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(ctx).colorScheme.error,
+              foregroundColor: Theme.of(ctx).colorScheme.onError,
+            ),
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Formatear'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      await context.read<HorarioProvider>().formatear();
+      await context.read<EventosProvider>().formatear();
+      await context.read<PerfilProvider>().formatear();
+      // Resetear el onboarding para que vuelva a aparecer al reiniciar
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('onboarding_done');
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Datos eliminados. Reiniciá la app para el asistente de configuración.',
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _abrirLink(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 }

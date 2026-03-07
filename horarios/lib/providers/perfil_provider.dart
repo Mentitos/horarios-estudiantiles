@@ -59,4 +59,16 @@ class PerfilProvider extends ChangeNotifier {
 
   List<String> get carrerasSeleccionadas => perfil?.carrerasSeleccionadas ?? [];
   List<String> get materiasAprobadas => perfil?.materiasAprobadas ?? [];
+
+  Future<void> formatear() async {
+    try {
+      await _repository.setCarreras([]);
+      await _repository.limpiarMateriasAprobadas();
+      perfil = await _repository.obtenerPerfil();
+      notifyListeners();
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+    }
+  }
 }

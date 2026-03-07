@@ -180,4 +180,11 @@ class HorarioRepository {
       await isar.horarioUsuarios.put(rHorario);
     });
   }
+
+  Future<void> eliminarHorario() async {
+    final isar = await _localDatasource.db;
+    await isar.writeTxn(() async {
+      await isar.horarioUsuarios.clear();
+    });
+  }
 }

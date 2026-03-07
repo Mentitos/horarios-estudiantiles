@@ -4,6 +4,7 @@ import '../../providers/horario_provider.dart';
 import '../../providers/materias_provider.dart';
 import '../../providers/perfil_provider.dart';
 import 'home_screen.dart';
+import 'onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -30,11 +31,17 @@ class _SplashScreenState extends State<SplashScreen> {
       perfilProvider.inicializar(),
     ]);
 
-    if (mounted) {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
-    }
+    if (!mounted) return;
+
+    final yaCompleto = await onboardingCompleted();
+    if (!mounted) return;
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) =>
+            yaCompleto ? const HomeScreen() : const OnboardingScreen(),
+      ),
+    );
   }
 
   @override
