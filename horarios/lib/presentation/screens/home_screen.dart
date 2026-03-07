@@ -7,6 +7,7 @@ import 'calendario_eventos_screen.dart';
 import 'ajustes_screen.dart';
 import 'calificaciones_screen.dart';
 import 'profesores_screen.dart';
+import 'grabaciones_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -65,7 +66,7 @@ class HomeScreenState extends State<HomeScreen> {
       CalendarioEventosScreen(key: _calendarioKey),
       const CalificacionesScreen(),
       const ProfesoresScreen(),
-      const PlaceholderScreen(title: 'Grabaciones', icon: Icons.mic_rounded),
+      const GrabacionesScreen(),
       const AjustesScreen(),
     ];
 

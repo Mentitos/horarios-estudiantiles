@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'providers/horario_provider.dart';
 import 'providers/materias_provider.dart';
 import 'providers/perfil_provider.dart';
@@ -7,10 +8,13 @@ import 'providers/theme_provider.dart';
 import 'providers/eventos_provider.dart';
 import 'providers/calificaciones_provider.dart';
 import 'providers/profesores_provider.dart';
+import 'providers/grabaciones_provider.dart';
 import 'presentation/screens/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('es', null);
+
   runApp(
     MultiProvider(
       providers: [
@@ -21,6 +25,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => EventosProvider()),
         ChangeNotifierProvider(create: (_) => CalificacionesProvider()),
         ChangeNotifierProvider(create: (_) => ProfesoresProvider()),
+        ChangeNotifierProvider(create: (_) => GrabacionesProvider()),
       ],
       child: const MyApp(),
     ),

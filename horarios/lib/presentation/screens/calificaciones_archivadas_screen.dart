@@ -1,0 +1,104 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../providers/calificaciones_provider.dart';
+import 'detalle_calificacion_screen.dart';
+
+class CalificacionesArchivadasScreen extends StatelessWidget {
+  const CalificacionesArchivadasScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Calificaciones Archivadas')),
+      body: Consumer<CalificacionesProvider>(
+        builder: (context, provider, child) {
+          final notasArchivadas = provider.calificacionesArchivadas;
+
+          if (notasArchivadas.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.inventory_2_outlined,
+                    size: 80,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withOpacity(0.3),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Tu archivo está vacío',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: notasArchivadas.length,
+            itemBuilder: (ctx, i) {
+              final nota = notasArchivadas[i];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                elevation: 0,
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceVariant.withOpacity(0.5),
+                child: ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.secondaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.inventory_2,
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    ),
+                  ),
+                  title: Text(
+                    nota.nombreMateria,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '${nota.tipoEvaluacion} • ${nota.valorPorcentual > 0 ? nota.valorPorcentual : 0}%',
+                  ),
+                  trailing: Text(
+                    nota.titulo,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withOpacity(0.7),
+                    ),
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            DetalleCalificacionScreen(calificacionId: nota.id),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}

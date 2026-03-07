@@ -425,6 +425,39 @@ class AjustesScreen extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const Divider(height: 24),
+                  const Text(
+                    '¡Probá mi otra app!',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Finanzas Libre',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: FilledButton.tonalIcon(
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 8,
+                        ),
+                      ),
+                      onPressed: () => _abrirLink(
+                        'https://mentitos.github.io/finanzaslibre-pagina/',
+                      ),
+                      icon: const Icon(
+                        Icons.account_balance_wallet_rounded,
+                        size: 18,
+                      ),
+                      label: const Text(
+                        'Conocé Finanzas Libre',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),

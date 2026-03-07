@@ -9,6 +9,11 @@ class CalificacionesProvider extends ChangeNotifier {
   bool _cargando = true;
 
   List<Calificacion> get calificaciones => _calificaciones;
+  List<Calificacion> get calificacionesActivas =>
+      _calificaciones.where((c) => !c.isArchivada).toList();
+  List<Calificacion> get calificacionesArchivadas =>
+      _calificaciones.where((c) => c.isArchivada).toList();
+
   bool get cargando => _cargando;
 
   CalificacionesProvider({CalificacionesRepository? repository})
@@ -45,6 +50,15 @@ class CalificacionesProvider extends ChangeNotifier {
     _calificaciones.removeWhere((c) => c.id == id);
     notifyListeners();
     await _repository.guardarCalificaciones(_calificaciones);
+  }
+
+  Future<void> toggleArchivar(String id) async {
+    final index = _calificaciones.indexWhere((c) => c.id == id);
+    if (index != -1) {
+      _calificaciones[index].isArchivada = !_calificaciones[index].isArchivada;
+      await _repository.guardarCalificaciones(_calificaciones);
+      notifyListeners();
+    }
   }
 
   void ordenarPor(String criterio) {

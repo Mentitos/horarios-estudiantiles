@@ -8,6 +8,7 @@ class Calificacion {
   final double valorPorcentual;
   final String nota;
   final String sistemaCalificacion;
+  bool isArchivada;
 
   Calificacion({
     required this.id,
@@ -19,6 +20,7 @@ class Calificacion {
     required this.valorPorcentual,
     required this.nota,
     required this.sistemaCalificacion,
+    this.isArchivada = false,
   });
 
   Map<String, dynamic> toJson() {
@@ -32,6 +34,7 @@ class Calificacion {
       'valorPorcentual': valorPorcentual,
       'nota': nota,
       'sistemaCalificacion': sistemaCalificacion,
+      'isArchivada': isArchivada,
     };
   }
 
@@ -46,6 +49,7 @@ class Calificacion {
       valorPorcentual: (json['valorPorcentual'] as num).toDouble(),
       nota: json['nota'] as String,
       sistemaCalificacion: json['sistemaCalificacion'] as String,
+      isArchivada: json['isArchivada'] as bool? ?? false,
     );
   }
 }
