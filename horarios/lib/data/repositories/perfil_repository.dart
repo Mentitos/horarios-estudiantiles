@@ -10,14 +10,14 @@ class PerfilRepository {
     : _localDatasource = localDatasource ?? LocalDatasource();
 
   Future<PerfilUsuario?> obtenerPerfil() async {
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     return await isar.perfilUsuarios.where().findFirst();
   }
 
   Future<PerfilUsuario> crearPerfilVacio() async {
     final nuevoPerfil = PerfilUsuario();
 
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.perfilUsuarios.put(nuevoPerfil);
     });
@@ -31,7 +31,7 @@ class PerfilRepository {
 
     perfil.carrerasSeleccionadas = carreras;
 
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.perfilUsuarios.put(perfil!);
     });
@@ -51,7 +51,7 @@ class PerfilRepository {
 
     perfil.materiasAprobadas = aprobadas;
 
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.perfilUsuarios.put(perfil!);
     });
@@ -68,7 +68,7 @@ class PerfilRepository {
     perfil ??= await crearPerfilVacio();
     perfil.materiasAprobadas = [];
 
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.perfilUsuarios.put(perfil!);
     });

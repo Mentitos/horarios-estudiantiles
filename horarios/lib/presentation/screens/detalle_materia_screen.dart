@@ -6,8 +6,6 @@ import '../../providers/calificaciones_provider.dart';
 import '../../providers/horario_provider.dart';
 import 'agregar_calificacion_screen.dart';
 
-import 'agregar_calificacion_screen.dart';
-
 //  Ayer no pude dormir hasta las 9 de la mañana pq me costaba respirar
 //  Pude comprar unas curitas que se ponen en la nariz para abrirla
 //  Que bien que dormi dios mio, seguramente compre los internos que duran mas

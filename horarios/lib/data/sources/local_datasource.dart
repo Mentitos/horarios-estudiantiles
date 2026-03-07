@@ -12,18 +12,17 @@ import '../models/materia_custom.dart';
 import 'github_datasource.dart';
 
 class LocalDatasource {
-  static const String _isFetchedKey = 'datos_cargados';
-  late Future<Isar>? db;
+  static final LocalDatasource _instance = LocalDatasource._internal();
+  factory LocalDatasource() => _instance;
 
-  LocalDatasource() {
+  static const String _isFetchedKey = 'datos_cargados';
+  late final Future<Isar> db;
+
+  LocalDatasource._internal() {
     db = _initDb();
   }
 
   Future<Isar> _initDb() async {
-    if (Isar.instanceNames.isNotEmpty) {
-      return Isar.getInstance()!;
-    }
-
     final dir = await getApplicationDocumentsDirectory();
     return await Isar.open([
       MateriaSchema,
@@ -49,7 +48,7 @@ class LocalDatasource {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_isFetchedKey);
 
-    final isar = await db!;
+    final isar = await db;
     await isar.writeTxn(() async {
       await isar.materias.clear();
       await isar.carreras.clear();
@@ -57,36 +56,36 @@ class LocalDatasource {
   }
 
   Future<void> guardarMaterias(List<Materia> materias) async {
-    final isar = await db!;
+    final isar = await db;
     await isar.writeTxn(() async {
       await isar.materias.putAll(materias);
     });
   }
 
   Future<void> guardarCarreras(List<Carrera> carreras) async {
-    final isar = await db!;
+    final isar = await db;
     await isar.writeTxn(() async {
       await isar.carreras.putAll(carreras);
     });
   }
 
   Future<List<Carrera>> leerTodasLasCarreras() async {
-    final isar = await db!;
+    final isar = await db;
     return await isar.carreras.where().findAll();
   }
 
   Future<Carrera?> leerCarreraPorNombre(String nombre) async {
-    final isar = await db!;
+    final isar = await db;
     return await isar.carreras.where().nombreEqualTo(nombre).findFirst();
   }
 
   Future<Materia?> leerMateriaPorId(String idMateria) async {
-    final isar = await db!;
+    final isar = await db;
     return await isar.materias.where().materiaIdEqualTo(idMateria).findFirst();
   }
 
   Future<MateriaNotas?> leerNotasPorMateriaId(String materiaId) async {
-    final isar = await db!;
+    final isar = await db;
     return await isar.materiaNotas
         .where()
         .materiaIdEqualTo(materiaId)
@@ -94,33 +93,33 @@ class LocalDatasource {
   }
 
   Future<void> guardarNotasMateria(MateriaNotas notas) async {
-    final isar = await db!;
+    final isar = await db;
     await isar.writeTxn(() async {
       await isar.materiaNotas.put(notas);
     });
   }
 
   Future<List<MateriaCustom>> leerMateriasCustom() async {
-    final isar = await db!;
+    final isar = await db;
     return await isar.materiaCustoms.where().findAll();
   }
 
   Future<void> guardarMateriaCustom(MateriaCustom custom) async {
-    final isar = await db!;
+    final isar = await db;
     await isar.writeTxn(() async {
       await isar.materiaCustoms.put(custom);
     });
   }
 
   Future<void> eliminarMateriaCustom(String materiaId) async {
-    final isar = await db!;
+    final isar = await db;
     await isar.writeTxn(() async {
       await isar.materiaCustoms.where().materiaIdEqualTo(materiaId).deleteAll();
     });
   }
 
   Future<void> limpiarMateriasOcultas() async {
-    final isar = await db!;
+    final isar = await db;
     await isar.writeTxn(() async {
       final ocultas = await isar.materiaCustoms
           .where()

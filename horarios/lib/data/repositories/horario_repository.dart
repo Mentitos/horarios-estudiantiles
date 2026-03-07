@@ -49,7 +49,7 @@ class HorarioRepository {
   }
 
   Future<HorarioUsuario?> obtenerHorario() async {
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     return await isar.horarioUsuarios.where().findFirst();
   }
 
@@ -59,7 +59,7 @@ class HorarioRepository {
       ..fechaActualizacion = DateTime.now()
       ..materiasSeleccionadas = [];
 
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(nuevoHorario);
     });
@@ -90,7 +90,7 @@ class HorarioRepository {
       ..add(seleccionada);
     rHorario.fechaActualizacion = DateTime.now();
 
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario!);
     });
@@ -105,7 +105,7 @@ class HorarioRepository {
         .toList();
     rHorario.fechaActualizacion = DateTime.now();
 
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
     });
@@ -142,7 +142,7 @@ class HorarioRepository {
     rHorario.materiasSeleccionadas[indiceMateria] = materiaUpdate;
     rHorario.fechaActualizacion = DateTime.now();
 
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
     });
@@ -185,7 +185,7 @@ class HorarioRepository {
     rHorario.materiasSeleccionadas[indiceMateria] = materiaUpdate;
     rHorario.fechaActualizacion = DateTime.now();
 
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
     });
@@ -210,14 +210,14 @@ class HorarioRepository {
     rHorario.materiasSeleccionadas[indiceMateria] = materiaUpdate;
     rHorario.fechaActualizacion = DateTime.now();
 
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
     });
   }
 
   Future<void> eliminarHorario() async {
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.clear();
     });
@@ -248,7 +248,7 @@ class HorarioRepository {
     rHorario.materiasSeleccionadas[indice] = materiaAActualizar;
     rHorario.fechaActualizacion = DateTime.now();
 
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
     });
@@ -266,7 +266,7 @@ class HorarioRepository {
       ultimaActualizacion: DateTime.now(),
     );
 
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     final existente = await isar.materiaNotas
         .where()
         .materiaIdEqualTo(materiaId)
@@ -310,7 +310,7 @@ class HorarioRepository {
     rHorario.materiasSeleccionadas = nuevasMaterias;
     rHorario.fechaActualizacion = DateTime.now();
 
-    final isar = await _localDatasource.db!;
+    final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.put(rHorario);
     });

@@ -15,7 +15,7 @@ extension GetMateriaNotasCollection on Isar {
 
 const MateriaNotasSchema = CollectionSchema(
   name: r'MateriaNotas',
-  id: 826018416940638,
+  id: 8260184169406381191,
   properties: {
     r'contenido': PropertySchema(
       id: 0,
@@ -40,7 +40,7 @@ const MateriaNotasSchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'materiaId': IndexSchema(
-      id: 844686262709449,
+      id: 8446862627094492875,
       name: r'materiaId',
       unique: true,
       replace: true,
