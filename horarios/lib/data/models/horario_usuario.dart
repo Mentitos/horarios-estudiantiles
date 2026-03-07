@@ -16,8 +16,10 @@ class HorarioUsuario {
 class MateriaSeleccionada {
   String? materiaId;
   String? materiaNombre;
-
   int? colorARGB;
+
+  List<String> profesores = [];
+  String? aula;
 
   List<BloqueHorario> bloques = [];
 }

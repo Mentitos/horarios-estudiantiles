@@ -187,4 +187,37 @@ class HorarioRepository {
       await isar.horarioUsuarios.clear();
     });
   }
+
+  Future<void> actualizarMateria(
+    int horarioId,
+    String materiaId,
+    String nuevoNombre,
+    List<String> nuevosProfesores,
+    String nuevoAula,
+    int nuevoColorARGB,
+  ) async {
+    final isar = await _localDatasource.db;
+
+    final rHorario = await isar.horarioUsuarios.get(horarioId);
+    if (rHorario == null) throw Exception('Horario no encontrado');
+
+    final indice = rHorario.materiasSeleccionadas.indexWhere(
+      (m) => m.materiaId == materiaId,
+    );
+    if (indice == -1) return;
+
+    final materiaAActualizar = rHorario.materiasSeleccionadas[indice];
+    materiaAActualizar.materiaNombre = nuevoNombre;
+    materiaAActualizar.profesores = List.from(nuevosProfesores);
+    materiaAActualizar.aula = nuevoAula;
+    materiaAActualizar.colorARGB = nuevoColorARGB;
+
+    rHorario.materiasSeleccionadas = List.from(rHorario.materiasSeleccionadas);
+    rHorario.materiasSeleccionadas[indice] = materiaAActualizar;
+    rHorario.fechaActualizacion = DateTime.now();
+
+    await isar.writeTxn(() async {
+      await isar.horarioUsuarios.put(rHorario);
+    });
+  }
 }

@@ -96,4 +96,30 @@ class HorarioProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<void> actualizarMateria(
+    String materiaId,
+    String nuevoNombre,
+    List<String> nuevosProfesores,
+    String? nuevoAula,
+    int nuevoColorARGB,
+  ) async {
+    if (horario == null) return;
+    try {
+      await _repository.actualizarMateria(
+        horario!.id,
+        materiaId,
+        nuevoNombre,
+        nuevosProfesores,
+        nuevoAula ?? '',
+        nuevoColorARGB,
+      );
+      horario = await _repository.obtenerHorario();
+      notifyListeners();
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
 }

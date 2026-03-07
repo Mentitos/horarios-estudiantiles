@@ -746,26 +746,36 @@ const MateriaSeleccionadaSchema = Schema(
   name: r'MateriaSeleccionada',
   id: -8510792447932389814,
   properties: {
-    r'bloques': PropertySchema(
+    r'aula': PropertySchema(
       id: 0,
+      name: r'aula',
+      type: IsarType.string,
+    ),
+    r'bloques': PropertySchema(
+      id: 1,
       name: r'bloques',
       type: IsarType.objectList,
       target: r'BloqueHorario',
     ),
     r'colorARGB': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'colorARGB',
       type: IsarType.long,
     ),
     r'materiaId': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'materiaId',
       type: IsarType.string,
     ),
     r'materiaNombre': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'materiaNombre',
       type: IsarType.string,
+    ),
+    r'profesores': PropertySchema(
+      id: 5,
+      name: r'profesores',
+      type: IsarType.stringList,
     )
   },
   estimateSize: _materiaSeleccionadaEstimateSize,
@@ -780,6 +790,12 @@ int _materiaSeleccionadaEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.aula;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.bloques.length * 3;
   {
     final offsets = allOffsets[BloqueHorario]!;
@@ -801,6 +817,13 @@ int _materiaSeleccionadaEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.profesores.length * 3;
+  {
+    for (var i = 0; i < object.profesores.length; i++) {
+      final value = object.profesores[i];
+      bytesCount += value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -810,15 +833,17 @@ void _materiaSeleccionadaSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
+  writer.writeString(offsets[0], object.aula);
   writer.writeObjectList<BloqueHorario>(
-    offsets[0],
+    offsets[1],
     allOffsets,
     BloqueHorarioSchema.serialize,
     object.bloques,
   );
-  writer.writeLong(offsets[1], object.colorARGB);
-  writer.writeString(offsets[2], object.materiaId);
-  writer.writeString(offsets[3], object.materiaNombre);
+  writer.writeLong(offsets[2], object.colorARGB);
+  writer.writeString(offsets[3], object.materiaId);
+  writer.writeString(offsets[4], object.materiaNombre);
+  writer.writeStringList(offsets[5], object.profesores);
 }
 
 MateriaSeleccionada _materiaSeleccionadaDeserialize(
@@ -828,16 +853,18 @@ MateriaSeleccionada _materiaSeleccionadaDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = MateriaSeleccionada();
+  object.aula = reader.readStringOrNull(offsets[0]);
   object.bloques = reader.readObjectList<BloqueHorario>(
-        offsets[0],
+        offsets[1],
         BloqueHorarioSchema.deserialize,
         allOffsets,
         BloqueHorario(),
       ) ??
       [];
-  object.colorARGB = reader.readLongOrNull(offsets[1]);
-  object.materiaId = reader.readStringOrNull(offsets[2]);
-  object.materiaNombre = reader.readStringOrNull(offsets[3]);
+  object.colorARGB = reader.readLongOrNull(offsets[2]);
+  object.materiaId = reader.readStringOrNull(offsets[3]);
+  object.materiaNombre = reader.readStringOrNull(offsets[4]);
+  object.profesores = reader.readStringList(offsets[5]) ?? [];
   return object;
 }
 
@@ -849,6 +876,8 @@ P _materiaSeleccionadaDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
+      return (reader.readStringOrNull(offset)) as P;
+    case 1:
       return (reader.readObjectList<BloqueHorario>(
             offset,
             BloqueHorarioSchema.deserialize,
@@ -856,12 +885,14 @@ P _materiaSeleccionadaDeserializeProp<P>(
             BloqueHorario(),
           ) ??
           []) as P;
-    case 1:
-      return (reader.readLongOrNull(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readLongOrNull(offset)) as P;
     case 3:
       return (reader.readStringOrNull(offset)) as P;
+    case 4:
+      return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -869,6 +900,160 @@ P _materiaSeleccionadaDeserializeProp<P>(
 
 extension MateriaSeleccionadaQueryFilter on QueryBuilder<MateriaSeleccionada,
     MateriaSeleccionada, QFilterCondition> {
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      aulaIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'aula',
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      aulaIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'aula',
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      aulaEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'aula',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      aulaGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'aula',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      aulaLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'aula',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      aulaBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'aula',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      aulaStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'aula',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      aulaEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'aula',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      aulaContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'aula',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      aulaMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'aula',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      aulaIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'aula',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      aulaIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'aula',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
       bloquesLengthEqualTo(int length) {
     return QueryBuilder.apply(this, (query) {
@@ -1337,6 +1522,231 @@ extension MateriaSeleccionadaQueryFilter on QueryBuilder<MateriaSeleccionada,
         property: r'materiaNombre',
         value: '',
       ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresElementEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'profesores',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresElementGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'profesores',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresElementLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'profesores',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresElementBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'profesores',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresElementStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'profesores',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresElementEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'profesores',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresElementContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'profesores',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresElementMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'profesores',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresElementIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'profesores',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresElementIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'profesores',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresLengthEqualTo(int length) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'profesores',
+        length,
+        true,
+        length,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'profesores',
+        0,
+        true,
+        0,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'profesores',
+        0,
+        false,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresLengthLessThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'profesores',
+        0,
+        true,
+        length,
+        include,
+      );
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresLengthGreaterThan(
+    int length, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'profesores',
+        length,
+        include,
+        999999,
+        true,
+      );
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      profesoresLengthBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.listLength(
+        r'profesores',
+        lower,
+        includeLower,
+        upper,
+        includeUpper,
+      );
     });
   }
 }
