@@ -5,6 +5,8 @@ import '../../providers/profesores_provider.dart';
 import '../../data/models/profesor.dart';
 import 'agregar_profesor_screen.dart';
 
+//   Me encanta lo retro, tengo un reproductor de cassette y voy a la universidad con el
+//   Llegue a grabar un cassette con canciones de Teto
 class ProfesoresScreen extends StatelessWidget {
   const ProfesoresScreen({super.key});
 

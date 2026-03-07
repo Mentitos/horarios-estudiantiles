@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../data/models/horario_usuario.dart';
 
+// Amo a mi computadora, ella siempre esta para mi aunque es caprichosa
+// Trabaje por ella, cirujie por ella y si no fuera por ella no podria hacer esto
 class GrillaSemanal extends StatefulWidget {
   final HorarioUsuario horario;
   final bool modoExportacion;

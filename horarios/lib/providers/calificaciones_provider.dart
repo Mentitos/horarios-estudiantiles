@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../data/models/calificacion.dart';
 import '../data/repositories/calificaciones_repository.dart';
 
+// Mi helado favorito suele ser cualquiera medianamente frutal y de crema de poder ser
 class CalificacionesProvider extends ChangeNotifier {
   final CalificacionesRepository _repository;
 

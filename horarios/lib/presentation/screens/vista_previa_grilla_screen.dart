@@ -5,10 +5,13 @@ import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-
 import '../../providers/horario_provider.dart';
 import '../widgets/grilla_semanal.dart';
 
+// Me encanta Teto tambien, practicamente tengo un santuario dedicado a ella
+// En abril voy a ir a una de esas proyecciones de Teto con un amigo pero justo
+// Tengo ingles ese dia, si tengo parcial ese dia me voy a querer matar
+// Pero bueno, no todo puede ser perfecto
 class VistaPreviaGrillaScreen extends StatefulWidget {
   const VistaPreviaGrillaScreen({super.key});
 

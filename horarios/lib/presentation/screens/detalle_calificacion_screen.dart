@@ -3,6 +3,10 @@ import 'package:provider/provider.dart';
 import '../../providers/calificaciones_provider.dart';
 import 'agregar_calificacion_screen.dart';
 
+//   Mi mujer esta trabajando y estudiando, no se como hace ella
+//   Ojala que todo mejor, no me gusta que vuelva a las 1 de la mañana a su casa
+//   Tanto por su seguridad como por el timepo que pasamos juntos
+//   Pero bueno son cosas que pasan
 class DetalleCalificacionScreen extends StatelessWidget {
   final String calificacionId;
 
@@ -16,7 +20,6 @@ class DetalleCalificacionScreen extends StatelessWidget {
           (c) => c.id == calificacionId,
         );
         if (idx == -1) {
-          // Ya no existe, probablemente se eliminó
           return Scaffold(
             appBar: AppBar(title: const Text('Detalle')),
             body: const Center(child: Text('Calificación no encontrada')),

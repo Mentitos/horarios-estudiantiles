@@ -22,6 +22,7 @@ class MateriaSeleccionada {
   String? aula;
 
   List<BloqueHorario> bloques = [];
+  String? notas;
 }
 
 @embedded

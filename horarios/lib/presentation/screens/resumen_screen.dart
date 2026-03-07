@@ -82,22 +82,40 @@ class ResumenScreen extends StatelessWidget {
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        _QuickChip(
+                        _NavCard(
                           icon: Icons.grid_view_rounded,
                           label: 'Horario',
                           onTap: () => _navegar(context, 1),
                         ),
-                        const SizedBox(width: 8),
-                        _QuickChip(
+                        const SizedBox(width: 12),
+                        _NavCard(
                           icon: Icons.calendar_month_rounded,
                           label: 'Calendario',
                           onTap: () => _navegar(context, 2),
                         ),
-                        const SizedBox(width: 8),
-                        _QuickChip(
+                        const SizedBox(width: 12),
+                        _NavCard(
+                          icon: Icons.note_alt_rounded,
+                          label: 'Notas',
+                          onTap: () => _navegar(context, 3),
+                        ),
+                        const SizedBox(width: 12),
+                        _NavCard(
+                          icon: Icons.person_search_rounded,
+                          label: 'Profesores',
+                          onTap: () => _navegar(context, 4),
+                        ),
+                        const SizedBox(width: 12),
+                        _NavCard(
+                          icon: Icons.mic_rounded,
+                          label: 'Grabaciones',
+                          onTap: () => _navegar(context, 5),
+                        ),
+                        const SizedBox(width: 12),
+                        _NavCard(
                           icon: Icons.settings_rounded,
                           label: 'Ajustes',
-                          onTap: () => _navegar(context, 3),
+                          onTap: () => _navegar(context, 6),
                         ),
                       ],
                     ),
@@ -213,11 +231,11 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _QuickChip extends StatelessWidget {
+class _NavCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
-  const _QuickChip({
+  const _NavCard({
     required this.icon,
     required this.label,
     required this.onTap,
@@ -226,12 +244,35 @@ class _QuickChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    return ActionChip(
-      avatar: Icon(icon, size: 16, color: colorScheme.onSecondaryContainer),
-      label: Text(label),
-      backgroundColor: colorScheme.secondaryContainer,
-      labelStyle: TextStyle(color: colorScheme.onSecondaryContainer),
-      onPressed: onTap,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.zero,
+      child: Container(
+        width: 100,
+        height: 100,
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceVariant.withOpacity(0.5),
+          borderRadius: BorderRadius.zero,
+          border: Border.all(
+            color: colorScheme.outlineVariant.withOpacity(0.5),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 32, color: colorScheme.primary),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

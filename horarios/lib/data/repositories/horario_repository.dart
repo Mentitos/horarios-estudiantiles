@@ -1,7 +1,8 @@
 import 'package:isar/isar.dart';
 
-import '../models/horario_usuario.dart';
 import '../models/materia.dart';
+import '../models/horario_usuario.dart';
+import '../models/materia_notas.dart';
 import '../sources/local_datasource.dart';
 
 class HorarioRepository {
@@ -263,6 +264,77 @@ class HorarioRepository {
     rHorario.fechaActualizacion = DateTime.now();
 
     await isar.writeTxn(() async {
+      await isar.horarioUsuarios.put(rHorario);
+    });
+  }
+
+  Future<String> obtenerNotasMateria(String materiaId) async {
+    final isar = await _localDatasource.db;
+    final notas = await isar.materiaNotas
+        .where()
+        .materiaIdEqualTo(materiaId)
+        .findFirst();
+    return notas?.contenido ?? '';
+  }
+
+  Future<void> guardarNotasMateria(String materiaId, String contenido) async {
+    final isar = await _localDatasource.db;
+
+    final existente = await isar.materiaNotas
+        .where()
+        .materiaIdEqualTo(materiaId)
+        .findFirst();
+
+    final notas = MateriaNotas(
+      materiaId: materiaId,
+      contenido: contenido,
+      ultimaActualizacion: DateTime.now(),
+    );
+
+    if (existente != null) {
+      notas.id = existente.id;
+    }
+
+    await isar.writeTxn(() async {
+      await isar.materiaNotas.put(notas);
+    });
+  }
+
+  Future<void> actualizarNotasMateria(
+    int horarioId,
+    String materiaId,
+    String nuevasNotas,
+  ) async {
+    await guardarNotasMateria(materiaId, nuevasNotas);
+
+    final isar = await _localDatasource.db;
+    await isar.writeTxn(() async {
+      final rHorario = await isar.horarioUsuarios.get(horarioId);
+      if (rHorario == null) return;
+
+      final index = rHorario.materiasSeleccionadas.indexWhere(
+        (m) => m.materiaId == materiaId,
+      );
+      if (index == -1) return;
+
+      final original = rHorario.materiasSeleccionadas[index];
+      final nuevaMateria = MateriaSeleccionada()
+        ..materiaId = original.materiaId
+        ..materiaNombre = original.materiaNombre
+        ..colorARGB = original.colorARGB
+        ..profesores = List.from(original.profesores)
+        ..aula = original.aula
+        ..bloques = List.from(original.bloques)
+        ..notas = nuevasNotas;
+
+      final nuevasMaterias = List<MateriaSeleccionada>.from(
+        rHorario.materiasSeleccionadas,
+      );
+      nuevasMaterias[index] = nuevaMateria;
+
+      rHorario.materiasSeleccionadas = nuevasMaterias;
+      rHorario.fechaActualizacion = DateTime.now();
+
       await isar.horarioUsuarios.put(rHorario);
     });
   }

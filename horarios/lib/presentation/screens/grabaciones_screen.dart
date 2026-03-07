@@ -5,6 +5,8 @@ import 'package:share_plus/share_plus.dart';
 import '../../providers/grabaciones_provider.dart';
 import '../../data/models/grabacion.dart';
 
+//   Despues de este poryecto no se que mas hacer, es el 7/3/26 y no tengo otro
+//   Proyecto en mente que pueda hacerlo
 class GrabacionesScreen extends StatelessWidget {
   const GrabacionesScreen({super.key});
 

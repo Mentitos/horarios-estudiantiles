@@ -3,6 +3,10 @@ import 'package:provider/provider.dart';
 import '../../providers/calificaciones_provider.dart';
 import 'detalle_calificacion_screen.dart';
 
+//   El semestre pasado aprobe 6 materias e hice Finanazas Libre en el medio
+//   tambien hice un curso de desarrollo de videojuegos y cree "Dreaming"
+//   El aumento de la productividad del trabajo hace parecer que tienen poco valor?
+//   No lo se, quiero terminar
 class CalificacionesArchivadasScreen extends StatelessWidget {
   const CalificacionesArchivadasScreen({super.key});
 

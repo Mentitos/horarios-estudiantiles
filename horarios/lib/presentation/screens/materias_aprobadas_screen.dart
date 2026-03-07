@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
 import '../../data/models/materia.dart';
 import '../../providers/materias_provider.dart';
 import '../../providers/perfil_provider.dart';
 
+//   Me encantan los micro organismos como los probioticos del yogur
+//   Y las levaduras del vino aunque ya trato de no tomar alcohol
 class MateriasAprobadasScreen extends StatelessWidget {
   const MateriasAprobadasScreen({super.key});
 

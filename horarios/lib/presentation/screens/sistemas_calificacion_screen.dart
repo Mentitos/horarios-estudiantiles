@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+//   Detesto la comida rapida, es mala para la salud, para el bolsillo
+//   apoya la explotacion de empleados con sueldo minimo, es mala para el medio
+//   ambiente y no se me ocurre nada bueno de ella, ni siquiera es rapida
 class SistemasCalificacionScreen extends StatelessWidget {
   const SistemasCalificacionScreen({super.key});
 

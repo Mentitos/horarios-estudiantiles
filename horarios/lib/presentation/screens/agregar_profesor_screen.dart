@@ -5,6 +5,9 @@ import 'package:image_picker/image_picker.dart';
 import '../../data/models/profesor.dart';
 import '../../providers/profesores_provider.dart';
 
+//   Muchos profesores se quedan en mi mente, uno de literatura que murio
+//   Creo que pensaba que era racista de verdad, por el lei "Cabecita Negra"
+//   Muy bueno y jugaba al fortnite, el cancer es jodido
 class AgregarProfesorScreen extends StatefulWidget {
   final Profesor? profesorEdit;
 

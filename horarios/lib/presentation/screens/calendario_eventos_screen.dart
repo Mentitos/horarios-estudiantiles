@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
-
 import '../../data/models/evento.dart';
 import '../../providers/eventos_provider.dart';
 import '../../providers/horario_provider.dart';
 
+//  No tengo dialogo interno y cuando hablo en ingles siento que seria util?
 class CalendarioEventosScreen extends StatefulWidget {
   const CalendarioEventosScreen({super.key});
 

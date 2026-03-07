@@ -10,6 +10,8 @@ import 'calificaciones_archivadas_screen.dart';
 import 'profesores_screen.dart';
 import 'grabaciones_screen.dart';
 
+// Te imaginas qeu a mucha gente de la ungs le guste o que vea un compañero
+// usandola y dija "JIJI yo la hice"
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 

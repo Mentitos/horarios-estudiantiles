@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import '../data/models/carrera.dart';
 import '../data/repositories/materia_repository.dart';
 
+//  Mi fuerza de trabajo se ve plasmada en este trabajo muerto pero que revalorizo
 class MateriasProvider extends ChangeNotifier {
   final MateriaRepository _repository;
 

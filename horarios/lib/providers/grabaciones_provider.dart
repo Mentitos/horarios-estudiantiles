@@ -6,6 +6,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../data/models/grabacion.dart';
 import '../data/repositories/grabaciones_repository.dart';
+//  Recuerdo que para Finanzas Libre una señora me pidio que se pueda poner cosas con voz
+//  Y bueno, aca estamos, haciendo lo mismo pero para horarios pero para profesores
 
 class GrabacionesProvider extends ChangeNotifier {
   final GrabacionesRepository _repository;
@@ -52,7 +54,6 @@ class GrabacionesProvider extends ChangeNotifier {
   }
 
   void _ordenarGrabaciones() {
-    // Orden descendente por fecha (Más nuevas arriba)
     _grabaciones.sort((a, b) => b.fecha.compareTo(a.fecha));
   }
 
@@ -111,11 +112,9 @@ class GrabacionesProvider extends ChangeNotifier {
   Future<void> reproducirORepausar(Grabacion grabacion) async {
     try {
       if (_playingId == grabacion.id) {
-        // Pausar si es el que está sonando
         await _audioPlayer.pause();
         _playingId = null;
       } else {
-        // Detener el anterior y reproducir el nuevo
         await _audioPlayer.stop();
         await _audioPlayer.play(DeviceFileSource(grabacion.pathArchivo));
         _playingId = grabacion.id;
@@ -128,7 +127,6 @@ class GrabacionesProvider extends ChangeNotifier {
 
   Future<void> eliminarGrabacion(String id) async {
     try {
-      // Si está reproduciendo, lo frenamos
       if (_playingId == id) {
         await _audioPlayer.stop();
         _playingId = null;
@@ -136,7 +134,6 @@ class GrabacionesProvider extends ChangeNotifier {
 
       final grabacion = _grabaciones.firstWhere((g) => g.id == id);
 
-      // Intentar borrar archivo físico
       final file = File(grabacion.pathArchivo);
       if (await file.exists()) {
         await file.delete();

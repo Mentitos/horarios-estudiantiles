@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../data/models/evento.dart';
 
+// Me gusta mucho linux pero este proyecto lo hago en windows por mejores compatibilidades
+//  Y porque uso linux en mi computadora del gobierno (menos potente)
 class EventosProvider with ChangeNotifier {
   final List<Evento> _eventos = [];
   bool _cargando = true;

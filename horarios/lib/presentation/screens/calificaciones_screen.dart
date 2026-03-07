@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/calificaciones_provider.dart';
+import '../../providers/horario_provider.dart';
 import 'agregar_calificacion_screen.dart';
 import 'detalle_calificacion_screen.dart';
+import 'detalle_materia_screen.dart';
 
+//   No entiendo la monopolizacion de los diseños de ui
+//   Espero haberlo hecho lo suficientemente distinto, obviamente me base en
+//   Mi agenda estudiantil o algo asi era pero dios mio tiene anuncios cada
+//   3 segundos, que feo
 class CalificacionesScreen extends StatefulWidget {
-  const CalificacionesScreen({super.key});
+  final int initialIndex;
+  const CalificacionesScreen({super.key, this.initialIndex = 0});
 
   @override
   State<CalificacionesScreen> createState() => _CalificacionesScreenState();
@@ -14,99 +21,116 @@ class CalificacionesScreen extends StatefulWidget {
 class _CalificacionesScreenState extends State<CalificacionesScreen> {
   @override
   Widget build(BuildContext context) {
+    return DefaultTabController(
+      initialIndex: widget.initialIndex,
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          toolbarHeight: 0,
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Clasificaciones'),
+              Tab(text: 'Materias'),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _buildCalificacionesTab(context),
+            _buildMateriasTab(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCalificacionesTab(BuildContext context) {
     return Consumer<CalificacionesProvider>(
       builder: (context, provider, child) {
         if (provider.cargando) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         final notas = provider.calificacionesActivas;
 
+        if (notas.isEmpty) return _buildEmptyState(context);
+
         return Scaffold(
-          body: notas.isEmpty
-              ? _buildEmptyState(context)
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: notas.length,
-                  itemBuilder: (ctx, i) {
-                    final nota = notas[i];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      elevation: 0,
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceVariant.withOpacity(0.5),
-                      child: ListTile(
-                        leading: Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.primaryContainer,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.emoji_events,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onPrimaryContainer,
-                          ),
+          body: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: notas.length,
+            itemBuilder: (ctx, i) {
+              final nota = notas[i];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                elevation: 0,
+                color: Theme.of(
+                  context,
+                ).colorScheme.surfaceVariant.withOpacity(0.5),
+                child: ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.emoji_events,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                  ),
+                  title: Text(
+                    nota.nombreMateria,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  subtitle: Text(
+                    '${nota.tipoEvaluacion} • ${nota.valorPorcentual > 0 ? nota.valorPorcentual : 0}%',
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        nota.titulo,
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
-                        title: Text(
-                          nota.nombreMateria,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                        subtitle: Text(
-                          '${nota.tipoEvaluacion} • ${nota.valorPorcentual > 0 ? nota.valorPorcentual : 0}%',
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              nota.titulo,
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.primary,
+                      ),
+                      if (provider.modoArchivadoVisible) ...[
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(Icons.inventory_2_outlined),
+                          onPressed: () {
+                            provider.toggleArchivar(nota.id);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Calificación archivada'),
+                                duration: Duration(seconds: 2),
                               ),
-                            ),
-                            if (provider.modoArchivadoVisible) ...[
-                              const SizedBox(width: 8),
-                              IconButton(
-                                icon: const Icon(Icons.inventory_2_outlined),
-                                onPressed: () {
-                                  provider.toggleArchivar(nota.id);
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Calificación archivada'),
-                                      duration: Duration(seconds: 2),
-                                    ),
-                                  );
-                                },
-                                tooltip: 'Archivar',
-                              ),
-                            ],
-                          ],
+                            );
+                          },
+                          tooltip: 'Archivar',
                         ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => DetalleCalificacionScreen(
-                                calificacionId: nota.id,
-                              ),
-                            ),
-                          );
-                        },
+                      ],
+                    ],
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) =>
+                            DetalleCalificacionScreen(calificacionId: nota.id),
                       ),
                     );
                   },
                 ),
+              );
+            },
+          ),
           floatingActionButton: FloatingActionButton.extended(
             onPressed: () {
               Navigator.push(
@@ -120,6 +144,105 @@ class _CalificacionesScreenState extends State<CalificacionesScreen> {
             icon: const Icon(Icons.add),
             label: const Text('Agregar'),
           ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMateriasTab(BuildContext context) {
+    return Consumer2<HorarioProvider, CalificacionesProvider>(
+      builder: (context, horarioProv, califProv, child) {
+        final materias = horarioProv.horario?.materiasSeleccionadas ?? [];
+
+        if (materias.isEmpty) {
+          return const Center(
+            child: Text('Cargá materias en tu horario para verlas aquí'),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: materias.length,
+          itemBuilder: (context, index) {
+            final materia = materias[index];
+            final color = Color(materia.colorARGB ?? 0xFF000000);
+
+            final notasMateria = califProv.calificacionesActivas
+                .where((c) => c.materiaId == materia.materiaId)
+                .toList();
+
+            double promedio = 0;
+            if (notasMateria.isNotEmpty) {
+              double sumaPuntosPonderados = 0;
+              double sumaPesos = 0;
+              double sumaSimple = 0;
+              int countSimple = 0;
+
+              for (var n in notasMateria) {
+                final valor = double.tryParse(n.titulo);
+                if (valor != null) {
+                  if (n.valorPorcentual > 0) {
+                    sumaPuntosPonderados += (valor * n.valorPorcentual / 100);
+                    sumaPesos += n.valorPorcentual;
+                  } else {
+                    sumaSimple += valor;
+                    countSimple++;
+                  }
+                }
+              }
+
+              if (sumaPesos > 0) {
+                promedio = sumaPuntosPonderados;
+              } else if (countSimple > 0) {
+                promedio = sumaSimple / countSimple;
+              }
+            }
+
+            return Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: ListTile(
+                leading: Container(
+                  width: 12,
+                  decoration: BoxDecoration(
+                    color: color,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                title: Text(
+                  materia.materiaNombre ?? 'Materia',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  notasMateria.isEmpty
+                      ? 'Sin calificaciones'
+                      : '${notasMateria.length} calificaciones registradas',
+                ),
+                trailing: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      promedio > 0 ? promedio.toStringAsFixed(1) : '--',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const Text('Promedio', style: TextStyle(fontSize: 10)),
+                  ],
+                ),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => DetalleMateriaScreen(materia: materia),
+                    ),
+                  );
+                },
+              ),
+            );
+          },
         );
       },
     );

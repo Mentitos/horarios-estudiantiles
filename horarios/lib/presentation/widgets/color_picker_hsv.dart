@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 
+// Mi educacion tecnica fue publica asi que siento que tengo que devolver algo
+// Mi fuerza de trabajo es lo que tengo para ofrecer
 class ColorPickerHSV extends StatefulWidget {
   final Color initialColor;
   final ValueChanged<Color> onColorChanged;

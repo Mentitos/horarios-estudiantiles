@@ -6,6 +6,11 @@ import '../../providers/materias_provider.dart';
 import '../../utils/carreras_grupos.dart';
 import 'home_screen.dart';
 
+//   Me gustan las cosas que se hacen con las manos, cubos rubiks, cuchillos mariposas
+//   spinner y muchas otras cosas, soy bastante inquieto y me gusta hacer cosas
+//   No puedo estar viendo una pelicula si no es algo que me guste de ante mano
+//   O este con gente que quiero para verla, tampoco ver cosas como tiktok o reels
+//   No entiendo como gente puede usar su tiempo de esas formas, es un ocio mega vacio
 const String _kOnboardingDone = 'onboarding_done';
 
 Future<bool> onboardingCompleted() async {

@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../providers/theme_provider.dart';
-
 import '../../providers/horario_provider.dart';
 import '../../providers/eventos_provider.dart';
 import '../../providers/materias_provider.dart';
@@ -12,6 +11,10 @@ import '../../utils/carreras_grupos.dart';
 import '../../data/sources/local_datasource.dart';
 import 'materias_aprobadas_screen.dart';
 
+//   Solo con que ayude a alguien a sobrellevar sus estudios me siento realizado
+//   Mucha gente llego a usar Finanzas Libre, tuve mensajes de gente desconocida
+//   Agradeciendo el que la haya creado, escucho sugerencias e implemento segun
+//   Mi criterio y el de los usuarios
 class AjustesScreen extends StatelessWidget {
   const AjustesScreen({super.key});
 

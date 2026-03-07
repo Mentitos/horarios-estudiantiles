@@ -6,6 +6,7 @@ import '../models/materia.dart';
 import '../models/carrera.dart';
 import '../models/horario_usuario.dart';
 import '../models/perfil_usuario.dart';
+import '../models/materia_notas.dart';
 
 class LocalDatasource {
   static const String _isFetchedKey = 'datos_cargados';
@@ -26,6 +27,7 @@ class LocalDatasource {
       CarreraSchema,
       HorarioUsuarioSchema,
       PerfilUsuarioSchema,
+      MateriaNotasSchema,
     ], directory: dir.path);
   }
 
@@ -77,5 +79,20 @@ class LocalDatasource {
   Future<Materia?> leerMateriaPorId(String idMateria) async {
     final isar = await db;
     return await isar.materias.where().materiaIdEqualTo(idMateria).findFirst();
+  }
+
+  Future<MateriaNotas?> leerNotasPorMateriaId(String materiaId) async {
+    final isar = await db;
+    return await isar.materiaNotas
+        .where()
+        .materiaIdEqualTo(materiaId)
+        .findFirst();
+  }
+
+  Future<void> guardarNotasMateria(MateriaNotas notas) async {
+    final isar = await db;
+    await isar.writeTxn(() async {
+      await isar.materiaNotas.put(notas);
+    });
   }
 }

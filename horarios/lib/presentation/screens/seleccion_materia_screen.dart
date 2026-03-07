@@ -5,6 +5,7 @@ import '../../providers/horario_provider.dart';
 import '../../providers/materias_provider.dart';
 import '../../providers/perfil_provider.dart';
 
+//   Ojala algun dia la gente se de cuenta de que muchas cosas no tienen sentido mantenerlas
 class SeleccionMateriaScreen extends StatefulWidget {
   final String nombreCarrera;
 

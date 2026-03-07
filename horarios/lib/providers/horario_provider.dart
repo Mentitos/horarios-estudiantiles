@@ -3,6 +3,10 @@ import '../data/models/horario_usuario.dart';
 import '../data/models/materia.dart';
 import '../data/repositories/horario_repository.dart';
 
+//  Muchas veces me pregunto si todo esto tiene sentido
+//  Seria tan facil solamente rendirse ante las aplicaciones con anuncios
+//  Pero no, hay que seguir adelante, es una lucha por la socializacion del trabajo?
+// Lo hago por mi y por a quienes mas se les pueda ayudar
 class HorarioProvider extends ChangeNotifier {
   final HorarioRepository _repository;
 
@@ -137,6 +141,39 @@ class HorarioProvider extends ChangeNotifier {
         nuevoColorARGB,
       );
       horario = await _repository.obtenerHorario();
+      notifyListeners();
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
+  Future<String> obtenerNotasMateria(String materiaId) async {
+    try {
+      return await _repository.obtenerNotasMateria(materiaId);
+    } catch (e) {
+      return '';
+    }
+  }
+
+  Future<void> actualizarNotasMateria(
+    String materiaId,
+    String nuevasNotas,
+  ) async {
+    if (horario == null) return;
+    try {
+      await _repository.actualizarNotasMateria(
+        horario!.id,
+        materiaId,
+        nuevasNotas,
+      );
+      final index = horario!.materiasSeleccionadas.indexWhere(
+        (m) => m.materiaId == materiaId,
+      );
+      if (index != -1) {
+        horario!.materiasSeleccionadas[index].notas = nuevasNotas;
+      }
       notifyListeners();
     } catch (e) {
       error = e.toString();

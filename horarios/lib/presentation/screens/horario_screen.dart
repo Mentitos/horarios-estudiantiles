@@ -13,6 +13,8 @@ import '../../data/models/profesor.dart';
 import 'package:uuid/uuid.dart';
 import '../widgets/color_picker_hsv.dart';
 
+//   Por que las empresas no me llaman? todavia no me tengo que preocupar tanto
+//   este proyecto vuelve al portafolio y vender paginas web mmmm no se cuanto dure
 class HorarioScreen extends StatelessWidget {
   final bool mostrarSabado;
   final bool mostrarDomingo;

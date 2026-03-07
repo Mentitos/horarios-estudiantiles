@@ -6,6 +6,7 @@ import '../../data/models/horario_usuario.dart';
 import '../../data/models/calificacion.dart';
 import 'sistemas_calificacion_screen.dart';
 
+//   Odio las estructuras de poder donde un lado no consiente
 class AgregarCalificacionScreen extends StatefulWidget {
   final Calificacion? calificacionEdit;
 
@@ -247,8 +248,8 @@ class _AgregarCalificacionScreenState extends State<AgregarCalificacionScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Calificación eliminada')),
                 );
-                Navigator.pop(context); // Cierra Editar
-                Navigator.pop(context); // Cierra Detalle
+                Navigator.pop(context);
+                Navigator.pop(context);
               },
               icon: const Icon(Icons.delete_outline),
               label: const Text('Eliminar calificación'),

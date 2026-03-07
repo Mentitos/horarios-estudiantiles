@@ -11,6 +11,8 @@ import 'providers/profesores_provider.dart';
 import 'providers/grabaciones_provider.dart';
 import 'presentation/screens/splash_screen.dart';
 
+//  Me gusta mucho mi mujer, si bien este proyecto esta ampliamente
+//  Vinculado con la UNGS me gustaria poder expandirlo a su universidad
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('es', null);

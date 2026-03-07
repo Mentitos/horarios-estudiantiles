@@ -6,6 +6,14 @@ import '../../providers/perfil_provider.dart';
 import 'home_screen.dart';
 import 'onboarding_screen.dart';
 
+//   Hace poco cuando sali con mi mujer a Retiro siendo que ahora ni me acuerdo a que fuimos
+//   Conoci a un chabon medio raro pero bastante cercano de algun modo
+//   Trabajaba en un puesto de diarios y me vendio a Nagatoro
+//   Me mostro sus consolas chipeadas asi que estuve muy feliz por eso
+//   Ni me gusta tanto Nagatoro pero queria ayudarlo
+//   A la vuelta quizas fui el unico humano masculino que termino de leer
+//   Nagatoro con una mujer la cual era su novia durmiendo meintras lee Nagatoro
+//   LLegue a mi casa y lo publique en facebook. No le tengo aprecio a esas cosas?
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
