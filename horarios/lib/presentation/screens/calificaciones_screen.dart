@@ -31,18 +31,20 @@ class _CalificacionesScreenState extends State<CalificacionesScreen>
       vsync: this,
       initialIndex: widget.initialIndex,
     );
-    _tabController.addListener(() {
-      if (!_tabController.indexIsChanging) {
-        setState(() {
-          _showFab = _tabController.index == 0;
-        });
-      }
+    _tabController.addListener(_handleTabSelection);
+    _showFab = _tabController.index == 0;
+  }
+
+  void _handleTabSelection() {
+    if (_tabController.indexIsChanging) return;
+    setState(() {
+      _showFab = _tabController.index == 0;
     });
-    _showFab = widget.initialIndex == 0;
   }
 
   @override
   void dispose() {
+    _tabController.removeListener(_handleTabSelection);
     _tabController.dispose();
     super.dispose();
   }
