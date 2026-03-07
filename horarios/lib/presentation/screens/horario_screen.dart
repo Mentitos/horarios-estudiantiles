@@ -374,7 +374,7 @@ class HorarioScreen extends StatelessWidget {
                                   boxShadow: [
                                     if (isSelected)
                                       BoxShadow(
-                                        color: Color(c).withOpacity(0.5),
+                                        color: Color(c).withValues(alpha: 0.5),
                                         blurRadius: 6,
                                         spreadRadius: 2,
                                       ),
@@ -765,7 +765,7 @@ class HorarioScreen extends StatelessWidget {
                           Icon(
                             Icons.person,
                             size: 16,
-                            color: textColor.withOpacity(0.8),
+                            color: textColor.withValues(alpha: 0.8),
                           ),
                           const SizedBox(width: 4),
                           Expanded(
@@ -774,7 +774,7 @@ class HorarioScreen extends StatelessWidget {
                                   .where((p) => p.isNotEmpty)
                                   .join(', '),
                               style: TextStyle(
-                                color: textColor.withOpacity(0.9),
+                                color: textColor.withValues(alpha: 0.9),
                                 fontSize: 15,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -790,13 +790,13 @@ class HorarioScreen extends StatelessWidget {
                           Icon(
                             Icons.room,
                             size: 16,
-                            color: textColor.withOpacity(0.8),
+                            color: textColor.withValues(alpha: 0.8),
                           ),
                           const SizedBox(width: 4),
                           Text(
                             'Aula General: ${materia.aula!}',
                             style: TextStyle(
-                              color: textColor.withOpacity(0.9),
+                              color: textColor.withValues(alpha: 0.9),
                               fontSize: 14,
                             ),
                           ),
@@ -808,7 +808,7 @@ class HorarioScreen extends StatelessWidget {
                       Text(
                         'Sin horarios configurados',
                         style: TextStyle(
-                          color: textColor.withOpacity(0.8),
+                          color: textColor.withValues(alpha: 0.8),
                           fontStyle: FontStyle.italic,
                         ),
                       )
@@ -892,7 +892,7 @@ class HorarioScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.3),
+          color: Colors.black.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(

@@ -66,7 +66,7 @@ class _CalificacionesScreenState extends State<CalificacionesScreen> {
                 elevation: 0,
                 color: Theme.of(
                   context,
-                ).colorScheme.surfaceVariant.withOpacity(0.5),
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 child: ListTile(
                   leading: Container(
                     padding: const EdgeInsets.all(12),
@@ -276,7 +276,7 @@ class _CalificacionesScreenState extends State<CalificacionesScreen> {
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],

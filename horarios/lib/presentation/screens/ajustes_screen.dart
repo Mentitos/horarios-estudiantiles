@@ -434,7 +434,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                         letterSpacing: 0.8,
                         color: Theme.of(
                           context,
-                        ).colorScheme.onSurface.withOpacity(0.5),
+                        ).colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ),

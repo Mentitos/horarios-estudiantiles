@@ -80,7 +80,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       decoration: BoxDecoration(
                         color: _currentPage == i
                             ? colorScheme.primary
-                            : colorScheme.primary.withOpacity(0.25),
+                            : colorScheme.primary.withValues(alpha: 0.25),
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
@@ -118,7 +118,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Text(
                       'Omitir',
                       style: TextStyle(
-                        color: colorScheme.onSurface.withOpacity(0.5),
+                        color: colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -206,7 +206,7 @@ class _PaginaCarreraState extends State<_PaginaCarrera> {
                 style: TextStyle(
                   color: Theme.of(
                     context,
-                  ).colorScheme.onSurface.withOpacity(0.6),
+                  ).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               const SizedBox(height: 20),
@@ -314,7 +314,7 @@ class _GrupoCarreraState extends State<_GrupoCarrera>
                   turns: _rotacion,
                   child: Icon(
                     Icons.keyboard_arrow_down_rounded,
-                    color: colorScheme.onSurface.withOpacity(0.7),
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -397,7 +397,7 @@ class _PaginaAprobadas extends StatelessWidget {
             Text(
               'Omitiste la selección de carrera. Podés configurar las materias aprobadas desde Ajustes.',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -425,7 +425,7 @@ class _PaginaAprobadas extends StatelessWidget {
           Text(
             'Marcá las que ya cursaste. Podés cambiar esto después en Ajustes.',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 12),

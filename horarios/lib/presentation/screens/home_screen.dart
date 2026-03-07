@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/calificaciones_provider.dart';
 import 'resumen_screen.dart';
 import 'horario_screen.dart';
@@ -26,6 +27,25 @@ class HomeScreenState extends State<HomeScreen> {
 
   final GlobalKey<CalendarioEventosScreenState> _calendarioKey =
       GlobalKey<CalendarioEventosScreenState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarPreferencias();
+  }
+
+  Future<void> _cargarPreferencias() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _mostrarSabado = prefs.getBool('mostrar_sabado') ?? false;
+      _mostrarDomingo = prefs.getBool('mostrar_domingo') ?? false;
+    });
+  }
+
+  Future<void> _guardarPreferencia(String key, bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(key, value);
+  }
 
   void navigateTo(int index) {
     setState(() => _currentIndex = index);
@@ -160,8 +180,14 @@ class HomeScreenState extends State<HomeScreen> {
           ],
           onSelected: (val) {
             setState(() {
-              if (val == 'sabado') _mostrarSabado = !_mostrarSabado;
-              if (val == 'domingo') _mostrarDomingo = !_mostrarDomingo;
+              if (val == 'sabado') {
+                _mostrarSabado = !_mostrarSabado;
+                _guardarPreferencia('mostrar_sabado', _mostrarSabado);
+              }
+              if (val == 'domingo') {
+                _mostrarDomingo = !_mostrarDomingo;
+                _guardarPreferencia('mostrar_domingo', _mostrarDomingo);
+              }
             });
           },
         ),
@@ -270,14 +296,14 @@ class PlaceholderScreen extends StatelessWidget {
           Icon(
             icon,
             size: 64,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
             'Próximamente: $title',
             style: TextStyle(
               fontSize: 18,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],

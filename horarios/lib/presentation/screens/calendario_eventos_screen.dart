@@ -77,7 +77,7 @@ class CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: tipo,
+                      initialValue: tipo,
                       decoration: const InputDecoration(labelText: 'Tipo'),
                       items: ['Examen', 'Parcial', 'TP', 'Final', 'Otro']
                           .map(
@@ -90,7 +90,7 @@ class CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
-                      value: materiaId,
+                      initialValue: materiaId,
                       decoration: const InputDecoration(labelText: 'Materia'),
                       items: materias.map((m) {
                         return DropdownMenuItem(
@@ -303,7 +303,7 @@ class CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
                         size: 48,
                         color: Theme.of(
                           context,
-                        ).colorScheme.onSurface.withOpacity(0.3),
+                        ).colorScheme.onSurface.withValues(alpha: 0.3),
                       ),
                       const SizedBox(height: 12),
                       Text(
@@ -311,7 +311,7 @@ class CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
                         style: TextStyle(
                           color: Theme.of(
                             context,
-                          ).colorScheme.onSurface.withOpacity(0.5),
+                          ).colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ],
@@ -433,7 +433,9 @@ class _DowLabel extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
         ),
       ),

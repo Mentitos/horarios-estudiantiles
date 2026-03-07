@@ -183,7 +183,7 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceVariant.withOpacity(0.3),
+                  color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: colorScheme.outlineVariant),
                 ),
@@ -224,7 +224,7 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
             width: double.infinity,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: colorScheme.surfaceVariant.withOpacity(0.3),
+              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
               borderRadius: BorderRadius.circular(24),
             ),
             child: const Center(child: Text('Sin calificaciones registradas')),
@@ -275,7 +275,7 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: colorScheme.primary.withOpacity(0.1),
+                color: colorScheme.primary.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -288,7 +288,7 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
-                  color: colorScheme.onPrimaryContainer.withOpacity(0.8),
+                  color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
                 ),
               ),
               const SizedBox(height: 8),
@@ -308,7 +308,7 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: colorScheme.onPrimaryContainer.withOpacity(0.1),
+                    color: colorScheme.onPrimaryContainer.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -349,7 +349,7 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
                   'Basado en tus calificaciones registradas',
                   style: TextStyle(
                     fontSize: 12,
-                    color: colorScheme.onPrimaryContainer.withOpacity(0.6),
+                    color: colorScheme.onPrimaryContainer.withValues(alpha: 0.6),
                   ),
                 ),
             ],
@@ -382,7 +382,7 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
       return Text(
         'No alcanza para promocionar (Final)',
         style: TextStyle(
-          color: colors.onPrimaryContainer.withOpacity(0.8),
+          color: colors.onPrimaryContainer.withValues(alpha: 0.8),
           fontSize: 12,
         ),
       );
@@ -394,7 +394,7 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
       return Text(
         'Imposible promocionar (Necesitás ${notaNecesaria.toStringAsFixed(1)})',
         style: TextStyle(
-          color: colors.onPrimaryContainer.withOpacity(0.8),
+          color: colors.onPrimaryContainer.withValues(alpha: 0.8),
           fontSize: 12,
         ),
       );
@@ -406,7 +406,7 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
         Text(
           'Para llegar a 7 necesitás:',
           style: TextStyle(
-            color: colors.onPrimaryContainer.withOpacity(0.8),
+            color: colors.onPrimaryContainer.withValues(alpha: 0.8),
             fontSize: 13,
           ),
         ),

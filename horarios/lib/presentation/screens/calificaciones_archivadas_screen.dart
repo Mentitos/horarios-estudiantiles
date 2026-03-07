@@ -28,7 +28,7 @@ class CalificacionesArchivadasScreen extends StatelessWidget {
                     size: 80,
                     color: Theme.of(
                       context,
-                    ).colorScheme.onSurface.withOpacity(0.3),
+                    ).colorScheme.onSurface.withValues(alpha: 0.3),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -37,7 +37,7 @@ class CalificacionesArchivadasScreen extends StatelessWidget {
                       fontSize: 18,
                       color: Theme.of(
                         context,
-                      ).colorScheme.onSurface.withOpacity(0.6),
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ],
@@ -55,7 +55,7 @@ class CalificacionesArchivadasScreen extends StatelessWidget {
                 elevation: 0,
                 color: Theme.of(
                   context,
-                ).colorScheme.surfaceVariant.withOpacity(0.5),
+                ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 child: ListTile(
                   leading: Container(
                     padding: const EdgeInsets.all(12),
@@ -90,7 +90,7 @@ class CalificacionesArchivadasScreen extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                           color: Theme.of(
                             context,
-                          ).colorScheme.primary.withOpacity(0.7),
+                          ).colorScheme.primary.withValues(alpha: 0.7),
                         ),
                       ),
                       const SizedBox(width: 8),

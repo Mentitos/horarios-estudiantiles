@@ -200,7 +200,7 @@ class _AgregarProfesorScreenState extends State<AgregarProfesorScreen> {
               onTap: _seleccionarFoto,
               child: CircleAvatar(
                 radius: 50,
-                backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                 backgroundImage: _rutaImagen != null
                     ? FileImage(File(_rutaImagen!))
                     : null,

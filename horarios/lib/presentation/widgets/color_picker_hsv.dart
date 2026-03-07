@@ -26,7 +26,7 @@ class _ColorPickerHSVState extends State<ColorPickerHSV> {
   @override
   void initState() {
     super.initState();
-    Color startColor = widget.initialColor.withOpacity(1.0);
+    Color startColor = widget.initialColor.withValues(alpha: 1.0);
     HSVColor hsv = HSVColor.fromColor(startColor);
 
     if (hsv.value < 0.05 && hsv.saturation < 0.05) {
