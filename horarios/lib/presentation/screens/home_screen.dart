@@ -6,6 +6,7 @@ import 'horario_screen.dart';
 import 'calendario_eventos_screen.dart';
 import 'ajustes_screen.dart';
 import 'calificaciones_screen.dart';
+import 'profesores_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -16,11 +17,9 @@ class HomeScreen extends StatefulWidget {
 
 class HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  // Opciones del calendario semanal
   bool _mostrarSabado = false;
   bool _mostrarDomingo = false;
 
-  // Llave para acceder al estado del calendario y su método irAHoy
   final GlobalKey<CalendarioEventosScreenState> _calendarioKey =
       GlobalKey<CalendarioEventosScreenState>();
 
@@ -65,10 +64,7 @@ class HomeScreenState extends State<HomeScreen> {
       ),
       CalendarioEventosScreen(key: _calendarioKey),
       const CalificacionesScreen(),
-      const PlaceholderScreen(
-        title: 'Profesores',
-        icon: Icons.person_search_rounded,
-      ),
+      const ProfesoresScreen(),
       const PlaceholderScreen(title: 'Grabaciones', icon: Icons.mic_rounded),
       const AjustesScreen(),
     ];
@@ -142,7 +138,6 @@ class HomeScreenState extends State<HomeScreen> {
   }
 
   List<Widget>? _buildAppBarActions() {
-    // 1 = Horario
     if (_currentIndex == 1) {
       return [
         PopupMenuButton<String>(
@@ -167,9 +162,7 @@ class HomeScreenState extends State<HomeScreen> {
           },
         ),
       ];
-    }
-    // 2 = Calendario
-    else if (_currentIndex == 2) {
+    } else if (_currentIndex == 2) {
       return [
         IconButton(
           icon: const Icon(Icons.calendar_today_rounded),
@@ -179,9 +172,7 @@ class HomeScreenState extends State<HomeScreen> {
           },
         ),
       ];
-    }
-    // 3 = Calificaciones
-    else if (_currentIndex == 3) {
+    } else if (_currentIndex == 3) {
       return [
         PopupMenuButton<String>(
           icon: const Icon(Icons.sort_rounded),

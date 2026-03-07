@@ -129,7 +129,6 @@ class SistemasCalificacionScreen extends StatelessWidget {
             )
           : null,
       onTap: () {
-        // Al seleccionar, se podría regresar el valor
         Navigator.pop(context, title);
       },
     );

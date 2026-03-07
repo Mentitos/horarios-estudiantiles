@@ -6,6 +6,7 @@ import 'providers/perfil_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/eventos_provider.dart';
 import 'providers/calificaciones_provider.dart';
+import 'providers/profesores_provider.dart';
 import 'presentation/screens/splash_screen.dart';
 
 void main() async {
@@ -19,6 +20,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => EventosProvider()),
         ChangeNotifierProvider(create: (_) => CalificacionesProvider()),
+        ChangeNotifierProvider(create: (_) => ProfesoresProvider()),
       ],
       child: const MyApp(),
     ),
