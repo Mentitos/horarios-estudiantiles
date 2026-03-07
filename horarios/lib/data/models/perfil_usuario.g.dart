@@ -15,7 +15,7 @@ extension GetPerfilUsuarioCollection on Isar {
 
 const PerfilUsuarioSchema = CollectionSchema(
   name: r'PerfilUsuario',
-  id: -1854772830458305577,
+  id: -185477283045830,
   properties: {
     r'carrerasSeleccionadas': PropertySchema(
       id: 0,

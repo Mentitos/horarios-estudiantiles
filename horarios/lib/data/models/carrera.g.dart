@@ -15,7 +15,7 @@ extension GetCarreraCollection on Isar {
 
 const CarreraSchema = CollectionSchema(
   name: r'Carrera',
-  id: 7716092522208123804,
+  id: 771609252220812,
   properties: {
     r'materiasIds': PropertySchema(
       id: 0,
@@ -35,7 +35,7 @@ const CarreraSchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'nombre': IndexSchema(
-      id: -8239814765453414572,
+      id: -823981476545341,
       name: r'nombre',
       unique: true,
       replace: true,

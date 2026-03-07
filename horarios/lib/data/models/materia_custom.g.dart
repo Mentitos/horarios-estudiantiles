@@ -15,7 +15,7 @@ extension GetMateriaCustomCollection on Isar {
 
 const MateriaCustomSchema = CollectionSchema(
   name: r'MateriaCustom',
-  id: -3450368153890493642,
+  id: -345036815389049,
   properties: {
     r'carreraAsociada': PropertySchema(
       id: 0,
@@ -50,7 +50,7 @@ const MateriaCustomSchema = CollectionSchema(
   idName: r'id',
   indexes: {
     r'materiaId': IndexSchema(
-      id: 8446862627094492875,
+      id: 844686262709449,
       name: r'materiaId',
       unique: true,
       replace: true,

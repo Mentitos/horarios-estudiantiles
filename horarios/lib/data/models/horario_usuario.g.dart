@@ -15,7 +15,7 @@ extension GetHorarioUsuarioCollection on Isar {
 
 const HorarioUsuarioSchema = CollectionSchema(
   name: r'HorarioUsuario',
-  id: 5146170470437166058,
+  id: 514617047043716,
   properties: {
     r'fechaActualizacion': PropertySchema(
       id: 0,
@@ -744,7 +744,7 @@ extension HorarioUsuarioQueryProperty
 
 const MateriaSeleccionadaSchema = Schema(
   name: r'MateriaSeleccionada',
-  id: -8510792447932389814,
+  id: -851079244793238,
   properties: {
     r'aula': PropertySchema(
       id: 0,
@@ -1935,7 +1935,7 @@ extension MateriaSeleccionadaQueryObject on QueryBuilder<MateriaSeleccionada,
 
 const BloqueHorarioSchema = Schema(
   name: r'BloqueHorario',
-  id: -644508994527177508,
+  id: -644508994527177,
   properties: {
     r'aula': PropertySchema(
       id: 0,
