@@ -9,6 +9,8 @@ import 'providers/eventos_provider.dart';
 import 'providers/calificaciones_provider.dart';
 import 'providers/profesores_provider.dart';
 import 'providers/grabaciones_provider.dart';
+import 'providers/donaciones_provider.dart';
+import 'providers/fotos_provider.dart';
 import 'data/sources/local_datasource.dart';
 import 'data/repositories/horario_repository.dart';
 import 'presentation/screens/splash_screen.dart';
@@ -37,6 +39,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CalificacionesProvider()),
         ChangeNotifierProvider(create: (_) => ProfesoresProvider()),
         ChangeNotifierProvider(create: (_) => GrabacionesProvider()),
+        ChangeNotifierProvider(create: (_) => DonacionesProvider()),
+        ChangeNotifierProvider(create: (_) => FotosProvider()),
       ],
       child: const MyApp(),
     ),

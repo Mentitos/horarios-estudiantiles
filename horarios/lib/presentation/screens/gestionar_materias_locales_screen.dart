@@ -388,6 +388,7 @@ class _GestionarMateriasLocalesScreenState
       floatingActionButton: _carreraSeleccionada == null
           ? null
           : FloatingActionButton.extended(
+              heroTag: 'fab_gestionar_locales',
               onPressed: _agregarMateriaLocal,
               icon: const Icon(Icons.add),
               label: const Text('Nueva Materia'),

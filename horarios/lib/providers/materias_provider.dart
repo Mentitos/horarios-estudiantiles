@@ -16,7 +16,7 @@ class MateriasProvider extends ChangeNotifier {
   Future<void> inicializar() async {
     cargando = true;
     error = null;
-    notifyListeners();
+    _safeNotify();
 
     try {
       await _repository.cargarDatosIniciales();
@@ -27,8 +27,13 @@ class MateriasProvider extends ChangeNotifier {
       error = e.toString();
     } finally {
       cargando = false;
-      notifyListeners();
+      _safeNotify();
     }
+  }
+
+  void _safeNotify() {
+    // Usamos microtask para evitar errores de notify durante el build
+    Future.microtask(() => notifyListeners());
   }
 
   Future<void> refrescar() async {

@@ -11,6 +11,7 @@ import 'calificaciones_screen.dart';
 import 'calificaciones_archivadas_screen.dart';
 import 'profesores_screen.dart';
 import 'grabaciones_screen.dart';
+import 'galeria_screen.dart';
 
 // Te imaginas qeu a mucha gente de la ungs le guste o que vea un compañero
 // usandola y dija "JIJI yo la hice"
@@ -66,6 +67,7 @@ class HomeScreenState extends State<HomeScreen> {
     'Calificaciones',
     'Profesores',
     'Grabaciones',
+    'Galería',
     'Ajustes',
   ];
 
@@ -79,6 +81,7 @@ class HomeScreenState extends State<HomeScreen> {
     _DrawerItem(icon: Icons.note_alt_rounded, label: 'Calificaciones'),
     _DrawerItem(icon: Icons.person_search_rounded, label: 'Profesores'),
     _DrawerItem(icon: Icons.mic_rounded, label: 'Grabaciones'),
+    _DrawerItem(icon: Icons.collections_rounded, label: 'Galería'),
   ];
 
   static const List<_DrawerItem> _drawerItemsSettings = [
@@ -98,6 +101,7 @@ class HomeScreenState extends State<HomeScreen> {
       const CalificacionesScreen(),
       const ProfesoresScreen(),
       const GrabacionesScreen(),
+      const GaleriaScreen(),
       const AjustesScreen(),
     ];
 

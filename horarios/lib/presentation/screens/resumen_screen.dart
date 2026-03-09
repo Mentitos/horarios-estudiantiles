@@ -113,9 +113,15 @@ class ResumenScreen extends StatelessWidget {
                         ),
                         const SizedBox(width: 12),
                         _NavCard(
+                          icon: Icons.collections_rounded,
+                          label: 'Galería',
+                          onTap: () => _navegar(context, 6),
+                        ),
+                        const SizedBox(width: 12),
+                        _NavCard(
                           icon: Icons.settings_rounded,
                           label: 'Ajustes',
-                          onTap: () => _navegar(context, 6),
+                          onTap: () => _navegar(context, 7),
                         ),
                       ],
                     ),

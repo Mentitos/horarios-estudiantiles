@@ -394,6 +394,7 @@ class CalendarioEventosScreenState extends State<CalendarioEventosScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_calendario',
         onPressed: () => _mostrarDialogoAgregarEvento(context),
         tooltip: 'Agregar Examen/TP',
         child: const Icon(Icons.add),

@@ -16,7 +16,7 @@ class HorarioProvider extends ChangeNotifier {
   Future<void> inicializar() async {
     cargando = true;
     error = null;
-    notifyListeners();
+    _safeNotify();
 
     try {
       horario = await _repository.obtenerHorario();
@@ -25,8 +25,12 @@ class HorarioProvider extends ChangeNotifier {
       error = e.toString();
     } finally {
       cargando = false;
-      notifyListeners();
+      _safeNotify();
     }
+  }
+
+  void _safeNotify() {
+    Future.microtask(() => notifyListeners());
   }
 
   Future<void> agregarMateria(Materia materia) async {

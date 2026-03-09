@@ -90,6 +90,7 @@ class ProfesoresScreen extends StatelessWidget {
                   },
                 ),
           floatingActionButton: FloatingActionButton(
+            heroTag: 'fab_profesores',
             onPressed: () {
               Navigator.push(
                 context,

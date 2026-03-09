@@ -59,6 +59,7 @@ class _CalificacionesScreenState extends State<CalificacionesScreen>
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab_calificaciones',
         onPressed: () {
           Navigator.push(
             context,

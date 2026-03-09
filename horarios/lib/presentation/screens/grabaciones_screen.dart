@@ -32,6 +32,7 @@ class GrabacionesScreen extends StatelessWidget {
         floatingActionButton: Consumer<GrabacionesProvider>(
           builder: (context, provider, child) {
             return FloatingActionButton(
+              heroTag: 'fab_grabaciones',
               backgroundColor: provider.isRecording
                   ? Theme.of(context).colorScheme.errorContainer
                   : Theme.of(context).colorScheme.primaryContainer,

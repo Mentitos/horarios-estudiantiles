@@ -38,6 +38,7 @@ class _SeleccionMateriaScreenState extends State<SeleccionMateriaScreen> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'fab_seleccion_materia',
         onPressed: _agregarMateriaLocal,
         icon: const Icon(Icons.add),
         label: const Text('Crear Materia'),

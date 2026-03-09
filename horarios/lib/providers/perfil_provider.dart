@@ -16,7 +16,7 @@ class PerfilProvider extends ChangeNotifier {
   Future<void> inicializar() async {
     cargando = true;
     error = null;
-    notifyListeners();
+    _safeNotify();
 
     try {
       perfil = await _repository.obtenerPerfil();
@@ -25,8 +25,12 @@ class PerfilProvider extends ChangeNotifier {
       error = e.toString();
     } finally {
       cargando = false;
-      notifyListeners();
+      _safeNotify();
     }
+  }
+
+  void _safeNotify() {
+    Future.microtask(() => notifyListeners());
   }
 
   Future<void> setCarreras(List<String> carreras) async {

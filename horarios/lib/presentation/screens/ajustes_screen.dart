@@ -8,6 +8,8 @@ import '../../providers/horario_provider.dart';
 import '../../providers/eventos_provider.dart';
 import '../../providers/materias_provider.dart';
 import '../../providers/perfil_provider.dart';
+import 'package:intl/intl.dart';
+import '../../providers/donaciones_provider.dart';
 import '../../utils/carreras_grupos.dart';
 import '../../data/sources/local_datasource.dart';
 import 'materias_aprobadas_screen.dart';
@@ -545,6 +547,101 @@ class _AjustesScreenState extends State<AjustesScreen> {
                         ),
                       ],
                     ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Meta de la Comunidad',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(height: 8),
+                  Consumer<DonacionesProvider>(
+                    builder: (context, donacionesProv, child) {
+                      final meta = donacionesProv.meta;
+                      final montoTotal = donacionesProv.monto;
+                      final porcentaje = donacionesProv.porcentaje;
+                      final porcentajeTexto = (porcentaje * 100).toStringAsFixed(1);
+                      
+                      final nFormat = NumberFormat.currency(
+                        locale: 'es_AR',
+                        symbol: '\$',
+                        decimalDigits: 0,
+                      );
+
+                      return Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Expanded(
+                                  child: Text(
+                                    'Mantenimiento de Servidores & Mejoras de la App',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                if (donacionesProv.cargando)
+                                  const SizedBox(
+                                    width: 12,
+                                    height: 12,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                else
+                                  Text(
+                                    '$porcentajeTexto%',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(10),
+                              child: LinearProgressIndicator(
+                                value: porcentaje,
+                                minHeight: 12,
+                                backgroundColor: Theme.of(context).colorScheme.surface,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  nFormat.format(montoTotal),
+                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                                ),
+                                Text(
+                                  'Meta: ${nFormat.format(meta)} ARS',
+                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'Con tu ayuda puedo cubrir los costos del servidor y seguir mejorando la app con las funciones que me pidan. ¡Gracias por el aguante!',
+                              style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                   const Divider(height: 24),
                   const Text(

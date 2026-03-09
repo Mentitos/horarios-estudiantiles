@@ -705,6 +705,7 @@ class HorarioScreen extends StatelessWidget {
           ],
         ),
         floatingActionButton: FloatingActionButton(
+          heroTag: 'fab_horario',
           child: const Icon(Icons.add),
           onPressed: () => _iniciarFlujoAgregarMateria(context),
         ),

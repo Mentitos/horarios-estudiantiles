@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../models/carrera.dart';
 import '../models/materia.dart';
@@ -20,19 +21,37 @@ class GithubDatasource {
         ),
       ]);
 
-      final materiasResponse = responses[0];
-      final carrerasResponse = responses[1];
+      final materiasRaw = responses[0].data;
+      final carrerasRaw = responses[1].data;
 
-      final materiasJsonList =
-          (materiasResponse.data is String
-                  ? jsonDecode(materiasResponse.data)
-                  : materiasResponse.data)
-              as List<dynamic>;
-      final carrerasJsonList =
-          (carrerasResponse.data is String
-                  ? jsonDecode(carrerasResponse.data)
-                  : carrerasResponse.data)
-              as List<dynamic>;
+      if (materiasRaw == null || (materiasRaw is String && materiasRaw.trim().isEmpty)) {
+        throw Exception('El archivo materias.json está vacío en GitHub.');
+      }
+      if (carrerasRaw == null || (carrerasRaw is String && carrerasRaw.trim().isEmpty)) {
+        throw Exception('El archivo carreras.json está vacío en GitHub.');
+      }
+
+      final materiasData = materiasRaw is String ? jsonDecode(materiasRaw) : materiasRaw;
+      final carrerasData = carrerasRaw is String ? jsonDecode(carrerasRaw) : carrerasRaw;
+
+      if (materiasData is! List) {
+        throw Exception('El archivo materias.json de GitHub no tiene formato de lista (encontrado: ${materiasData.runtimeType})');
+      }
+
+      final List<dynamic> materiasJsonList = materiasData;
+      List<dynamic> carrerasJsonList = [];
+
+      if (carrerasData is List) {
+        carrerasJsonList = carrerasData;
+      } else if (carrerasData is Map) {
+        for (var categoryValue in carrerasData.values) {
+          if (categoryValue is List) {
+            carrerasJsonList.addAll(categoryValue);
+          }
+        }
+      } else {
+        throw Exception('El archivo carreras.json de GitHub tiene un formato desconocido (encontrado: ${carrerasData.runtimeType})');
+      }
 
       List<Materia> materias = [];
       for (var jsonMateria in materiasJsonList) {
@@ -46,9 +65,12 @@ class GithubDatasource {
       for (var jsonCarrera in carrerasJsonList) {
         final carrera = Carrera()..nombre = jsonCarrera['nombre'] as String;
 
-        final List<dynamic> materiasRaw =
-            jsonCarrera['materias'] as List<dynamic>;
-        carrera.materiasIds = materiasRaw.map((e) => e.toString()).toList();
+        final materiasRawList = jsonCarrera['materias'];
+        if (materiasRawList is List) {
+          carrera.materiasIds = materiasRawList.map((e) => e.toString()).toList();
+        } else {
+          carrera.materiasIds = [];
+        }
 
         carreras.add(carrera);
       }
@@ -56,6 +78,27 @@ class GithubDatasource {
       return (materias: materias, carreras: carreras);
     } catch (e) {
       throw Exception('Error al descargar los datos desde GitHub: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchDonaciones() async {
+    try {
+      final response = await _dio.get(
+        'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/donaciones.json',
+      );
+      
+      final rawData = response.data;
+      if (rawData == null || (rawData is String && rawData.trim().isEmpty)) {
+        return {'monto': 0, 'meta': 50000};
+      }
+
+      if (rawData is String) {
+        return jsonDecode(rawData) as Map<String, dynamic>;
+      }
+      return rawData as Map<String, dynamic>;
+    } catch (e) {
+      debugPrint('Error al buscar donaciones: $e');
+      return {'monto': 0, 'meta': 50000};
     }
   }
 }

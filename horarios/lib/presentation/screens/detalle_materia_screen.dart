@@ -178,6 +178,7 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
           ),
         ),
         floatingActionButton: FloatingActionButton.extended(
+          heroTag: 'fab_detalle_materia',
           onPressed: () {
             Navigator.push(
               context,
