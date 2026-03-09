@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../utils/carreras_grupos.dart';
+import 'package:provider/provider.dart';
+import '../../providers/materias_provider.dart';
 import 'seleccion_materia_screen.dart';
 
 //   Odio a obsolescencia programada, una vez acompañando a un amigo fuimos
@@ -11,7 +11,9 @@ class SeleccionCarreraScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tipos = gruposCarreras.keys.toList();
+    final materiasProvider = context.watch<MateriasProvider>();
+    final gruposCarrerasData = materiasProvider.carrerasPorGrupo;
+    final tipos = gruposCarrerasData.keys.toList();
 
     return Scaffold(
       appBar: AppBar(
@@ -22,14 +24,15 @@ class SeleccionCarreraScreen extends StatelessWidget {
         itemCount: tipos.length,
         itemBuilder: (context, index) {
           final tipo = tipos[index];
-          final carrerasInfo = gruposCarreras[tipo]!;
+          final carrerasInfo = gruposCarrerasData[tipo]!;
 
           return ExpansionTile(
             title: Text(
               tipo,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            children: carrerasInfo.map((nombreCarrera) {
+            children: carrerasInfo.map((carreraObj) {
+              final nombreCarrera = carreraObj.nombre ?? '';
               return ListTile(
                 title: Text(nombreCarrera),
                 onTap: () {

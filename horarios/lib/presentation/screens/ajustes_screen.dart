@@ -174,9 +174,14 @@ class _AjustesScreenState extends State<AjustesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Text(
-                    'Mi carrera',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  Text(
+                    perfilProvider.carrerasSeleccionadas.length > 1
+                        ? 'Mis carreras'
+                        : 'Mi carrera',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   if (perfilProvider.esAlumnoExterno) ...[

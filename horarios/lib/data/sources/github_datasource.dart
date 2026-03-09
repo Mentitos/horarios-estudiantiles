@@ -96,7 +96,6 @@ class GithubDatasource {
           }
         }
       } else if (carrerasData is List) {
-        // Fallback for non-grouped list
         for (var jsonCarrera in carrerasData) {
           final carrera = Carrera()..nombre = jsonCarrera['nombre'] as String;
           final materiasRawList = jsonCarrera['materias'];
