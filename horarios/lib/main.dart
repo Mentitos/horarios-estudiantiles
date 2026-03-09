@@ -15,11 +15,13 @@ import 'providers/version_provider.dart';
 import 'data/sources/local_datasource.dart';
 import 'data/repositories/horario_repository.dart';
 import 'presentation/screens/splash_screen.dart';
+import 'services/notification_service.dart';
 
 //  Me gusta mucho mi mujer, si bien este proyecto esta ampliamente
 //  Vinculado con la UNGS me gustaria poder expandirlo a su universidad
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService().init();
   await initializeDateFormatting('es', null);
 
   final localDatasource = LocalDatasource();

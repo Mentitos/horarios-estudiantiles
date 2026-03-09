@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../data/models/evento.dart';
+import '../services/notification_service.dart';
 
 // Me gusta mucho linux pero este proyecto lo hago en windows por mejores compatibilidades
 //  Y porque uso linux en mi computadora del gobierno (menos potente)
 class EventosProvider with ChangeNotifier {
   final List<Evento> _eventos = [];
   bool _cargando = true;
+  final NotificationService _notificationService = NotificationService();
 
   List<Evento> get eventos => _eventos;
   bool get cargando => _cargando;
@@ -32,8 +34,29 @@ class EventosProvider with ChangeNotifier {
       debugPrint('Error loading events: $e');
     }
 
+    await actualizarNotificaciones();
+
     _cargando = false;
     notifyListeners();
+  }
+
+  Future<void> actualizarNotificaciones() async {
+    await _notificationService.cancelAll();
+    final prefs = await SharedPreferences.getInstance();
+    final int hour = prefs.getInt('notif_hour') ?? 21;
+    final bool enabled = prefs.getBool('notif_enabled') ?? true;
+
+    if (!enabled) return;
+
+    for (var evento in _eventos) {
+      await _notificationService.scheduleEventNotifications(
+        id: evento.id,
+        title: evento.titulo,
+        type: evento.tipo,
+        date: evento.fecha,
+        hour: hour,
+      );
+    }
   }
 
   Future<void> _guardarEventos() async {
@@ -54,12 +77,25 @@ class EventosProvider with ChangeNotifier {
     _eventos.add(evento);
     notifyListeners();
     await _guardarEventos();
+
+    final prefs = await SharedPreferences.getInstance();
+    final int hour = prefs.getInt('notif_hour') ?? 21;
+    if (prefs.getBool('notif_enabled') ?? true) {
+      await _notificationService.scheduleEventNotifications(
+        id: evento.id,
+        title: evento.titulo,
+        type: evento.tipo,
+        date: evento.fecha,
+        hour: hour,
+      );
+    }
   }
 
   Future<void> eliminarEvento(String id) async {
     _eventos.removeWhere((e) => e.id == id);
     notifyListeners();
     await _guardarEventos();
+    await _notificationService.cancelEventNotifications(id);
   }
 
   bool isSameDay(DateTime a, DateTime b) {
@@ -71,5 +107,6 @@ class EventosProvider with ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('eventos_calendario');
+    await _notificationService.cancelAll();
   }
 }

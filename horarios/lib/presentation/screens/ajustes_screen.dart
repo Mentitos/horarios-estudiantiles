@@ -28,6 +28,65 @@ class AjustesScreen extends StatefulWidget {
 }
 
 class _AjustesScreenState extends State<AjustesScreen> {
+  bool _notifEnabled = true;
+  int _notifHour = 21;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifSettings();
+  }
+
+  Future<void> _loadNotifSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _notifEnabled = prefs.getBool('notif_enabled') ?? true;
+      _notifHour = prefs.getInt('notif_hour') ?? 21;
+    });
+  }
+
+  Future<void> _saveNotifEnabled(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notif_enabled', value);
+    setState(() {
+      _notifEnabled = value;
+    });
+    if (mounted) {
+      context.read<EventosProvider>().actualizarNotificaciones();
+      context.read<HorarioProvider>().actualizarNotificaciones();
+    }
+  }
+
+  Future<void> _saveNotifHour(int hour) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('notif_hour', hour);
+    setState(() {
+      _notifHour = hour;
+    });
+    if (mounted) {
+      context.read<EventosProvider>().actualizarNotificaciones();
+      context.read<HorarioProvider>().actualizarNotificaciones();
+    }
+  }
+
+  Future<void> _mostrarSelectorHora(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay(hour: _notifHour, minute: 0),
+      helpText: 'Seleccionar hora de notificación',
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      await _saveNotifHour(picked.hour);
+    }
+  }
+
   Future<void> _mostrarDialogoSeleccionarCarreras(BuildContext context) async {
     final perfilProvider = context.read<PerfilProvider>();
     final carrerasActuales = List<String>.from(
@@ -250,6 +309,51 @@ class _AjustesScreenState extends State<AjustesScreen> {
                       label: const Text('Cambiar carrera'),
                       onPressed: () =>
                           _mostrarDialogoSeleccionarCarreras(context),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const Text(
+                    'Notificaciones',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    'Recibí recordatorios de tus eventos y un resumen de tus materias del día.',
+                  ),
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    title: const Text('Activar notificaciones'),
+                    subtitle: Text(_notifEnabled ? 'Activado' : 'Desactivado'),
+                    value: _notifEnabled,
+                    onChanged: (val) => _saveNotifEnabled(val),
+                  ),
+                  if (_notifEnabled) ...[
+                    ListTile(
+                      title: const Text('Hora de notificación'),
+                      subtitle: Text(
+                        '${_notifHour.toString().padLeft(2, '0')}:00 hs',
+                      ),
+                      trailing: const Icon(Icons.access_time),
+                      onTap: () => _mostrarSelectorHora(context),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Text(
+                        'Se te notificará 1 semana y 1 día antes de cada evento, y todas las mañanas con tu cursada.',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                     ),
                   ],
                 ],

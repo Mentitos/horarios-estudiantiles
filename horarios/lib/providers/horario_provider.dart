@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/models/horario_usuario.dart';
 import '../data/models/materia.dart';
 import '../data/repositories/horario_repository.dart';
+import '../services/notification_service.dart';
 
 class HorarioProvider extends ChangeNotifier {
   final HorarioRepository _repository;
@@ -9,6 +11,7 @@ class HorarioProvider extends ChangeNotifier {
   HorarioUsuario? horario;
   bool cargando = true;
   String? error;
+  final NotificationService _notificationService = NotificationService();
 
   HorarioProvider({HorarioRepository? repository})
     : _repository = repository ?? HorarioRepository();
@@ -25,7 +28,58 @@ class HorarioProvider extends ChangeNotifier {
       error = e.toString();
     } finally {
       cargando = false;
+      await actualizarNotificaciones();
       _safeNotify();
+    }
+  }
+
+  Future<void> actualizarNotificaciones() async {
+    if (horario == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final bool enabled = prefs.getBool('notif_enabled') ?? true;
+    final int hour = prefs.getInt('notif_hour') ?? 21;
+
+    if (!enabled) {
+      await _notificationService.scheduleDailySummary(subjects: [], hour: hour);
+      return;
+    }
+
+    final now = DateTime.now();
+    final String todayName = _getDiaSemana(now.weekday);
+
+    final List<String> subjectsToday = [];
+    for (var materia in horario!.materiasSeleccionadas) {
+      final bool cursaHoy = materia.bloques.any((b) => b.dia == todayName);
+      if (cursaHoy) {
+        subjectsToday.add(materia.materiaNombre ?? 'Materia');
+      }
+    }
+
+    await _notificationService.scheduleDailySummary(
+      subjects: subjectsToday,
+      hour: hour,
+    );
+  }
+
+  String _getDiaSemana(int weekday) {
+    switch (weekday) {
+      case DateTime.monday:
+        return 'Lunes';
+      case DateTime.tuesday:
+        return 'Martes';
+      case DateTime.wednesday:
+        return 'Miércoles';
+      case DateTime.thursday:
+        return 'Jueves';
+      case DateTime.friday:
+        return 'Viernes';
+      case DateTime.saturday:
+        return 'Sábado';
+      case DateTime.sunday:
+        return 'Domingo';
+      default:
+        return '';
     }
   }
 
@@ -37,11 +91,11 @@ class HorarioProvider extends ChangeNotifier {
     try {
       await _repository.agregarMateria(materia);
       horario = await _repository.obtenerHorario();
+      await actualizarNotificaciones();
       notifyListeners();
     } catch (e) {
       error = e.toString();
       notifyListeners();
-      rethrow;
     }
   }
 
@@ -49,11 +103,11 @@ class HorarioProvider extends ChangeNotifier {
     try {
       await _repository.eliminarMateria(materiaId);
       horario = await _repository.obtenerHorario();
+      await actualizarNotificaciones();
       notifyListeners();
     } catch (e) {
       error = e.toString();
       notifyListeners();
-      rethrow;
     }
   }
 
@@ -106,6 +160,7 @@ class HorarioProvider extends ChangeNotifier {
     try {
       await _repository.eliminarHorario();
       horario = await _repository.crearHorarioVacio('Mi Horario');
+      await actualizarNotificaciones();
       notifyListeners();
     } catch (e) {
       error = e.toString();
