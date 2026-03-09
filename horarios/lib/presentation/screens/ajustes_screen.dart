@@ -40,7 +40,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
-              title: const Text('Seleccionar Carreras (máx 2)'),
+              title: const Text('Seleccionar Carreras (máx 3)'),
               content: SizedBox(
                 width: double.maxFinite,
                 child: ListView.builder(
@@ -61,11 +61,11 @@ class _AjustesScreenState extends State<AjustesScreen> {
                           value: isSelected,
                           onChanged: (bool? checked) {
                             if (checked == true) {
-                              if (carrerasActuales.length >= 2) {
+                              if (carrerasActuales.length >= 3) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(
-                                      'Máximo 2 carreras permitidas',
+                                      'Máximo 3 carreras permitidas',
                                     ),
                                   ),
                                 );
@@ -177,7 +177,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Seleccioná hasta 2 carreras para ver tu progreso.',
+                    'Seleccioná hasta 3 carreras para ver tu progreso.',
                   ),
                   const SizedBox(height: 16),
                   Wrap(
@@ -470,17 +470,23 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     children: [
                       const Text(
                         'Acerca de',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       Consumer<VersionProvider>(
                         builder: (context, vProv, _) {
                           final date = vProv.buildDate;
-                          final dateStr = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+                          final dateStr =
+                              '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
                           return Text(
                             'Actualizado: $dateStr',
                             style: TextStyle(
                               fontSize: 11,
-                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.5),
                             ),
                           );
                         },
@@ -497,24 +503,34 @@ class _AjustesScreenState extends State<AjustesScreen> {
                             margin: const EdgeInsets.only(bottom: 12),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primaryContainer,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
                               children: [
-                                Icon(Icons.update, color: Theme.of(context).colorScheme.onPrimaryContainer),
+                                Icon(
+                                  Icons.update,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimaryContainer,
+                                ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
                                     '¡Nueva versión disponible!',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimaryContainer,
                                     ),
                                   ),
                                 ),
                                 TextButton(
-                                  onPressed: () => _abrirLink(vProv.downloadUrl),
+                                  onPressed: () =>
+                                      _abrirLink(vProv.downloadUrl),
                                   child: const Text('DESCARGAR'),
                                 ),
                               ],
@@ -527,11 +543,17 @@ class _AjustesScreenState extends State<AjustesScreen> {
                             decoration: BoxDecoration(
                               color: Colors.green.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                              border: Border.all(
+                                color: Colors.green.withValues(alpha: 0.3),
+                              ),
                             ),
                             child: const Row(
                               children: [
-                                Icon(Icons.check_circle, color: Colors.green, size: 20),
+                                Icon(
+                                  Icons.check_circle,
+                                  color: Colors.green,
+                                  size: 20,
+                                ),
                                 SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
@@ -551,16 +573,31 @@ class _AjustesScreenState extends State<AjustesScreen> {
                             padding: const EdgeInsets.only(bottom: 12),
                             child: Text(
                               vProv.error!,
-                              style: const TextStyle(color: Colors.red, fontSize: 12),
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
+                              ),
                               textAlign: TextAlign.center,
                             ),
                           ),
                         ElevatedButton.icon(
-                          onPressed: vProv.loading ? null : () => vProv.checkUpdates(),
-                          icon: vProv.loading 
-                            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                            : const Icon(Icons.refresh, size: 18),
-                          label: Text(vProv.loading ? 'Verificando...' : 'Buscar actualizaciones'),
+                          onPressed: vProv.loading
+                              ? null
+                              : () => vProv.checkUpdates(),
+                          icon: vProv.loading
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.refresh, size: 18),
+                          label: Text(
+                            vProv.loading
+                                ? 'Verificando...'
+                                : 'Buscar actualizaciones',
+                          ),
                         ),
                       ],
                     ),
@@ -646,97 +683,193 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Meta de la Comunidad',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                  ),
-                  const SizedBox(height: 8),
                   Consumer<DonacionesProvider>(
                     builder: (context, donacionesProv, child) {
-                      final meta = donacionesProv.meta;
-                      final montoTotal = donacionesProv.monto;
+                      final titulo = donacionesProv.titulo;
+                      final montoActual = donacionesProv.montoActual;
+                      final metas = donacionesProv.metas;
+                      final proxima = donacionesProv.metaProxima;
                       final porcentaje = donacionesProv.porcentaje;
-                      final porcentajeTexto = (porcentaje * 100).toStringAsFixed(1);
-                      
+                      final porcentajeTexto = (porcentaje * 100)
+                          .toStringAsFixed(1);
+
                       final nFormat = NumberFormat.currency(
                         locale: 'es_AR',
                         symbol: '\$',
                         decimalDigits: 0,
                       );
 
-                      return Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Expanded(
-                                  child: Text(
-                                    'Mantenimiento de Servidores & Mejoras de la App',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                if (donacionesProv.cargando)
-                                  const SizedBox(
-                                    width: 12,
-                                    height: 12,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  )
-                                else
-                                  Text(
-                                    '$porcentajeTexto%',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Theme.of(context).colorScheme.primary,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
-                              child: LinearProgressIndicator(
-                                value: porcentaje,
-                                minHeight: 12,
-                                backgroundColor: Theme.of(context).colorScheme.surface,
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                  Theme.of(context).colorScheme.primary,
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                titulo,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  nFormat.format(montoTotal),
-                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                              if (donacionesProv.cargando)
+                                const SizedBox(
+                                  width: 12,
+                                  height: 12,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
                                 ),
-                                Text(
-                                  'Meta: ${nFormat.format(meta)} ARS',
-                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withValues(alpha: 0.3),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primary.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        proxima?.nombre ??
+                                            '¡Todas las metas alcanzadas!',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      '$porcentajeTexto%',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: LinearProgressIndicator(
+                                    value: porcentaje,
+                                    minHeight: 12,
+                                    backgroundColor: Theme.of(
+                                      context,
+                                    ).colorScheme.surface,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Recaudado: ${nFormat.format(montoActual)}',
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    if (proxima != null)
+                                      Text(
+                                        'Meta: ${nFormat.format(proxima.monto)}',
+                                        style: const TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                                if (metas.isNotEmpty) ...[
+                                  const Divider(height: 24),
+                                  ...metas.map((m) {
+                                    final alcanzada = montoActual >= m.monto;
+                                    return Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 8.0,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            alcanzada
+                                                ? Icons.check_circle
+                                                : Icons.circle_outlined,
+                                            size: 14,
+                                            color: alcanzada
+                                                ? Colors.green
+                                                : Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurface
+                                                      .withValues(alpha: 0.5),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              m.nombre,
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                color: alcanzada
+                                                    ? null
+                                                    : Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurface
+                                                          .withValues(
+                                                            alpha: 0.7,
+                                                          ),
+                                                decoration: alcanzada
+                                                    ? TextDecoration.lineThrough
+                                                    : null,
+                                              ),
+                                            ),
+                                          ),
+                                          Text(
+                                            nFormat.format(m.monto),
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                              color: alcanzada
+                                                  ? Colors.green
+                                                  : null,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }),
+                                ],
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Con tu ayuda puedo cubrir los costos del servidor y seguir mejorando la app con las funciones que me pidan. ¡Gracias por el aguante!',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontStyle: FontStyle.italic,
+                                  ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Con tu ayuda puedo cubrir los costos del servidor y seguir mejorando la app con las funciones que me pidan. ¡Gracias por el aguante!',
-                              style: TextStyle(fontSize: 11, fontStyle: FontStyle.italic),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -757,7 +890,8 @@ class _AjustesScreenState extends State<AjustesScreen> {
                   ),
                   const SizedBox(height: 2),
                   GestureDetector(
-                    onTap: () => _abrirLink('mailto:sugerenciasfinanzaslibre@gmail.com'),
+                    onTap: () =>
+                        _abrirLink('mailto:sugerenciasfinanzaslibre@gmail.com'),
                     child: Text(
                       'sugerenciasfinanzaslibre@gmail.com',
                       style: TextStyle(

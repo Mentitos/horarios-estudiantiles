@@ -168,10 +168,10 @@ class _PaginaCarreraState extends State<_PaginaCarrera> {
       if (_selected.contains(carrera)) {
         _selected.remove(carrera);
       } else {
-        if (_selected.length >= 2) {
+        if (_selected.length >= 3) {
           ScaffoldMessenger.of(
             context,
-          ).showSnackBar(const SnackBar(content: Text('Máximo 2 carreras')));
+          ).showSnackBar(const SnackBar(content: Text('Máximo 3 carreras')));
           return;
         }
         _selected.add(carrera);
@@ -202,7 +202,7 @@ class _PaginaCarreraState extends State<_PaginaCarrera> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Podés elegir hasta 2 carreras.',
+                'Podés elegir hasta 3 carreras.',
                 style: TextStyle(
                   color: Theme.of(
                     context,
@@ -397,7 +397,9 @@ class _PaginaAprobadas extends StatelessWidget {
             Text(
               'Omitiste la selección de carrera. Podés configurar las materias aprobadas desde Ajustes.',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -425,7 +427,9 @@ class _PaginaAprobadas extends StatelessWidget {
           Text(
             'Marcá las que ya cursaste. Podés cambiar esto después en Ajustes.',
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
           const SizedBox(height: 12),

@@ -24,18 +24,26 @@ class GithubDatasource {
       final materiasRaw = responses[0].data;
       final carrerasRaw = responses[1].data;
 
-      if (materiasRaw == null || (materiasRaw is String && materiasRaw.trim().isEmpty)) {
+      if (materiasRaw == null ||
+          (materiasRaw is String && materiasRaw.trim().isEmpty)) {
         throw Exception('El archivo materias.json está vacío en GitHub.');
       }
-      if (carrerasRaw == null || (carrerasRaw is String && carrerasRaw.trim().isEmpty)) {
+      if (carrerasRaw == null ||
+          (carrerasRaw is String && carrerasRaw.trim().isEmpty)) {
         throw Exception('El archivo carreras.json está vacío en GitHub.');
       }
 
-      final materiasData = materiasRaw is String ? jsonDecode(materiasRaw) : materiasRaw;
-      final carrerasData = carrerasRaw is String ? jsonDecode(carrerasRaw) : carrerasRaw;
+      final materiasData = materiasRaw is String
+          ? jsonDecode(materiasRaw)
+          : materiasRaw;
+      final carrerasData = carrerasRaw is String
+          ? jsonDecode(carrerasRaw)
+          : carrerasRaw;
 
       if (materiasData is! List) {
-        throw Exception('El archivo materias.json de GitHub no tiene formato de lista (encontrado: ${materiasData.runtimeType})');
+        throw Exception(
+          'El archivo materias.json de GitHub no tiene formato de lista (encontrado: ${materiasData.runtimeType})',
+        );
       }
 
       final List<dynamic> materiasJsonList = materiasData;
@@ -50,7 +58,9 @@ class GithubDatasource {
           }
         }
       } else {
-        throw Exception('El archivo carreras.json de GitHub tiene un formato desconocido (encontrado: ${carrerasData.runtimeType})');
+        throw Exception(
+          'El archivo carreras.json de GitHub tiene un formato desconocido (encontrado: ${carrerasData.runtimeType})',
+        );
       }
 
       List<Materia> materias = [];
@@ -67,7 +77,9 @@ class GithubDatasource {
 
         final materiasRawList = jsonCarrera['materias'];
         if (materiasRawList is List) {
-          carrera.materiasIds = materiasRawList.map((e) => e.toString()).toList();
+          carrera.materiasIds = materiasRawList
+              .map((e) => e.toString())
+              .toList();
         } else {
           carrera.materiasIds = [];
         }
@@ -86,10 +98,14 @@ class GithubDatasource {
       final response = await _dio.get(
         'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/donaciones.json',
       );
-      
+
       final rawData = response.data;
       if (rawData == null || (rawData is String && rawData.trim().isEmpty)) {
-        return {'monto': 0, 'meta': 50000};
+        return {
+          'titulo': 'Metas de la Comunidad',
+          'monto_actual': 0,
+          'metas': [],
+        };
       }
 
       if (rawData is String) {
@@ -98,7 +114,11 @@ class GithubDatasource {
       return rawData as Map<String, dynamic>;
     } catch (e) {
       debugPrint('Error al buscar donaciones: $e');
-      return {'monto': 0, 'meta': 50000};
+      return {
+        'titulo': 'Metas de la Comunidad',
+        'monto_actual': 0,
+        'metas': [],
+      };
     }
   }
 }

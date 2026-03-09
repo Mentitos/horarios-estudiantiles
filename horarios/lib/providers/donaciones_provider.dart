@@ -1,21 +1,51 @@
 import 'package:flutter/material.dart';
 import '../data/sources/github_datasource.dart';
 
+class MetaComunidad {
+  final String nombre;
+  final double monto;
+
+  MetaComunidad({required this.nombre, required this.monto});
+
+  factory MetaComunidad.fromJson(Map<String, dynamic> json) {
+    return MetaComunidad(
+      nombre: json['nombre'] as String,
+      monto: (json['monto'] as num).toDouble(),
+    );
+  }
+}
+
 class DonacionesProvider extends ChangeNotifier {
   final GithubDatasource _datasource;
-  
-  double _monto = 0.0;
-  double _meta = 50000.0;
+
+  String _titulo = 'Metas de la Comunidad';
+  double _montoActual = 0.0;
+  List<MetaComunidad> _metas = [];
   bool _cargando = false;
 
-  double get monto => _monto;
-  double get meta => _meta;
+  String get titulo => _titulo;
+  double get montoActual => _montoActual;
+  List<MetaComunidad> get metas => _metas;
   bool get cargando => _cargando;
-  
-  double get porcentaje => (_monto / _meta).clamp(0.0, 1.0);
 
-  DonacionesProvider({GithubDatasource? datasource}) 
-      : _datasource = datasource ?? GithubDatasource() {
+  /// Obtiene la meta actual (la primera que aún no se alcanzó)
+  MetaComunidad? get metaProxima {
+    if (_metas.isEmpty) return null;
+    return _metas.firstWhere(
+      (m) => m.monto > _montoActual,
+      orElse: () => _metas.last,
+    );
+  }
+
+  /// Porcentaje de progreso hacia la meta actual/próxima
+  double get porcentaje {
+    final proxima = metaProxima;
+    if (proxima == null || proxima.monto == 0) return 0.0;
+    return (_montoActual / proxima.monto).clamp(0.0, 1.0);
+  }
+
+  DonacionesProvider({GithubDatasource? datasource})
+    : _datasource = datasource ?? GithubDatasource() {
     refrescar();
   }
 
@@ -25,8 +55,14 @@ class DonacionesProvider extends ChangeNotifier {
 
     try {
       final data = await _datasource.fetchDonaciones();
-      _monto = (data['monto'] as num).toDouble();
-      _meta = (data['meta'] as num).toDouble();
+      _titulo = data['titulo'] ?? 'Metas de la Comunidad';
+      _montoActual = (data['monto_actual'] as num? ?? 0.0).toDouble();
+
+      if (data['metas'] is List) {
+        _metas = (data['metas'] as List)
+            .map((m) => MetaComunidad.fromJson(m as Map<String, dynamic>))
+            .toList();
+      }
     } catch (e) {
       debugPrint('Error en DonacionesProvider: $e');
     } finally {
