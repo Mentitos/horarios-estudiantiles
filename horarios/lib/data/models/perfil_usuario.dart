@@ -9,4 +9,6 @@ class PerfilUsuario {
   List<String> carrerasSeleccionadas = [];
 
   List<String> materiasAprobadas = [];
+
+  bool esAlumnoExterno = false;
 }

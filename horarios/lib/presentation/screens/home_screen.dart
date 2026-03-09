@@ -12,6 +12,7 @@ import 'calificaciones_archivadas_screen.dart';
 import 'profesores_screen.dart';
 import 'grabaciones_screen.dart';
 import 'galeria_screen.dart';
+import '../../providers/perfil_provider.dart';
 
 // Te imaginas qeu a mucha gente de la ungs le guste o que vea un compañero
 // usandola y dija "JIJI yo la hice"
@@ -91,6 +92,7 @@ class HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final perfilProvider = context.watch<PerfilProvider>();
     final screens = [
       ResumenScreen(onNavigate: navigateTo),
       HorarioScreen(
@@ -137,7 +139,9 @@ class HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  'Horarios UNGS',
+                  perfilProvider.esAlumnoExterno
+                      ? 'Mis Horarios'
+                      : 'Horarios UNGS',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,

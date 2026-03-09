@@ -176,40 +176,58 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    'Seleccioná hasta 3 carreras para ver tu progreso.',
-                  ),
-                  const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 8.0,
-                    children: perfilProvider.carrerasSeleccionadas.map((
-                      carrera,
-                    ) {
-                      return Chip(
-                        label: Text(carrera),
-                        onDeleted: () {
-                          final nuevas = List<String>.from(
-                            perfilProvider.carrerasSeleccionadas,
-                          )..remove(carrera);
-                          perfilProvider.setCarreras(nuevas);
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    icon: const Icon(Icons.school),
-                    label: const Text('Cambiar carrera'),
-                    onPressed: () =>
-                        _mostrarDialogoSeleccionarCarreras(context),
-                  ),
+                  if (perfilProvider.esAlumnoExterno) ...[
+                    const Text(
+                      'Estás usando la app como alumno de otra universidad.',
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.school),
+                      label: const Text('Unirme a la UNGS'),
+                      onPressed: () async {
+                        await perfilProvider.setAlumnoExterno(false);
+                        if (context.mounted) {
+                          _mostrarDialogoSeleccionarCarreras(context);
+                        }
+                      },
+                    ),
+                  ] else ...[
+                    const Text(
+                      'Seleccioná hasta 3 carreras para ver tu progreso.',
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 8.0,
+                      children: perfilProvider.carrerasSeleccionadas.map((
+                        carrera,
+                      ) {
+                        return Chip(
+                          label: Text(carrera),
+                          onDeleted: () {
+                            final nuevas = List<String>.from(
+                              perfilProvider.carrerasSeleccionadas,
+                            )..remove(carrera);
+                            perfilProvider.setCarreras(nuevas);
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.school),
+                      label: const Text('Cambiar carrera'),
+                      onPressed: () =>
+                          _mostrarDialogoSeleccionarCarreras(context),
+                    ),
+                  ],
                 ],
               ),
             ),
           ),
           const SizedBox(height: 16),
 
-          if (perfilProvider.carrerasSeleccionadas.isNotEmpty)
+          if (!perfilProvider.esAlumnoExterno &&
+              perfilProvider.carrerasSeleccionadas.isNotEmpty)
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -317,108 +335,115 @@ class _AjustesScreenState extends State<AjustesScreen> {
               ),
             ),
 
-          if (perfilProvider.carrerasSeleccionadas.isNotEmpty)
+          if (!perfilProvider.esAlumnoExterno &&
+              perfilProvider.carrerasSeleccionadas.isNotEmpty)
             const SizedBox(height: 16),
 
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text(
-                    'Actualizar datos desde la web',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Forzar la descarga de la última versión de materias y carreras.',
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: materiasProvider.cargando
-                        ? null
-                        : () async {
-                            try {
-                              await context
-                                  .read<MateriasProvider>()
-                                  .refrescar();
-                              if (!context.mounted) return;
-
-                              final locales = await LocalDatasource()
-                                  .leerMateriasCustom();
-                              final hayOcultas = locales.any(
-                                (c) => c.estaOculta,
-                              );
-
-                              if (hayOcultas) {
+          if (!perfilProvider.esAlumnoExterno)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text(
+                      'Actualizar datos desde la web',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Forzar la descarga de la última versión de materias y carreras.',
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: materiasProvider.cargando
+                          ? null
+                          : () async {
+                              try {
+                                await context
+                                    .read<MateriasProvider>()
+                                    .refrescar();
                                 if (!context.mounted) return;
-                                final restaurar = await showDialog<bool>(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    title: const Text('Datos actualizados'),
-                                    content: const Text(
-                                      'Se descargaron los datos correctamente. Tienes materias oficiales que ocultaste previamente, ¿deseas restaurarlas y volver a verlas?',
-                                    ),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () =>
-                                            Navigator.of(ctx).pop(false),
-                                        child: const Text('No'),
-                                      ),
-                                      ElevatedButton(
-                                        onPressed: () =>
-                                            Navigator.of(ctx).pop(true),
-                                        child: const Text('Restaurar'),
-                                      ),
-                                    ],
-                                  ),
+
+                                final locales = await LocalDatasource()
+                                    .leerMateriasCustom();
+                                final hayOcultas = locales.any(
+                                  (c) => c.estaOculta,
                                 );
 
-                                if (restaurar == true) {
-                                  await LocalDatasource()
-                                      .limpiarMateriasOcultas();
+                                if (hayOcultas) {
+                                  if (!context.mounted) return;
+                                  final restaurar = await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Datos actualizados'),
+                                      content: const Text(
+                                        'Se descargaron los datos correctamente. Tienes materias oficiales que ocultaste previamente, ¿deseas restaurarlas y volver a verlas?',
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () =>
+                                              Navigator.of(ctx).pop(false),
+                                          child: const Text('No'),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: () =>
+                                              Navigator.of(ctx).pop(true),
+                                          child: const Text('Restaurar'),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+
+                                  if (restaurar == true) {
+                                    await LocalDatasource()
+                                        .limpiarMateriasOcultas();
+                                    if (context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Planillas restauradas correctamente.',
+                                          ),
+                                        ),
+                                      );
+                                      setState(() {});
+                                    }
+                                  }
+                                } else {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
-                                        content: Text(
-                                          'Planillas restauradas correctamente.',
-                                        ),
+                                        content: Text('Actualizadas!'),
                                       ),
                                     );
                                     setState(() {});
                                   }
                                 }
-                              } else {
+                              } catch (e) {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text('Actualizadas!'),
-                                    ),
+                                    SnackBar(content: Text('Error: $e')),
                                   );
-                                  setState(() {});
                                 }
                               }
-                            } catch (e) {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('Error: $e')),
-                                );
-                              }
-                            }
-                          },
-                    child: materiasProvider.cargando
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Text('Descargar JSON'),
-                  ),
-                ],
+                            },
+                      child: materiasProvider.cargando
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Text('Descargar JSON'),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
           const SizedBox(height: 16),
 
           // ── Avanzado ────────────────────────────────────────────

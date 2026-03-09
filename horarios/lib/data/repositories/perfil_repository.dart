@@ -73,4 +73,16 @@ class PerfilRepository {
       await isar.perfilUsuarios.put(perfil!);
     });
   }
+
+  Future<void> setAlumnoExterno(bool value) async {
+    var perfil = await obtenerPerfil();
+    perfil ??= await crearPerfilVacio();
+
+    perfil.esAlumnoExterno = value;
+
+    final isar = await _localDatasource.db;
+    await isar.writeTxn(() async {
+      await isar.perfilUsuarios.put(perfil!);
+    });
+  }
 }

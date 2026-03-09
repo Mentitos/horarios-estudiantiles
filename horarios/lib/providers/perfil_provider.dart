@@ -45,6 +45,18 @@ class PerfilProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> setAlumnoExterno(bool value) async {
+    try {
+      await _repository.setAlumnoExterno(value);
+      perfil = await _repository.obtenerPerfil();
+      notifyListeners();
+    } catch (e) {
+      error = e.toString();
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   Future<void> toggleMateriaAprobada(String materiaId) async {
     try {
       await _repository.toggleMateriaAprobada(materiaId);
@@ -64,10 +76,12 @@ class PerfilProvider extends ChangeNotifier {
 
   List<String> get carrerasSeleccionadas => perfil?.carrerasSeleccionadas ?? [];
   List<String> get materiasAprobadas => perfil?.materiasAprobadas ?? [];
+  bool get esAlumnoExterno => perfil?.esAlumnoExterno ?? false;
 
   Future<void> formatear() async {
     try {
       await _repository.setCarreras([]);
+      await _repository.setAlumnoExterno(false);
       await _repository.limpiarMateriasAprobadas();
       perfil = await _repository.obtenerPerfil();
       notifyListeners();

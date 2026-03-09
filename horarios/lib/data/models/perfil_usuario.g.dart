@@ -22,8 +22,13 @@ const PerfilUsuarioSchema = CollectionSchema(
       name: r'carrerasSeleccionadas',
       type: IsarType.stringList,
     ),
-    r'materiasAprobadas': PropertySchema(
+    r'esAlumnoExterno': PropertySchema(
       id: 1,
+      name: r'esAlumnoExterno',
+      type: IsarType.bool,
+    ),
+    r'materiasAprobadas': PropertySchema(
+      id: 2,
       name: r'materiasAprobadas',
       type: IsarType.stringList,
     )
@@ -72,7 +77,8 @@ void _perfilUsuarioSerialize(
   Map<Type, List<int>> allOffsets,
 ) {
   writer.writeStringList(offsets[0], object.carrerasSeleccionadas);
-  writer.writeStringList(offsets[1], object.materiasAprobadas);
+  writer.writeBool(offsets[1], object.esAlumnoExterno);
+  writer.writeStringList(offsets[2], object.materiasAprobadas);
 }
 
 PerfilUsuario _perfilUsuarioDeserialize(
@@ -83,8 +89,9 @@ PerfilUsuario _perfilUsuarioDeserialize(
 ) {
   final object = PerfilUsuario();
   object.carrerasSeleccionadas = reader.readStringList(offsets[0]) ?? [];
+  object.esAlumnoExterno = reader.readBool(offsets[1]);
   object.id = id;
-  object.materiasAprobadas = reader.readStringList(offsets[1]) ?? [];
+  object.materiasAprobadas = reader.readStringList(offsets[2]) ?? [];
   return object;
 }
 
@@ -98,6 +105,8 @@ P _perfilUsuarioDeserializeProp<P>(
     case 0:
       return (reader.readStringList(offset) ?? []) as P;
     case 1:
+      return (reader.readBool(offset)) as P;
+    case 2:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -427,6 +436,16 @@ extension PerfilUsuarioQueryFilter
     });
   }
 
+  QueryBuilder<PerfilUsuario, PerfilUsuario, QAfterFilterCondition>
+      esAlumnoExternoEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'esAlumnoExterno',
+        value: value,
+      ));
+    });
+  }
+
   QueryBuilder<PerfilUsuario, PerfilUsuario, QAfterFilterCondition> idEqualTo(
       Id value) {
     return QueryBuilder.apply(this, (query) {
@@ -716,10 +735,38 @@ extension PerfilUsuarioQueryLinks
     on QueryBuilder<PerfilUsuario, PerfilUsuario, QFilterCondition> {}
 
 extension PerfilUsuarioQuerySortBy
-    on QueryBuilder<PerfilUsuario, PerfilUsuario, QSortBy> {}
+    on QueryBuilder<PerfilUsuario, PerfilUsuario, QSortBy> {
+  QueryBuilder<PerfilUsuario, PerfilUsuario, QAfterSortBy>
+      sortByEsAlumnoExterno() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'esAlumnoExterno', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PerfilUsuario, PerfilUsuario, QAfterSortBy>
+      sortByEsAlumnoExternoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'esAlumnoExterno', Sort.desc);
+    });
+  }
+}
 
 extension PerfilUsuarioQuerySortThenBy
     on QueryBuilder<PerfilUsuario, PerfilUsuario, QSortThenBy> {
+  QueryBuilder<PerfilUsuario, PerfilUsuario, QAfterSortBy>
+      thenByEsAlumnoExterno() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'esAlumnoExterno', Sort.asc);
+    });
+  }
+
+  QueryBuilder<PerfilUsuario, PerfilUsuario, QAfterSortBy>
+      thenByEsAlumnoExternoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'esAlumnoExterno', Sort.desc);
+    });
+  }
+
   QueryBuilder<PerfilUsuario, PerfilUsuario, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -743,6 +790,13 @@ extension PerfilUsuarioQueryWhereDistinct
   }
 
   QueryBuilder<PerfilUsuario, PerfilUsuario, QDistinct>
+      distinctByEsAlumnoExterno() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'esAlumnoExterno');
+    });
+  }
+
+  QueryBuilder<PerfilUsuario, PerfilUsuario, QDistinct>
       distinctByMateriasAprobadas() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'materiasAprobadas');
@@ -762,6 +816,13 @@ extension PerfilUsuarioQueryProperty
       carrerasSeleccionadasProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'carrerasSeleccionadas');
+    });
+  }
+
+  QueryBuilder<PerfilUsuario, bool, QQueryOperations>
+      esAlumnoExternoProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'esAlumnoExterno');
     });
   }
 

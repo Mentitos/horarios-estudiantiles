@@ -34,6 +34,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
   final List<String> _carrerasSeleccionadas = [];
+  bool _esAlumnoExterno = false;
 
   void _nextPage() {
     if (_currentPage < 1) {
@@ -98,13 +99,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   _PaginaCarrera(
                     seleccionadas: _carrerasSeleccionadas,
+                    esAlumnoExterno: _esAlumnoExterno,
                     onChanged: (lista) => setState(() {
                       _carrerasSeleccionadas
                         ..clear()
                         ..addAll(lista);
                     }),
+                    onAlumnoExternoChanged: (val) => setState(() {
+                      _esAlumnoExterno = val;
+                      if (val) _carrerasSeleccionadas.clear();
+                    }),
                   ),
-                  _PaginaAprobadas(carreras: _carrerasSeleccionadas),
+                  if (!_esAlumnoExterno)
+                    _PaginaAprobadas(carreras: _carrerasSeleccionadas),
                 ],
               ),
             ),
@@ -125,11 +132,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   const Spacer(),
                   FilledButton(
                     onPressed: () async {
-                      if (_currentPage == 0 &&
-                          _carrerasSeleccionadas.isNotEmpty) {
-                        await context.read<PerfilProvider>().setCarreras(
-                          List.from(_carrerasSeleccionadas),
-                        );
+                      final pProv = context.read<PerfilProvider>();
+                      if (_currentPage == 0) {
+                        await pProv.setAlumnoExterno(_esAlumnoExterno);
+                        if (!_esAlumnoExterno &&
+                            _carrerasSeleccionadas.isNotEmpty) {
+                          await pProv.setCarreras(
+                            List.from(_carrerasSeleccionadas),
+                          );
+                        }
+                        if (_esAlumnoExterno) {
+                          _finish();
+                          return;
+                        }
                       }
                       _nextPage();
                     },
@@ -147,8 +162,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
 class _PaginaCarrera extends StatefulWidget {
   final List<String> seleccionadas;
+  final bool esAlumnoExterno;
   final void Function(List<String>) onChanged;
-  const _PaginaCarrera({required this.seleccionadas, required this.onChanged});
+  final void Function(bool) onAlumnoExternoChanged;
+
+  const _PaginaCarrera({
+    required this.seleccionadas,
+    required this.esAlumnoExterno,
+    required this.onChanged,
+    required this.onAlumnoExternoChanged,
+  });
 
   @override
   State<_PaginaCarrera> createState() => _PaginaCarreraState();
@@ -209,26 +232,41 @@ class _PaginaCarreraState extends State<_PaginaCarrera> {
                   ).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text(
+                  'Soy alumno de otra universidad',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+                subtitle: const Text(
+                  'Usar la app sin datos de la UNGS',
+                  style: TextStyle(fontSize: 12),
+                ),
+                value: widget.esAlumnoExterno,
+                onChanged: widget.onAlumnoExternoChanged,
+              ),
+              const SizedBox(height: 12),
             ],
           ),
         ),
 
-        Expanded(
-          child: ListView(
-            children: gruposCarreras.entries.map((entry) {
-              return _GrupoCarrera(
-                titulo: entry.key,
-                carreras: entry.value,
-                seleccionadas: _selected,
-                onToggle: _toggle,
-                initiallyExpanded: _selected.any(
-                  (s) => entry.value.contains(s),
-                ),
-              );
-            }).toList(),
+        if (!widget.esAlumnoExterno)
+          Expanded(
+            child: ListView(
+              children: gruposCarreras.entries.map((entry) {
+                return _GrupoCarrera(
+                  titulo: entry.key,
+                  carreras: entry.value,
+                  seleccionadas: _selected,
+                  onToggle: _toggle,
+                  initiallyExpanded: _selected.any(
+                    (s) => entry.value.contains(s),
+                  ),
+                );
+              }).toList(),
+            ),
           ),
-        ),
       ],
     );
   }
