@@ -400,12 +400,16 @@ class _DetalleMateriaScreenState extends State<DetalleMateriaScreen> {
             fontSize: 13,
           ),
         ),
-        Text(
-          '${notaNecesaria.toStringAsFixed(1)} en el ${pesoRestante.toStringAsFixed(0)}% restante',
-          style: TextStyle(
-            color: colors.onPrimaryContainer,
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
+        const SizedBox(width: 4),
+        Expanded(
+          child: Text(
+            '${notaNecesaria.toStringAsFixed(1)} en el ${pesoRestante.toStringAsFixed(0)}% restante',
+            textAlign: TextAlign.end,
+            style: TextStyle(
+              color: colors.onPrimaryContainer,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
           ),
         ),
       ],

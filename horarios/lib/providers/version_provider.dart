@@ -8,7 +8,7 @@ class VersionProvider extends ChangeNotifier {
   final Dio _dio = Dio();
   
   // Fecha de esta versión de la app. Se debe actualizar manualmente al compilar una nueva.
-  final DateTime _buildDate = DateTime.parse('2026-03-09T04:20:00');
+  final DateTime _buildDate = DateTime.parse('2026-03-09T04:40:00');
   
   bool _checkPerformed = false;
   bool _isUpToDate = false;
@@ -20,6 +20,7 @@ class VersionProvider extends ChangeNotifier {
   String? _error;
 
   String get currentVersion => _currentVersion;
+  DateTime get buildDate => _buildDate;
   String get downloadUrl => _downloadUrl;
   bool get isUpdateAvailable => _isUpdateAvailable;
   bool get isUpToDate => _isUpToDate;

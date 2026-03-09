@@ -473,13 +473,17 @@ class _AjustesScreenState extends State<AjustesScreen> {
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                       Consumer<VersionProvider>(
-                        builder: (context, vProv, _) => Text(
-                          'v${vProv.currentVersion}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                          ),
-                        ),
+                        builder: (context, vProv, _) {
+                          final date = vProv.buildDate;
+                          final dateStr = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+                          return Text(
+                            'Actualizado: $dateStr',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
