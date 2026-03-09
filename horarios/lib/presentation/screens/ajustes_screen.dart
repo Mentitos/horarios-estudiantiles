@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 import '../../providers/donaciones_provider.dart';
 import '../../utils/carreras_grupos.dart';
 import '../../data/sources/local_datasource.dart';
+import '../../providers/version_provider.dart';
 import 'materias_aprobadas_screen.dart';
 import 'gestionar_materias_locales_screen.dart' as file_gestionar;
 
@@ -464,11 +465,103 @@ class _AjustesScreenState extends State<AjustesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Acerca de',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Acerca de',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      Consumer<VersionProvider>(
+                        builder: (context, vProv, _) => Text(
+                          'v${vProv.currentVersion}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
+                  Consumer<VersionProvider>(
+                    builder: (context, vProv, _) => Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (vProv.isUpdateAvailable)
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primaryContainer,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(Icons.update, color: Theme.of(context).colorScheme.onPrimaryContainer),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    '¡Nueva versión disponible!',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                    ),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () => _abrirLink(vProv.downloadUrl),
+                                  child: const Text('DESCARGAR'),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (vProv.checkPerformed && vProv.isUpToDate)
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.green.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                            ),
+                            child: const Row(
+                              children: [
+                                Icon(Icons.check_circle, color: Colors.green, size: 20),
+                                SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    'Tenés la versión más reciente.',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (vProv.error != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: Text(
+                              vProv.error!,
+                              style: const TextStyle(color: Colors.red, fontSize: 12),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ElevatedButton.icon(
+                          onPressed: vProv.loading ? null : () => vProv.checkUpdates(),
+                          icon: vProv.loading 
+                            ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.refresh, size: 18),
+                          label: Text(vProv.loading ? 'Verificando...' : 'Buscar actualizaciones'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 24),
                   const Text(
                     'Proyecto Open Source. Podés ver el código libre en el repositorio:',
                   ),
@@ -652,6 +745,24 @@ class _AjustesScreenState extends State<AjustesScreen> {
                   const Text(
                     'Matias Gabriel Tello',
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    '¿Tenés alguna sugerencia o encontraste un error? Escribime a:',
+                    style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+                  ),
+                  const SizedBox(height: 2),
+                  GestureDetector(
+                    onTap: () => _abrirLink('mailto:sugerenciasfinanzaslibre@gmail.com'),
+                    child: Text(
+                      'sugerenciasfinanzaslibre@gmail.com',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(context).colorScheme.primary,
+                        decoration: TextDecoration.underline,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Align(
