@@ -43,21 +43,44 @@ class MateriaRepository {
   Future<List<dynamic>> getMateriasDeCarrera(String nombreCarrera) async {
     final carreras = await _localDatasource.leerTodasLasCarreras();
 
-    final carrera = carreras.firstWhere(
-      (c) => c.nombre == nombreCarrera,
-      orElse: () => throw Exception('Carrera \$nombreCarrera no encontrada'),
-    );
+    final carrera = carreras
+        .where((c) => c.nombre == nombreCarrera)
+        .firstOrNull;
 
     List<dynamic> materiasCruzadas = [];
     final customs = await _localDatasource.leerMateriasCustom();
 
-    for (String materiaIdCompuesto in carrera.materiasIds) {
-      if (materiaIdCompuesto.contains(':')) {
-        final idsInvolucrados = materiaIdCompuesto.split(':');
+    if (carrera != null) {
+      for (String materiaIdCompuesto in carrera.materiasIds) {
+        if (materiaIdCompuesto.contains(':')) {
+          final idsInvolucrados = materiaIdCompuesto.split(':');
 
-        List<Materia> grupoMaterias = [];
-        for (String idPart in idsInvolucrados) {
-          final materia = await _localDatasource.leerMateriaPorId(idPart);
+          List<Materia> grupoMaterias = [];
+          for (String idPart in idsInvolucrados) {
+            final materia = await _localDatasource.leerMateriaPorId(idPart);
+            if (materia != null) {
+              final customMatch = customs
+                  .where((c) => c.materiaId == materia.materiaId)
+                  .firstOrNull;
+              if (customMatch?.estaOculta == true) {
+                continue;
+              }
+              if (customMatch != null &&
+                  customMatch.nombrePersonalizado != null &&
+                  customMatch.nombrePersonalizado!.isNotEmpty) {
+                materia.nombre = customMatch.nombrePersonalizado;
+              }
+              grupoMaterias.add(materia);
+            }
+          }
+
+          if (grupoMaterias.isNotEmpty) {
+            materiasCruzadas.add(grupoMaterias);
+          }
+        } else {
+          final materia = await _localDatasource.leerMateriaPorId(
+            materiaIdCompuesto,
+          );
           if (materia != null) {
             final customMatch = customs
                 .where((c) => c.materiaId == materia.materiaId)
@@ -70,34 +93,11 @@ class MateriaRepository {
                 customMatch.nombrePersonalizado!.isNotEmpty) {
               materia.nombre = customMatch.nombrePersonalizado;
             }
-            grupoMaterias.add(materia);
+            materiasCruzadas.add(materia);
           }
-        }
-
-        if (grupoMaterias.isNotEmpty) {
-          materiasCruzadas.add(grupoMaterias);
-        }
-      } else {
-        final materia = await _localDatasource.leerMateriaPorId(
-          materiaIdCompuesto,
-        );
-        if (materia != null) {
-          final customMatch = customs
-              .where((c) => c.materiaId == materia.materiaId)
-              .firstOrNull;
-          if (customMatch?.estaOculta == true) {
-            continue;
-          }
-          if (customMatch != null &&
-              customMatch.nombrePersonalizado != null &&
-              customMatch.nombrePersonalizado!.isNotEmpty) {
-            materia.nombre = customMatch.nombrePersonalizado;
-          }
-          materiasCruzadas.add(materia);
         }
       }
     }
-
     final materiasLocalesNuevas = customs
         .where(
           (c) => c.esAgregadaLocalmente && c.carreraAsociada == nombreCarrera,

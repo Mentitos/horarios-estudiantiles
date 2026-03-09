@@ -4,6 +4,8 @@ import '../../providers/horario_provider.dart';
 import '../../providers/eventos_provider.dart';
 import '../../providers/perfil_provider.dart';
 import '../../data/sources/local_datasource.dart';
+import '../../data/models/materia_custom.dart';
+import 'materias_aprobadas_screen.dart';
 
 class ResumenScreen extends StatelessWidget {
   final void Function(int index)? onNavigate;
@@ -548,54 +550,100 @@ class _ProgresoCard extends StatelessWidget {
     return FutureBuilder(
       future: LocalDatasource().leerCarreraPorNombre(nombreCarrera),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const LinearProgressIndicator();
-        final carrera = snapshot.data!;
+        final carrera = snapshot.data;
         int aprobadas = 0;
-        final total = carrera.materiasIds.length;
-        for (var mId in carrera.materiasIds) {
-          if (mId.contains(':')) {
-            if (mId.split(':').any((p) => perfilProvider.estaAprobada(p))) {
-              aprobadas++;
-            }
-          } else {
-            if (perfilProvider.estaAprobada(mId)) {
-              aprobadas++;
+        int total = 0;
+
+        if (carrera != null) {
+          total = carrera.materiasIds.length;
+          for (var mId in carrera.materiasIds) {
+            if (mId.contains(':')) {
+              if (mId.split(':').any((p) => perfilProvider.estaAprobada(p))) {
+                aprobadas++;
+              }
+            } else {
+              if (perfilProvider.estaAprobada(mId)) {
+                aprobadas++;
+              }
             }
           }
-        }
-        final pct = total > 0 ? aprobadas / total : 0.0;
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  nombreCarrera,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                LinearProgressIndicator(
-                  value: pct,
-                  minHeight: 8,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '$aprobadas / $total aprobadas (${(pct * 100).toStringAsFixed(1)}%)',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+        } else {
+          return FutureBuilder<List<MateriaCustom>>(
+            future: LocalDatasource().leerMateriasCustom(),
+            builder: (context, customSnapshot) {
+              if (!customSnapshot.hasData)
+                return const LinearProgressIndicator();
+              final misMaterias = customSnapshot.data!
+                  .where((m) => m.carreraAsociada == nombreCarrera)
+                  .toList();
+              total = misMaterias.length;
+              aprobadas = misMaterias
+                  .where(
+                    (m) =>
+                        m.materiaId != null &&
+                        perfilProvider.estaAprobada(m.materiaId!),
+                  )
+                  .length;
+              final pct = total > 0 ? aprobadas / total : 0.0;
+              return InkWell(
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const MateriasAprobadasScreen(),
                   ),
                 ),
-              ],
-            ),
+                child: _buildProgresoUI(context, pct, aprobadas, total),
+              );
+            },
+          );
+        }
+
+        final pct = total > 0 ? aprobadas / total : 0.0;
+        return InkWell(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const MateriasAprobadasScreen()),
           ),
+          child: _buildProgresoUI(context, pct, aprobadas, total),
         );
       },
+    );
+  }
+
+  Widget _buildProgresoUI(
+    BuildContext context,
+    double pct,
+    int aprobadas,
+    int total,
+  ) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              nombreCarrera,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            LinearProgressIndicator(
+              value: pct,
+              minHeight: 8,
+              borderRadius: BorderRadius.circular(4),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '$aprobadas / $total aprobadas (${(pct * 100).toStringAsFixed(1)}%)',
+              style: TextStyle(
+                fontSize: 12,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

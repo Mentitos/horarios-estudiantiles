@@ -246,7 +246,34 @@ class _PaginaCarreraState extends State<_PaginaCarrera> {
                   style: TextStyle(fontSize: 12),
                 ),
                 value: widget.esAlumnoExterno,
-                onChanged: widget.onAlumnoExternoChanged,
+                onChanged: (val) async {
+                  if (val) {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Alumno de otra universidad'),
+                        content: const Text(
+                          'Si elegís esta opción, no verás las carreras ni materias de la UNGS.\n\nPodrás cargar el nombre de tu carrera y tus propias materias manualmente desde el menú de Ajustes > Gestionar Materias.',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text('Cancelar'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: const Text('Entendido'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true) {
+                      widget.onAlumnoExternoChanged(true);
+                    }
+                  } else {
+                    widget.onAlumnoExternoChanged(false);
+                  }
+                },
               ),
               const SizedBox(height: 12),
             ],

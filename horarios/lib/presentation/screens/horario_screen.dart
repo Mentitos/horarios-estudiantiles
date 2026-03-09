@@ -38,6 +38,7 @@ class HorarioScreen extends StatelessWidget {
     List<String> listaProfesores = List.from(materia.profesores);
     if (listaProfesores.isEmpty) listaProfesores.add('');
     String? aula = materia.aula;
+    String? comision = materia.comision;
     int colorElegido = materia.colorARGB ?? 0xFF000000;
 
     List<Materia> materiasDisponibles = [];
@@ -172,6 +173,7 @@ class HorarioScreen extends StatelessWidget {
                               nombre!,
                               listaProfesores,
                               aula,
+                              comision,
                               colorElegido,
                             );
                           }
@@ -219,6 +221,7 @@ class HorarioScreen extends StatelessWidget {
                                             nombre!,
                                             listaProfesores,
                                             aula,
+                                            comision,
                                             colorElegido,
                                           );
                                         }
@@ -244,6 +247,7 @@ class HorarioScreen extends StatelessWidget {
                                         nombre!,
                                         listaProfesores,
                                         aula,
+                                        comision,
                                         colorElegido,
                                       );
                                     }
@@ -265,6 +269,7 @@ class HorarioScreen extends StatelessWidget {
                                       nombre!,
                                       listaProfesores,
                                       aula,
+                                      comision,
                                       colorElegido,
                                     );
                                   },
@@ -282,8 +287,27 @@ class HorarioScreen extends StatelessWidget {
                         icon: const Icon(Icons.add),
                         label: const Text('Opcional: Añadir otro profesor'),
                       ),
-                      const SizedBox(height: 4),
                       const SizedBox(height: 12),
+                      TextFormField(
+                        initialValue: comision,
+                        decoration: const InputDecoration(
+                          labelText: 'Comisión (Opcional)',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.groups),
+                        ),
+                        onChanged: (val) {
+                          comision = val;
+                          horarioProvider.actualizarMateria(
+                            materiaActualizada.materiaId!,
+                            nombre!,
+                            listaProfesores,
+                            aula,
+                            comision,
+                            colorElegido,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 16),
                       TextFormField(
                         initialValue: aula,
                         decoration: const InputDecoration(
@@ -298,6 +322,7 @@ class HorarioScreen extends StatelessWidget {
                             nombre!,
                             listaProfesores,
                             aula,
+                            comision,
                             colorElegido,
                           );
                         },
@@ -325,6 +350,7 @@ class HorarioScreen extends StatelessWidget {
                                   nombre!,
                                   listaProfesores,
                                   aula,
+                                  comision,
                                   colorElegido,
                                 );
                               }
@@ -355,6 +381,7 @@ class HorarioScreen extends StatelessWidget {
                                   nombre!,
                                   listaProfesores,
                                   aula,
+                                  comision,
                                   colorElegido,
                                 );
                               },
@@ -796,6 +823,26 @@ class HorarioScreen extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             'Aula General: ${materia.aula!}',
+                            style: TextStyle(
+                              color: textColor.withValues(alpha: 0.9),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                    if (materia.comision?.isNotEmpty == true) ...[
+                      const SizedBox(height: 2),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.groups,
+                            size: 16,
+                            color: textColor.withValues(alpha: 0.8),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Comisión: ${materia.comision!}',
                             style: TextStyle(
                               color: textColor.withValues(alpha: 0.9),
                               fontSize: 14,

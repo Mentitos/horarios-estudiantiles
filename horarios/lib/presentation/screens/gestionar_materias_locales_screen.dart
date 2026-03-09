@@ -119,6 +119,47 @@ class _GestionarMateriasLocalesScreenState
     return combinadas;
   }
 
+  Future<void> _agregarCarrera() async {
+    final controller = TextEditingController();
+
+    final nombre = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Nombre de tu Carrera'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Ej: Ingeniería en Sistemas (UTN)',
+            hintText: 'Escribí el nombre de tu carrera',
+          ),
+          textCapitalization: TextCapitalization.words,
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(null),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+
+    if (nombre != null && nombre.isNotEmpty) {
+      final pProv = context.read<PerfilProvider>();
+      final nuevas = List<String>.from(pProv.carrerasSeleccionadas)
+        ..add(nombre);
+      await pProv.setCarreras(nuevas);
+      setState(() {
+        _carreraSeleccionada = nombre;
+      });
+      await _cargarMaterias();
+    }
+  }
+
   Future<void> _agregarMateriaLocal() async {
     final controller = TextEditingController();
 
@@ -216,6 +257,7 @@ class _GestionarMateriasLocalesScreenState
               nuevoNombre,
               matSel.profesores,
               matSel.aula ?? '',
+              matSel.comision,
               matSel.colorARGB ?? 0,
             );
           }
@@ -289,7 +331,35 @@ class _GestionarMateriasLocalesScreenState
     return Scaffold(
       appBar: AppBar(title: const Text('Gestionar Materias')),
       body: carreras.isEmpty
-          ? const Center(child: Text('No has seleccionado ninguna carrera.'))
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.school_outlined,
+                      size: 64,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'No has seleccionado ninguna carrera.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                    if (perfilProvider.esAlumnoExterno) ...[
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: _agregarCarrera,
+                        icon: const Icon(Icons.add),
+                        label: const Text('Agregar mi Carrera'),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            )
           : Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [

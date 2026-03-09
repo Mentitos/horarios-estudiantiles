@@ -3,6 +3,7 @@ import 'package:isar/isar.dart';
 import '../models/materia.dart';
 import '../models/horario_usuario.dart';
 import '../models/materia_notas.dart';
+import '../models/materia_custom.dart';
 import '../sources/local_datasource.dart';
 
 class HorarioRepository {
@@ -69,9 +70,7 @@ class HorarioRepository {
 
   Future<void> agregarMateria(Materia materia) async {
     var rHorario = await obtenerHorario();
-    if (rHorario == null) {
-      rHorario = await crearHorarioVacio('Mi Horario');
-    }
+    rHorario ??= await crearHorarioVacio('Mi Horario');
 
     final existe = rHorario.materiasSeleccionadas.any(
       (m) => m.materiaId == materia.materiaId,
@@ -220,6 +219,8 @@ class HorarioRepository {
     final isar = await _localDatasource.db;
     await isar.writeTxn(() async {
       await isar.horarioUsuarios.clear();
+      await isar.materiaNotas.clear();
+      await isar.materiaCustoms.clear();
     });
   }
 
@@ -228,6 +229,7 @@ class HorarioRepository {
     String nuevoNombre,
     List<String> nuevosProfesores,
     String nuevoAula,
+    String? nuevaComision,
     int nuevoColorARGB,
   ) async {
     final rHorario = await obtenerHorario();
@@ -242,6 +244,7 @@ class HorarioRepository {
     materiaAActualizar.materiaNombre = nuevoNombre;
     materiaAActualizar.profesores = List.from(nuevosProfesores);
     materiaAActualizar.aula = nuevoAula;
+    materiaAActualizar.comision = nuevaComision;
     materiaAActualizar.colorARGB = nuevoColorARGB;
 
     rHorario.materiasSeleccionadas = List.from(rHorario.materiasSeleccionadas);

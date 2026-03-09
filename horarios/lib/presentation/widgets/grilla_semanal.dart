@@ -263,6 +263,7 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
           bloquesDia.add({
             'bloque': bloque,
             'materiaNombre': materia.materiaNombre,
+            'comision': materia.comision,
             'color': Color(materia.colorARGB ?? 0xFF1E88E5),
           });
         }
@@ -315,6 +316,17 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
               if ((b.aula?.isNotEmpty ?? false) && height > 44)
                 Text(
                   'Aula: ${b.aula}',
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    fontSize: 11,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              if ((info['comision'] as String?)?.isNotEmpty == true &&
+                  height > 44)
+                Text(
+                  'Com.: ${info['comision']}',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.9),
                     fontSize: 11,

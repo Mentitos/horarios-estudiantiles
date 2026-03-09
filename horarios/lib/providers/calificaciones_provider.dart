@@ -113,4 +113,14 @@ class CalificacionesProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  Future<void> formatear() async {
+    try {
+      await _repository.limpiarTodas();
+      _calificaciones = [];
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error formatting qualifications: $e');
+    }
+  }
 }

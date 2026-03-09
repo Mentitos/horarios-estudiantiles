@@ -118,6 +118,7 @@ class HorarioProvider extends ChangeNotifier {
     String nuevoNombre,
     List<String> nuevosProfesores,
     String? nuevoAula,
+    String? nuevoComision,
     int nuevoColorARGB,
   ) async {
     try {
@@ -126,6 +127,7 @@ class HorarioProvider extends ChangeNotifier {
         nuevoNombre,
         nuevosProfesores,
         nuevoAula ?? '',
+        nuevoComision,
         nuevoColorARGB,
       );
       horario = await _repository.obtenerHorario();

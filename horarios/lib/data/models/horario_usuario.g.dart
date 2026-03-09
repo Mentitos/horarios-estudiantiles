@@ -762,23 +762,28 @@ const MateriaSeleccionadaSchema = Schema(
       name: r'colorARGB',
       type: IsarType.long,
     ),
-    r'materiaId': PropertySchema(
+    r'comision': PropertySchema(
       id: 3,
+      name: r'comision',
+      type: IsarType.string,
+    ),
+    r'materiaId': PropertySchema(
+      id: 4,
       name: r'materiaId',
       type: IsarType.string,
     ),
     r'materiaNombre': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'materiaNombre',
       type: IsarType.string,
     ),
     r'notas': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'notas',
       type: IsarType.string,
     ),
     r'profesores': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'profesores',
       type: IsarType.stringList,
     )
@@ -808,6 +813,12 @@ int _materiaSeleccionadaEstimateSize(
       final value = object.bloques[i];
       bytesCount +=
           BloqueHorarioSchema.estimateSize(value, offsets, allOffsets);
+    }
+  }
+  {
+    final value = object.comision;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
     }
   }
   {
@@ -852,10 +863,11 @@ void _materiaSeleccionadaSerialize(
     object.bloques,
   );
   writer.writeLong(offsets[2], object.colorARGB);
-  writer.writeString(offsets[3], object.materiaId);
-  writer.writeString(offsets[4], object.materiaNombre);
-  writer.writeString(offsets[5], object.notas);
-  writer.writeStringList(offsets[6], object.profesores);
+  writer.writeString(offsets[3], object.comision);
+  writer.writeString(offsets[4], object.materiaId);
+  writer.writeString(offsets[5], object.materiaNombre);
+  writer.writeString(offsets[6], object.notas);
+  writer.writeStringList(offsets[7], object.profesores);
 }
 
 MateriaSeleccionada _materiaSeleccionadaDeserialize(
@@ -874,10 +886,11 @@ MateriaSeleccionada _materiaSeleccionadaDeserialize(
       ) ??
       [];
   object.colorARGB = reader.readLongOrNull(offsets[2]);
-  object.materiaId = reader.readStringOrNull(offsets[3]);
-  object.materiaNombre = reader.readStringOrNull(offsets[4]);
-  object.notas = reader.readStringOrNull(offsets[5]);
-  object.profesores = reader.readStringList(offsets[6]) ?? [];
+  object.comision = reader.readStringOrNull(offsets[3]);
+  object.materiaId = reader.readStringOrNull(offsets[4]);
+  object.materiaNombre = reader.readStringOrNull(offsets[5]);
+  object.notas = reader.readStringOrNull(offsets[6]);
+  object.profesores = reader.readStringList(offsets[7]) ?? [];
   return object;
 }
 
@@ -907,6 +920,8 @@ P _materiaSeleccionadaDeserializeProp<P>(
     case 5:
       return (reader.readStringOrNull(offset)) as P;
     case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
       return (reader.readStringList(offset) ?? []) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1228,6 +1243,160 @@ extension MateriaSeleccionadaQueryFilter on QueryBuilder<MateriaSeleccionada,
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      comisionIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'comision',
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      comisionIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'comision',
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      comisionEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'comision',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      comisionGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'comision',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      comisionLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'comision',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      comisionBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'comision',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      comisionStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'comision',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      comisionEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'comision',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      comisionContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'comision',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      comisionMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'comision',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      comisionIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'comision',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<MateriaSeleccionada, MateriaSeleccionada, QAfterFilterCondition>
+      comisionIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'comision',
+        value: '',
       ));
     });
   }

@@ -23,7 +23,9 @@ class MateriasAprobadasScreen extends StatelessWidget {
       );
     }
 
-    if (carreras.length == 1) {
+    final numCarreras = carreras.length;
+
+    if (numCarreras == 1) {
       return Scaffold(
         appBar: AppBar(title: const Text('Materias aprobadas')),
         body: _ListaMateriasAprobadas(nombreCarrera: carreras[0]),
@@ -31,22 +33,19 @@ class MateriasAprobadasScreen extends StatelessWidget {
     }
 
     return DefaultTabController(
-      length: 2,
+      length: numCarreras,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Materias aprobadas'),
           bottom: TabBar(
-            tabs: [
-              Tab(text: carreras[0]),
-              Tab(text: carreras[1]),
-            ],
+            isScrollable: numCarreras > 2,
+            tabs: carreras.map((c) => Tab(text: c)).toList(),
           ),
         ),
         body: TabBarView(
-          children: [
-            _ListaMateriasAprobadas(nombreCarrera: carreras[0]),
-            _ListaMateriasAprobadas(nombreCarrera: carreras[1]),
-          ],
+          children: carreras
+              .map((c) => _ListaMateriasAprobadas(nombreCarrera: c))
+              .toList(),
         ),
       ),
     );

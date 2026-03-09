@@ -12,6 +12,7 @@ import 'package:intl/intl.dart';
 import '../../providers/donaciones_provider.dart';
 import '../../data/sources/local_datasource.dart';
 import '../../providers/version_provider.dart';
+import '../../providers/calificaciones_provider.dart';
 import 'materias_aprobadas_screen.dart';
 import 'gestionar_materias_locales_screen.dart' as file_gestionar;
 
@@ -199,6 +200,29 @@ class _AjustesScreenState extends State<AjustesScreen> {
                         }
                       },
                     ),
+                    const SizedBox(height: 8),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.edit_note),
+                      label: const Text('Gestionar mis materias'),
+                      onPressed: () async {
+                        await Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const file_gestionar.GestionarMateriasLocalesScreen(),
+                          ),
+                        );
+                        if (context.mounted) setState(() {});
+                      },
+                    ),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.check_circle_outline),
+                      label: const Text('Materias aprobadas'),
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const MateriasAprobadasScreen(),
+                        ),
+                      ),
+                    ),
                   ] else ...[
                     const Text(
                       'Seleccioná hasta 3 carreras para ver tu progreso.',
@@ -314,7 +338,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     }),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.check_circle_outline),
-                      label: const Text('Gestionar materias aprobadas'),
+                      label: const Text('Materias aprobadas'),
                       onPressed: () async {
                         await Navigator.of(context).push(
                           MaterialPageRoute(
@@ -759,15 +783,14 @@ class _AjustesScreenState extends State<AjustesScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer
-                                  .withValues(alpha: 0.3),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.primaryContainer.withOpacity(0.3),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.primary.withValues(alpha: 0.2),
+                                ).colorScheme.primary.withOpacity(0.2),
                               ),
                             ),
                             child: Column(
@@ -854,7 +877,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                                                 : Theme.of(context)
                                                       .colorScheme
                                                       .onSurface
-                                                      .withValues(alpha: 0.5),
+                                                      .withOpacity(0.5),
                                           ),
                                           const SizedBox(width: 8),
                                           Expanded(
@@ -867,9 +890,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                                                     : Theme.of(context)
                                                           .colorScheme
                                                           .onSurface
-                                                          .withValues(
-                                                            alpha: 0.7,
-                                                          ),
+                                                          .withOpacity(0.7),
                                                 decoration: alcanzada
                                                     ? TextDecoration.lineThrough
                                                     : null,
@@ -1026,10 +1047,12 @@ class _AjustesScreenState extends State<AjustesScreen> {
       final horarioProv = context.read<HorarioProvider>();
       final eventosProv = context.read<EventosProvider>();
       final perfilProv = context.read<PerfilProvider>();
+      final calificacionesProv = context.read<CalificacionesProvider>();
 
       await horarioProv.formatear();
       await eventosProv.formatear();
       await perfilProv.formatear();
+      await calificacionesProv.formatear();
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('onboarding_done');
       if (context.mounted) {

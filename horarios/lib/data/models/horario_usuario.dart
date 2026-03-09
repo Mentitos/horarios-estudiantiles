@@ -20,6 +20,7 @@ class MateriaSeleccionada {
 
   List<String> profesores = [];
   String? aula;
+  String? comision;
 
   List<BloqueHorario> bloques = [];
   String? notas;

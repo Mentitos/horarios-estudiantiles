@@ -79,10 +79,13 @@ class GaleriaScreen extends StatelessWidget {
   }
 
   Widget _buildMateriasTab(BuildContext context, FotosProvider provider) {
-    final materias = context.watch<HorarioProvider>().horario?.materiasSeleccionadas ?? [];
+    final materias =
+        context.watch<HorarioProvider>().horario?.materiasSeleccionadas ?? [];
 
     if (materias.isEmpty) {
-      return const Center(child: Text('Cargá materias en tu horario para ver fotos aquí'));
+      return const Center(
+        child: Text('Cargá materias en tu horario para ver fotos aquí'),
+      );
     }
 
     return ListView.builder(
@@ -90,7 +93,9 @@ class GaleriaScreen extends StatelessWidget {
       itemCount: materias.length,
       itemBuilder: (context, index) {
         final materia = materias[index];
-        final fotosMateria = provider.fotos.where((f) => f.materiaId == materia.materiaId).toList();
+        final fotosMateria = provider.fotos
+            .where((f) => f.materiaId == materia.materiaId)
+            .toList();
         final color = Color(materia.colorARGB ?? 0xFF000000);
 
         return Card(
@@ -179,9 +184,16 @@ class GaleriaScreen extends StatelessWidget {
               if (isSelected)
                 Positioned.fill(
                   child: Container(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.3),
                     child: const Center(
-                        child: Icon(Icons.check_circle, color: Colors.white, size: 32)),
+                      child: Icon(
+                        Icons.check_circle,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
                   ),
                 ),
               if (!isSelectionMode)
@@ -214,15 +226,29 @@ class GaleriaScreen extends StatelessWidget {
                       }
                     },
                     itemBuilder: (context) => [
-                      const PopupMenuItem(value: 'detalles', child: Text('Detalles')),
-                      const PopupMenuItem(value: 'renombrar', child: Text('Renombrar')),
-                      const PopupMenuItem(value: 'vincular', child: Text('Vincular a materia')),
-                      const PopupMenuItem(value: 'compartir', child: Text('Compartir')),
+                      const PopupMenuItem(
+                        value: 'detalles',
+                        child: Text('Detalles'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'renombrar',
+                        child: Text('Renombrar'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'vincular',
+                        child: Text('Vincular a materia'),
+                      ),
+                      const PopupMenuItem(
+                        value: 'compartir',
+                        child: Text('Compartir'),
+                      ),
                       PopupMenuItem(
                         value: 'eliminar',
                         child: Text(
                           'Eliminar',
-                          style: TextStyle(color: Theme.of(context).colorScheme.error),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
                         ),
                       ),
                     ],
@@ -234,7 +260,10 @@ class GaleriaScreen extends StatelessWidget {
                   left: 0,
                   right: 0,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 2,
+                    ),
                     color: Colors.black54,
                     child: Text(
                       foto.nombre ?? 'Vinculada',
@@ -263,9 +292,7 @@ class GaleriaScreen extends StatelessWidget {
           ),
           backgroundColor: Colors.black,
           body: Center(
-            child: InteractiveViewer(
-              child: Image.file(File(foto.pathArchivo)),
-            ),
+            child: InteractiveViewer(child: Image.file(File(foto.pathArchivo))),
           ),
         ),
       ),
@@ -292,7 +319,10 @@ class GaleriaScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cerrar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cerrar'),
+          ),
         ],
       ),
     );
@@ -304,7 +334,10 @@ class GaleriaScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+          Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+          ),
           Text(value, style: const TextStyle(fontSize: 14)),
         ],
       ),
@@ -315,7 +348,7 @@ class GaleriaScreen extends StatelessWidget {
     if (bytes <= 0) return "0 B";
     const suffixes = ["B", "KB", "MB", "GB"];
     var i = (log(bytes) / log(1024)).floor();
-    return ((bytes / pow(1024, i)).toStringAsFixed(2)) + ' ' + suffixes[i];
+    return '${(bytes / pow(1024, i)).toStringAsFixed(2)} ${suffixes[i]}';
   }
 
   void _mostrarDialogoRenombrar(BuildContext context, Foto foto) {
@@ -331,10 +364,16 @@ class GaleriaScreen extends StatelessWidget {
           textCapitalization: TextCapitalization.sentences,
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
           ElevatedButton(
             onPressed: () {
-              context.read<FotosProvider>().actualizarFoto(foto.id, nuevoNombre: controller.text.trim());
+              context.read<FotosProvider>().actualizarFoto(
+                foto.id,
+                nuevoNombre: controller.text.trim(),
+              );
               Navigator.pop(ctx);
             },
             child: const Text('Guardar'),
@@ -345,11 +384,13 @@ class GaleriaScreen extends StatelessWidget {
   }
 
   void _mostrarDialogoVincularMateria(BuildContext context, Foto foto) {
-    final materias = context.read<HorarioProvider>().horario?.materiasSeleccionadas ?? [];
+    final materias =
+        context.read<HorarioProvider>().horario?.materiasSeleccionadas ?? [];
 
     if (materias.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No tenés materias agregadas aún.')));
+        const SnackBar(content: Text('No tenés materias agregadas aún.')),
+      );
       return;
     }
 
@@ -367,10 +408,14 @@ class GaleriaScreen extends StatelessWidget {
               final isSelected = foto.materiaId == mat.materiaId;
               return ListTile(
                 title: Text(mat.materiaNombre ?? 'Sin nombre'),
-                trailing: isSelected ? const Icon(Icons.check_circle, color: Colors.green) : null,
+                trailing: isSelected
+                    ? const Icon(Icons.check_circle, color: Colors.green)
+                    : null,
                 onTap: () {
-                  context.read<FotosProvider>().actualizarFoto(foto.id,
-                      nuevaMateriaId: isSelected ? null : mat.materiaId);
+                  context.read<FotosProvider>().actualizarFoto(
+                    foto.id,
+                    nuevaMateriaId: isSelected ? null : mat.materiaId,
+                  );
                   Navigator.pop(ctx);
                 },
               );
@@ -386,15 +431,22 @@ class GaleriaScreen extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Eliminar foto'),
-        content: const Text('¿Estás seguro de que deseas eliminar esta imagen permanentemente?'),
+        content: const Text(
+          '¿Estás seguro de que deseas eliminar esta imagen permanentemente?',
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancelar')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
           TextButton(
             onPressed: () {
               context.read<FotosProvider>().eliminarFoto(foto.id);
               Navigator.pop(ctx);
             },
-            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
             child: const Text('Eliminar'),
           ),
         ],
@@ -404,7 +456,11 @@ class GaleriaScreen extends StatelessWidget {
 
   void _compartirFoto(Foto foto) async {
     try {
-      await Share.shareXFiles([XFile(foto.pathArchivo)], text: 'Mirá esta foto de mi clase');
+      await Share.shareXFiles(
+        [XFile(foto.pathArchivo)],
+        subject: 'Foto de mi clase',
+        text: 'Mirá esta foto de mi clase',
+      );
     } catch (e) {
       debugPrint("Error al compartir: $e");
     }
