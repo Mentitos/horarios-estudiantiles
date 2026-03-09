@@ -72,19 +72,43 @@ class GithubDatasource {
       }
 
       List<Carrera> carreras = [];
-      for (var jsonCarrera in carrerasJsonList) {
-        final carrera = Carrera()..nombre = jsonCarrera['nombre'] as String;
+      if (carrerasData is Map) {
+        for (var entry in carrerasData.entries) {
+          final grupoNombre = entry.key as String;
+          final carrerasJsonList = entry.value;
 
-        final materiasRawList = jsonCarrera['materias'];
-        if (materiasRawList is List) {
-          carrera.materiasIds = materiasRawList
-              .map((e) => e.toString())
-              .toList();
-        } else {
-          carrera.materiasIds = [];
+          if (carrerasJsonList is List) {
+            for (var jsonCarrera in carrerasJsonList) {
+              final carrera = Carrera()
+                ..nombre = jsonCarrera['nombre'] as String
+                ..grupo = grupoNombre;
+
+              final materiasRawList = jsonCarrera['materias'];
+              if (materiasRawList is List) {
+                carrera.materiasIds = materiasRawList
+                    .map((e) => e.toString())
+                    .toList();
+              } else {
+                carrera.materiasIds = [];
+              }
+              carreras.add(carrera);
+            }
+          }
         }
-
-        carreras.add(carrera);
+      } else if (carrerasData is List) {
+        // Fallback for non-grouped list
+        for (var jsonCarrera in carrerasData) {
+          final carrera = Carrera()..nombre = jsonCarrera['nombre'] as String;
+          final materiasRawList = jsonCarrera['materias'];
+          if (materiasRawList is List) {
+            carrera.materiasIds = materiasRawList
+                .map((e) => e.toString())
+                .toList();
+          } else {
+            carrera.materiasIds = [];
+          }
+          carreras.add(carrera);
+        }
       }
 
       return (materias: materias, carreras: carreras);

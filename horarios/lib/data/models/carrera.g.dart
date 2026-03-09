@@ -17,13 +17,18 @@ const CarreraSchema = CollectionSchema(
   name: r'Carrera',
   id: 7716092522208123804,
   properties: {
-    r'materiasIds': PropertySchema(
+    r'grupo': PropertySchema(
       id: 0,
+      name: r'grupo',
+      type: IsarType.string,
+    ),
+    r'materiasIds': PropertySchema(
+      id: 1,
       name: r'materiasIds',
       type: IsarType.stringList,
     ),
     r'nombre': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'nombre',
       type: IsarType.string,
     )
@@ -62,6 +67,12 @@ int _carreraEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.grupo;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.materiasIds.length * 3;
   {
     for (var i = 0; i < object.materiasIds.length; i++) {
@@ -84,8 +95,9 @@ void _carreraSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeStringList(offsets[0], object.materiasIds);
-  writer.writeString(offsets[1], object.nombre);
+  writer.writeString(offsets[0], object.grupo);
+  writer.writeStringList(offsets[1], object.materiasIds);
+  writer.writeString(offsets[2], object.nombre);
 }
 
 Carrera _carreraDeserialize(
@@ -95,9 +107,10 @@ Carrera _carreraDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Carrera();
+  object.grupo = reader.readStringOrNull(offsets[0]);
   object.id = id;
-  object.materiasIds = reader.readStringList(offsets[0]) ?? [];
-  object.nombre = reader.readStringOrNull(offsets[1]);
+  object.materiasIds = reader.readStringList(offsets[1]) ?? [];
+  object.nombre = reader.readStringOrNull(offsets[2]);
   return object;
 }
 
@@ -109,8 +122,10 @@ P _carreraDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readStringList(offset) ?? []) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 1:
+      return (reader.readStringList(offset) ?? []) as P;
+    case 2:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -325,6 +340,152 @@ extension CarreraQueryWhere on QueryBuilder<Carrera, Carrera, QWhereClause> {
 
 extension CarreraQueryFilter
     on QueryBuilder<Carrera, Carrera, QFilterCondition> {
+  QueryBuilder<Carrera, Carrera, QAfterFilterCondition> grupoIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'grupo',
+      ));
+    });
+  }
+
+  QueryBuilder<Carrera, Carrera, QAfterFilterCondition> grupoIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'grupo',
+      ));
+    });
+  }
+
+  QueryBuilder<Carrera, Carrera, QAfterFilterCondition> grupoEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'grupo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Carrera, Carrera, QAfterFilterCondition> grupoGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'grupo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Carrera, Carrera, QAfterFilterCondition> grupoLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'grupo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Carrera, Carrera, QAfterFilterCondition> grupoBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'grupo',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Carrera, Carrera, QAfterFilterCondition> grupoStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'grupo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Carrera, Carrera, QAfterFilterCondition> grupoEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'grupo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Carrera, Carrera, QAfterFilterCondition> grupoContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'grupo',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Carrera, Carrera, QAfterFilterCondition> grupoMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'grupo',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Carrera, Carrera, QAfterFilterCondition> grupoIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'grupo',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Carrera, Carrera, QAfterFilterCondition> grupoIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'grupo',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<Carrera, Carrera, QAfterFilterCondition> idEqualTo(Id value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
@@ -755,6 +916,18 @@ extension CarreraQueryLinks
     on QueryBuilder<Carrera, Carrera, QFilterCondition> {}
 
 extension CarreraQuerySortBy on QueryBuilder<Carrera, Carrera, QSortBy> {
+  QueryBuilder<Carrera, Carrera, QAfterSortBy> sortByGrupo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'grupo', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Carrera, Carrera, QAfterSortBy> sortByGrupoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'grupo', Sort.desc);
+    });
+  }
+
   QueryBuilder<Carrera, Carrera, QAfterSortBy> sortByNombre() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'nombre', Sort.asc);
@@ -770,6 +943,18 @@ extension CarreraQuerySortBy on QueryBuilder<Carrera, Carrera, QSortBy> {
 
 extension CarreraQuerySortThenBy
     on QueryBuilder<Carrera, Carrera, QSortThenBy> {
+  QueryBuilder<Carrera, Carrera, QAfterSortBy> thenByGrupo() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'grupo', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Carrera, Carrera, QAfterSortBy> thenByGrupoDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'grupo', Sort.desc);
+    });
+  }
+
   QueryBuilder<Carrera, Carrera, QAfterSortBy> thenById() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'id', Sort.asc);
@@ -797,6 +982,13 @@ extension CarreraQuerySortThenBy
 
 extension CarreraQueryWhereDistinct
     on QueryBuilder<Carrera, Carrera, QDistinct> {
+  QueryBuilder<Carrera, Carrera, QDistinct> distinctByGrupo(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'grupo', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Carrera, Carrera, QDistinct> distinctByMateriasIds() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'materiasIds');
@@ -816,6 +1008,12 @@ extension CarreraQueryProperty
   QueryBuilder<Carrera, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Carrera, String?, QQueryOperations> grupoProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'grupo');
     });
   }
 

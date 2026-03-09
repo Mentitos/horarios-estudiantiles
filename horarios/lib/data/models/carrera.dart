@@ -9,5 +9,7 @@ class Carrera {
   @Index(unique: true, replace: true)
   String? nombre;
 
+  String? grupo;
+
   List<String> materiasIds = [];
 }

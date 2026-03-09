@@ -10,6 +10,18 @@ class MateriasProvider extends ChangeNotifier {
   bool cargando = true;
   String? error;
 
+  Map<String, List<Carrera>> get carrerasPorGrupo {
+    final Map<String, List<Carrera>> grupos = {};
+    for (var carrera in carreras) {
+      final grupo = carrera.grupo ?? 'Sin categoría';
+      if (!grupos.containsKey(grupo)) {
+        grupos[grupo] = [];
+      }
+      grupos[grupo]!.add(carrera);
+    }
+    return grupos;
+  }
+
   MateriasProvider({MateriaRepository? repository})
     : _repository = repository ?? MateriaRepository();
 

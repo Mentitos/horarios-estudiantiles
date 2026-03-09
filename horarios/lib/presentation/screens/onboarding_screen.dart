@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/perfil_provider.dart';
 import '../../providers/materias_provider.dart';
-import '../../utils/carreras_grupos.dart';
 import 'home_screen.dart';
 
 //   Me gustan las cosas que se hacen con las manos, cubos rubiks, cuchillos mariposas
@@ -205,6 +204,9 @@ class _PaginaCarreraState extends State<_PaginaCarrera> {
 
   @override
   Widget build(BuildContext context) {
+    final materiasProvider = context.watch<MateriasProvider>();
+    final gruposCarrerasData = materiasProvider.carrerasPorGrupo;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -254,14 +256,18 @@ class _PaginaCarreraState extends State<_PaginaCarrera> {
         if (!widget.esAlumnoExterno)
           Expanded(
             child: ListView(
-              children: gruposCarreras.entries.map((entry) {
+              children: gruposCarrerasData.entries.map((entry) {
+                final grupoNombre = entry.key;
+                final carrerasDelGrupo = entry.value;
                 return _GrupoCarrera(
-                  titulo: entry.key,
-                  carreras: entry.value,
+                  titulo: grupoNombre,
+                  carreras: carrerasDelGrupo
+                      .map((c) => c.nombre ?? '')
+                      .toList(),
                   seleccionadas: _selected,
                   onToggle: _toggle,
                   initiallyExpanded: _selected.any(
-                    (s) => entry.value.contains(s),
+                    (s) => carrerasDelGrupo.any((c) => c.nombre == s),
                   ),
                 );
               }).toList(),

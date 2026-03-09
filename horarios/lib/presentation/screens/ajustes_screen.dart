@@ -10,7 +10,6 @@ import '../../providers/materias_provider.dart';
 import '../../providers/perfil_provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/donaciones_provider.dart';
-import '../../utils/carreras_grupos.dart';
 import '../../data/sources/local_datasource.dart';
 import '../../providers/version_provider.dart';
 import 'materias_aprobadas_screen.dart';
@@ -34,6 +33,9 @@ class _AjustesScreenState extends State<AjustesScreen> {
       perfilProvider.carrerasSeleccionadas,
     );
 
+    final materiasProvider = context.read<MateriasProvider>();
+    final gruposCarrerasData = materiasProvider.carrerasPorGrupo;
+
     await showDialog(
       context: context,
       builder: (context) {
@@ -45,14 +47,15 @@ class _AjustesScreenState extends State<AjustesScreen> {
                 width: double.maxFinite,
                 child: ListView.builder(
                   shrinkWrap: true,
-                  itemCount: gruposCarreras.keys.length,
+                  itemCount: gruposCarrerasData.keys.length,
                   itemBuilder: (context, index) {
-                    final tipo = gruposCarreras.keys.elementAt(index);
-                    final carrerasDelTipo = gruposCarreras[tipo]!;
+                    final tipo = gruposCarrerasData.keys.elementAt(index);
+                    final carrerasDelTipo = gruposCarrerasData[tipo]!;
 
                     return ExpansionTile(
                       title: Text(tipo),
-                      children: carrerasDelTipo.map((nombreCarrera) {
+                      children: carrerasDelTipo.map((carreraObj) {
+                        final nombreCarrera = carreraObj.nombre ?? '';
                         final isSelected = carrerasActuales.contains(
                           nombreCarrera,
                         );
