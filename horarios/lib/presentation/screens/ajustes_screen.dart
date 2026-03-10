@@ -928,9 +928,6 @@ class _AjustesScreenState extends State<AjustesScreen> {
                         case SyncStatus.error:
                           statusColor = Colors.red.withOpacity(0.2);
                           break;
-                        case SyncStatus.offline:
-                          statusColor = Colors.amber.withOpacity(0.3);
-                          break;
                         case SyncStatus.idle:
                           statusColor = null;
                       }
@@ -1007,240 +1004,296 @@ class _AjustesScreenState extends State<AjustesScreen> {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primaryContainer.withOpacity(0.3),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
+                          if (status == SyncStatus.error)
+                            Container(
+                              padding: const EdgeInsets.symmetric(vertical: 24),
+                              decoration: BoxDecoration(
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.primary.withOpacity(0.2),
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        goalFinal?.nombre ??
-                                            '¡Metas de la Comunidad!',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    Text(
-                                      '$porcentajeTexto%',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                      ),
-                                    ),
-                                  ],
+                                ).colorScheme.errorContainer.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.error.withOpacity(0.2),
                                 ),
-                                const SizedBox(height: 8),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: LinearProgressIndicator(
-                                    value: porcentaje,
-                                    minHeight: 12,
-                                    backgroundColor: Theme.of(
+                              ),
+                              child: Column(
+                                children: [
+                                  Icon(
+                                    Icons.wifi_off_rounded,
+                                    color: Theme.of(
                                       context,
-                                    ).colorScheme.surface,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Theme.of(context).colorScheme.primary,
+                                    ).colorScheme.error.withOpacity(0.6),
+                                    size: 32,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    donacionesProv.error ??
+                                        'Las donaciones se ven con internet',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.error.withOpacity(0.8),
                                     ),
                                   ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Conectate para ver las metas y el top de donantes.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant
+                                          .withOpacity(0.7),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.primaryContainer.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.primary.withOpacity(0.2),
                                 ),
-                                const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Recaudado: ${nFormat.format(montoActual)}',
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w500,
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          goalFinal?.nombre ??
+                                              '¡Metas de la Comunidad!',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        '$porcentajeTexto%',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Theme.of(
+                                            context,
+                                          ).colorScheme.primary,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: LinearProgressIndicator(
+                                      value: porcentaje,
+                                      minHeight: 12,
+                                      backgroundColor: Theme.of(
+                                        context,
+                                      ).colorScheme.surface,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Theme.of(context).colorScheme.primary,
                                       ),
                                     ),
-                                    if (goalFinal != null)
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
                                       Text(
-                                        'Meta final: ${nFormat.format(goalFinal.monto)}',
+                                        'Recaudado: ${nFormat.format(montoActual)}',
                                         style: const TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                  ],
-                                ),
-                                if (metas.isNotEmpty) ...[
-                                  const Divider(height: 24),
-                                  ...metas.map((m) {
-                                    final alcanzada = montoActual >= m.monto;
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 8.0,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            alcanzada
-                                                ? Icons.check_circle
-                                                : Icons.circle_outlined,
-                                            size: 14,
-                                            color: alcanzada
-                                                ? Colors.green
-                                                : Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurface
-                                                      .withOpacity(0.5),
+                                      if (goalFinal != null)
+                                        Text(
+                                          'Meta final: ${nFormat.format(goalFinal.monto)}',
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w500,
                                           ),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: Text(
-                                              m.nombre,
+                                        ),
+                                    ],
+                                  ),
+                                  if (metas.isNotEmpty) ...[
+                                    const Divider(height: 24),
+                                    ...metas.map((m) {
+                                      final alcanzada = montoActual >= m.monto;
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: 8.0,
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              alcanzada
+                                                  ? Icons.check_circle
+                                                  : Icons.circle_outlined,
+                                              size: 14,
+                                              color: alcanzada
+                                                  ? Colors.green
+                                                  : Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface
+                                                        .withOpacity(0.5),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                m.nombre,
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: alcanzada
+                                                      ? null
+                                                      : Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurface
+                                                            .withOpacity(0.7),
+                                                  decoration: alcanzada
+                                                      ? TextDecoration
+                                                            .lineThrough
+                                                      : null,
+                                                ),
+                                              ),
+                                            ),
+                                            Text(
+                                              nFormat.format(m.monto),
                                               style: TextStyle(
                                                 fontSize: 11,
+                                                fontWeight: FontWeight.bold,
                                                 color: alcanzada
-                                                    ? null
-                                                    : Theme.of(context)
-                                                          .colorScheme
-                                                          .onSurface
-                                                          .withOpacity(0.7),
-                                                decoration: alcanzada
-                                                    ? TextDecoration.lineThrough
+                                                    ? Colors.green
                                                     : null,
                                               ),
                                             ),
-                                          ),
-                                          Text(
-                                            nFormat.format(m.monto),
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.bold,
-                                              color: alcanzada
-                                                  ? Colors.green
-                                                  : null,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }),
-                                ],
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'Con tu ayuda puedo cubrir los costos del servidor y seguir mejorando la app con las funciones que me pidan. ¡Gracias por el aguante!',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontStyle: FontStyle.italic,
-                                  ),
-                                ),
-                                if (donacionesProv.topDonantes.isNotEmpty) ...[
-                                  const Divider(height: 32),
-                                  const Row(
-                                    children: [
-                                      Icon(
-                                        Icons.emoji_events_outlined,
-                                        size: 18,
-                                        color: Colors.amber,
-                                      ),
-                                      SizedBox(width: 8),
-                                      Text(
-                                        'Top Donantes',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
+                                          ],
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 12),
-                                  Container(
-                                    padding: const EdgeInsets.all(12),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .surfaceContainerHighest
-                                          .withOpacity(0.5),
-                                      borderRadius: BorderRadius.circular(12),
+                                      );
+                                    }),
+                                  ],
+                                  const SizedBox(height: 8),
+                                  const Text(
+                                    'Con tu ayuda puedo cubrir los costos del servidor y seguir mejorando la app con las funciones que me pidan. ¡Gracias por el aguante!',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontStyle: FontStyle.italic,
                                     ),
-                                    child: Column(
-                                      children: List.generate(
-                                        donacionesProv.topDonantes.length,
-                                        (index) {
-                                          final d =
-                                              donacionesProv.topDonantes[index];
-                                          final medalColor = index == 0
-                                              ? Colors.amber
-                                              : index == 1
-                                              ? const Color(0xFFC0C0C0)
-                                              : const Color(0xFFCD7F32);
+                                  ),
+                                  if (donacionesProv
+                                      .topDonantes
+                                      .isNotEmpty) ...[
+                                    const Divider(height: 32),
+                                    const Row(
+                                      children: [
+                                        Icon(
+                                          Icons.emoji_events_outlined,
+                                          size: 18,
+                                          color: Colors.amber,
+                                        ),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'Top Donantes',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainerHighest
+                                            .withOpacity(0.5),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Column(
+                                        children: List.generate(
+                                          donacionesProv.topDonantes.length,
+                                          (index) {
+                                            final d = donacionesProv
+                                                .topDonantes[index];
+                                            final medalColor = index == 0
+                                                ? Colors.amber
+                                                : index == 1
+                                                ? const Color(0xFFC0C0C0)
+                                                : const Color(0xFFCD7F32);
 
-                                          return Padding(
-                                            padding: EdgeInsets.only(
-                                              bottom:
-                                                  index <
-                                                      donacionesProv
-                                                              .topDonantes
-                                                              .length -
-                                                          1
-                                                  ? 8.0
-                                                  : 0,
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                if (index < 3)
-                                                  Icon(
-                                                    Icons.workspace_premium,
-                                                    size: 16,
-                                                    color: medalColor,
-                                                  )
-                                                else
-                                                  const SizedBox(width: 16),
-                                                const SizedBox(width: 8),
-                                                Expanded(
-                                                  child: Text(
-                                                    d.nombre,
-                                                    style: const TextStyle(
-                                                      fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.w500,
+                                            return Padding(
+                                              padding: EdgeInsets.only(
+                                                bottom:
+                                                    index <
+                                                        donacionesProv
+                                                                .topDonantes
+                                                                .length -
+                                                            1
+                                                    ? 8.0
+                                                    : 0,
+                                              ),
+                                              child: Row(
+                                                children: [
+                                                  if (index < 3)
+                                                    Icon(
+                                                      Icons.workspace_premium,
+                                                      size: 16,
+                                                      color: medalColor,
+                                                    )
+                                                  else
+                                                    const SizedBox(width: 16),
+                                                  const SizedBox(width: 8),
+                                                  Expanded(
+                                                    child: Text(
+                                                      d.nombre,
+                                                      style: const TextStyle(
+                                                        fontSize: 12,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
-                                                Text(
-                                                  nFormat.format(d.monto),
-                                                  style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Theme.of(
-                                                      context,
-                                                    ).colorScheme.primary,
+                                                  Text(
+                                                    nFormat.format(d.monto),
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Theme.of(
+                                                        context,
+                                                      ).colorScheme.primary,
+                                                    ),
                                                   ),
-                                                ),
-                                              ],
-                                            ),
-                                          );
-                                        },
+                                                ],
+                                              ),
+                                            );
+                                          },
+                                        ),
                                       ),
                                     ),
-                                  ),
+                                  ],
                                 ],
-                              ],
+                              ),
                             ),
-                          ),
                         ],
                       );
                     },

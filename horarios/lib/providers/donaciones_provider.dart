@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../data/sources/github_datasource.dart';
 
 class MetaComunidad {
@@ -31,7 +30,7 @@ class Donante {
   }
 }
 
-enum SyncStatus { idle, success, noChanges, error, offline }
+enum SyncStatus { idle, success, noChanges, error }
 
 class DonacionesProvider extends ChangeNotifier {
   final GithubDatasource _datasource;
@@ -44,6 +43,7 @@ class DonacionesProvider extends ChangeNotifier {
   String? _error;
   SyncStatus _status = SyncStatus.idle;
   DateTime? _ultimaActualizacion;
+  String? _lastDataHash;
 
   String get titulo => _titulo;
   double get montoActual => _montoActual;
@@ -56,36 +56,7 @@ class DonacionesProvider extends ChangeNotifier {
 
   DonacionesProvider({GithubDatasource? datasource})
     : _datasource = datasource ?? GithubDatasource() {
-    _init();
-  }
-
-  Future<void> _init() async {
-    await _loadLocal();
     refrescar();
-  }
-
-  Future<void> _loadLocal() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final donacionesStr = prefs.getString('cache_donaciones');
-      final topStr = prefs.getString('cache_top_donantes');
-
-      bool loaded = false;
-      if (donacionesStr != null) {
-        final data = jsonDecode(donacionesStr) as Map<String, dynamic>;
-        _procesarDonaciones(data);
-        loaded = true;
-      }
-      if (topStr != null) {
-        final topData = jsonDecode(topStr) as List<dynamic>;
-        _procesarTopDonantes(topData);
-        loaded = true;
-      }
-
-      if (loaded) notifyListeners();
-    } catch (e) {
-      debugPrint('Error cargando cache local: $e');
-    }
   }
 
   void _procesarDonaciones(Map<String, dynamic> data) {
@@ -106,7 +77,6 @@ class DonacionesProvider extends ChangeNotifier {
     _topDonantes.sort((a, b) => b.monto.compareTo(a.monto));
   }
 
-  /// Obtiene la meta actual (la primera que aún no se alcanzó)
   MetaComunidad? get metaProxima {
     if (_metas.isEmpty) return null;
     return _metas.firstWhere(
@@ -115,13 +85,11 @@ class DonacionesProvider extends ChangeNotifier {
     );
   }
 
-  /// Obtiene la meta final (la última de la lista)
   MetaComunidad? get metaFinal {
     if (_metas.isEmpty) return null;
     return _metas.last;
   }
 
-  /// Porcentaje de progreso hacia la meta final
   double get porcentaje {
     final goal = metaFinal;
     if (goal == null || goal.monto == 0) return 0.0;
@@ -132,6 +100,13 @@ class DonacionesProvider extends ChangeNotifier {
     _cargando = true;
     _error = null;
     _status = SyncStatus.idle;
+
+    if (force) {
+      _montoActual = 0.0;
+      _metas = [];
+      _topDonantes = [];
+    }
+
     notifyListeners();
 
     try {
@@ -143,48 +118,32 @@ class DonacionesProvider extends ChangeNotifier {
       final data = results[0] as Map<String, dynamic>;
       final topData = results[1] as List<dynamic>;
 
-      final prefs = await SharedPreferences.getInstance();
-      final oldDonaciones = prefs.getString('cache_donaciones');
-      final oldTop = prefs.getString('cache_top_donantes');
+      final currentDataHash = jsonEncode(data) + jsonEncode(topData);
+      bool isSame = _lastDataHash == currentDataHash;
 
-      final newDonacionesStr = jsonEncode(data);
-      final newTopStr = jsonEncode(topData);
-
-      bool changed = false;
-
-      // Solo actualizamos el estado si los datos de GitHub son distintos a los guardados o si es forzado
-      if (force || newDonacionesStr != oldDonaciones) {
-        _procesarDonaciones(data);
-        await prefs.setString('cache_donaciones', newDonacionesStr);
-        changed = true;
-      }
-
-      if (force || newTopStr != oldTop) {
-        _procesarTopDonantes(topData);
-        await prefs.setString('cache_top_donantes', newTopStr);
-        changed = true;
-      }
+      _procesarDonaciones(data);
+      _procesarTopDonantes(topData);
+      _lastDataHash = currentDataHash;
 
       _ultimaActualizacion = DateTime.now();
 
-      if (changed) {
-        _status = SyncStatus.success;
-      } else {
+      if (!force && isSame) {
         _status = SyncStatus.noChanges;
+      } else {
+        _status = SyncStatus.success;
       }
 
       notifyListeners();
     } catch (e) {
       debugPrint('Error en DonacionesProvider: $e');
+      _status = SyncStatus.error;
+      _error = 'Las donaciones se ven con internet';
 
-      // Fallback: Si falla la conexión pero tenemos algo en el estado (cargado de local previamente),
-      // avisamos que estamos en modo offline.
-      if (_metas.isNotEmpty) {
-        _status = SyncStatus.offline;
-      } else {
-        _error = 'Error al actualizar: No hay conexión ni datos guardados.';
-        _status = SyncStatus.error;
-      }
+      _montoActual = 0.0;
+      _metas = [];
+      _topDonantes = [];
+      _lastDataHash = null;
+
       notifyListeners();
     } finally {
       _cargando = false;

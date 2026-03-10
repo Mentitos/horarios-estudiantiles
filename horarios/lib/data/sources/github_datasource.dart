@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import '../models/carrera.dart';
 import '../models/materia.dart';
@@ -133,70 +132,52 @@ class GithubDatasource {
   }
 
   Future<Map<String, dynamic>> fetchDonaciones() async {
-    try {
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final random = DateTime.now().microsecondsSinceEpoch;
-      final response = await _dio.get(
-        'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/donaciones.json?v=$timestamp$random',
-        options: Options(
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
-          },
-        ),
-      );
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final random = DateTime.now().microsecondsSinceEpoch;
+    final response = await _dio.get(
+      'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/donaciones.json?v=$timestamp$random',
+      options: Options(
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      ),
+    );
 
-      final rawData = response.data;
-      if (rawData == null || (rawData is String && rawData.trim().isEmpty)) {
-        return {
-          'titulo': 'Metas de la Comunidad',
-          'monto_actual': 0,
-          'metas': [],
-        };
-      }
-
-      if (rawData is String) {
-        return jsonDecode(rawData) as Map<String, dynamic>;
-      }
-      return rawData as Map<String, dynamic>;
-    } catch (e) {
-      debugPrint('Error al buscar donaciones: $e');
-      return {
-        'titulo': 'Metas de la Comunidad',
-        'monto_actual': 0,
-        'metas': [],
-      };
+    final rawData = response.data;
+    if (rawData == null || (rawData is String && rawData.trim().isEmpty)) {
+      throw Exception('El archivo donaciones.json está vacío.');
     }
+
+    if (rawData is String) {
+      return jsonDecode(rawData) as Map<String, dynamic>;
+    }
+    return rawData as Map<String, dynamic>;
   }
 
   Future<List<dynamic>> fetchTopDonantes() async {
-    try {
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final random = DateTime.now().microsecondsSinceEpoch;
-      final response = await _dio.get(
-        'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/donantes_top.json?v=$timestamp$random',
-        options: Options(
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
-          },
-        ),
-      );
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final random = DateTime.now().microsecondsSinceEpoch;
+    final response = await _dio.get(
+      'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/donantes_top.json?v=$timestamp$random',
+      options: Options(
+        headers: {
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      ),
+    );
 
-      final rawData = response.data;
-      if (rawData == null || (rawData is String && rawData.trim().isEmpty)) {
-        return [];
-      }
-
-      if (rawData is String) {
-        return jsonDecode(rawData) as List<dynamic>;
-      }
-      return rawData as List<dynamic>;
-    } catch (e) {
-      debugPrint('Error al buscar top donantes: $e');
+    final rawData = response.data;
+    if (rawData == null || (rawData is String && rawData.trim().isEmpty)) {
       return [];
     }
+
+    if (rawData is String) {
+      return jsonDecode(rawData) as List<dynamic>;
+    }
+    return rawData as List<dynamic>;
   }
 }
