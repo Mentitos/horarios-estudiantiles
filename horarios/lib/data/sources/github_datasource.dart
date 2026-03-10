@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../models/carrera.dart';
 import '../models/materia.dart';
 
@@ -62,27 +64,13 @@ class GithubDatasource {
       }
 
       final List<dynamic> materiasJsonList = materiasData;
-      List<dynamic> carrerasJsonList = [];
-
-      if (carrerasData is List) {
-        carrerasJsonList = carrerasData;
-      } else if (carrerasData is Map) {
-        for (var categoryValue in carrerasData.values) {
-          if (categoryValue is List) {
-            carrerasJsonList.addAll(categoryValue);
-          }
-        }
-      } else {
-        throw Exception(
-          'El archivo carreras.json de GitHub tiene un formato desconocido (encontrado: ${carrerasData.runtimeType})',
-        );
-      }
 
       List<Materia> materias = [];
       for (var jsonMateria in materiasJsonList) {
+        if (jsonMateria is! Map) continue;
         final materia = Materia()
           ..materiaId = jsonMateria['id'].toString()
-          ..nombre = jsonMateria['nombre'] as String;
+          ..nombre = (jsonMateria['nombre'] ?? 'Sin nombre') as String;
         materias.add(materia);
       }
 
@@ -94,8 +82,10 @@ class GithubDatasource {
 
           if (carrerasJsonList is List) {
             for (var jsonCarrera in carrerasJsonList) {
+              if (jsonCarrera is! Map) continue;
               final carrera = Carrera()
-                ..nombre = jsonCarrera['nombre'] as String
+                ..nombre =
+                    (jsonCarrera['nombre'] ?? 'Carrera desconocida') as String
                 ..grupo = grupoNombre;
 
               final materiasRawList = jsonCarrera['materias'];
@@ -112,7 +102,10 @@ class GithubDatasource {
         }
       } else if (carrerasData is List) {
         for (var jsonCarrera in carrerasData) {
-          final carrera = Carrera()..nombre = jsonCarrera['nombre'] as String;
+          if (jsonCarrera is! Map) continue;
+          final carrera = Carrera()
+            ..nombre =
+                (jsonCarrera['nombre'] ?? 'Carrera desconocida') as String;
           final materiasRawList = jsonCarrera['materias'];
           if (materiasRawList is List) {
             carrera.materiasIds = materiasRawList
@@ -126,58 +119,82 @@ class GithubDatasource {
       }
 
       return (materias: materias, carreras: carreras);
+    } on DioException catch (e) {
+      String msg = 'Error de conexión con GitHub';
+      if (e.type == DioExceptionType.connectionTimeout)
+        msg = 'Tiempo de conexión agotado';
+      if (e.type == DioExceptionType.receiveTimeout)
+        msg = 'Error al recibir datos';
+      if (e.response?.statusCode == 404)
+        msg = 'No se encontraron las planillas en el servidor';
+      throw Exception('$msg: ${e.message}');
     } catch (e) {
-      throw Exception('Error al descargar los datos desde GitHub: $e');
+      throw Exception('Error al procesar los datos: $e');
     }
   }
 
   Future<Map<String, dynamic>> fetchDonaciones() async {
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final random = DateTime.now().microsecondsSinceEpoch;
-    final response = await _dio.get(
-      'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/donaciones.json?v=$timestamp$random',
-      options: Options(
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-        },
-      ),
-    );
+    try {
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final random = DateTime.now().microsecondsSinceEpoch;
+      final response = await _dio.get(
+        'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/donaciones.json?v=$timestamp$random',
+        options: Options(
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+          },
+        ),
+      );
 
-    final rawData = response.data;
-    if (rawData == null || (rawData is String && rawData.trim().isEmpty)) {
-      throw Exception('El archivo donaciones.json está vacío.');
-    }
+      final rawData = response.data;
+      if (rawData == null || (rawData is String && rawData.trim().isEmpty)) {
+        throw Exception('El archivo donaciones.json está vacío.');
+      }
 
-    if (rawData is String) {
-      return jsonDecode(rawData) as Map<String, dynamic>;
+      if (rawData is String) {
+        return jsonDecode(rawData) as Map<String, dynamic>;
+      }
+      return rawData as Map<String, dynamic>;
+    } on DioException catch (e) {
+      throw Exception(
+        'Error al obtener donaciones (${e.response?.statusCode}): ${e.message}',
+      );
+    } catch (e) {
+      throw Exception('Error al procesar donaciones: $e');
     }
-    return rawData as Map<String, dynamic>;
   }
 
   Future<List<dynamic>> fetchTopDonantes() async {
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final random = DateTime.now().microsecondsSinceEpoch;
-    final response = await _dio.get(
-      'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/donantes_top.json?v=$timestamp$random',
-      options: Options(
-        headers: {
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-        },
-      ),
-    );
+    try {
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final random = DateTime.now().microsecondsSinceEpoch;
+      final response = await _dio.get(
+        'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/donantes_top.json?v=$timestamp$random',
+        options: Options(
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+          },
+        ),
+      );
 
-    final rawData = response.data;
-    if (rawData == null || (rawData is String && rawData.trim().isEmpty)) {
+      final rawData = response.data;
+      if (rawData == null || (rawData is String && rawData.trim().isEmpty)) {
+        return [];
+      }
+
+      if (rawData is String) {
+        return jsonDecode(rawData) as List<dynamic>;
+      }
+      return rawData as List<dynamic>;
+    } on DioException {
+      return []; // Return empty list on network error for non-critical data
+    } catch (e) {
+      debugPrint('Error fetchTopDonantes: $e');
       return [];
     }
-
-    if (rawData is String) {
-      return jsonDecode(rawData) as List<dynamic>;
-    }
-    return rawData as List<dynamic>;
   }
 }

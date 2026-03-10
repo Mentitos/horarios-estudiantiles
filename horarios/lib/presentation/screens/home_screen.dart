@@ -13,6 +13,7 @@ import 'profesores_screen.dart';
 import 'grabaciones_screen.dart';
 import 'galeria_screen.dart';
 import '../../providers/perfil_provider.dart';
+import 'calculadora_notas_screen.dart';
 
 // Te imaginas qeu a mucha gente de la ungs le guste o que vea un compañero
 // usandola y dija "JIJI yo la hice"
@@ -280,6 +281,16 @@ class HomeScreenState extends State<HomeScreen> {
           ],
           onSelected: (val) {
             context.read<CalificacionesProvider>().ordenarPor(val);
+          },
+        ),
+        IconButton(
+          icon: const Icon(Icons.calculate_rounded),
+          tooltip: 'Calculadora de notas',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CalculadoraNotasScreen()),
+            );
           },
         ),
         PopupMenuButton<String>(
