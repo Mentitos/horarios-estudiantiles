@@ -928,6 +928,9 @@ class _AjustesScreenState extends State<AjustesScreen> {
                         case SyncStatus.error:
                           statusColor = Colors.red.withOpacity(0.2);
                           break;
+                        case SyncStatus.offline:
+                          statusColor = Colors.amber.withOpacity(0.3);
+                          break;
                         case SyncStatus.idle:
                           statusColor = null;
                       }

@@ -31,7 +31,7 @@ class Donante {
   }
 }
 
-enum SyncStatus { idle, success, noChanges, error }
+enum SyncStatus { idle, success, noChanges, error, offline }
 
 class DonacionesProvider extends ChangeNotifier {
   final GithubDatasource _datasource;
@@ -176,9 +176,15 @@ class DonacionesProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error en DonacionesProvider: $e');
-      _error =
-          'Error al actualizar: GitHub aún no refleja el cambio o hay un problema de red.';
-      _status = SyncStatus.error;
+
+      // Fallback: Si falla la conexión pero tenemos algo en el estado (cargado de local previamente),
+      // avisamos que estamos en modo offline.
+      if (_metas.isNotEmpty) {
+        _status = SyncStatus.offline;
+      } else {
+        _error = 'Error al actualizar: No hay conexión ni datos guardados.';
+        _status = SyncStatus.error;
+      }
       notifyListeners();
     } finally {
       _cargando = false;
