@@ -44,6 +44,7 @@ class EventosProvider with ChangeNotifier {
     await _notificationService.cancelAll();
     final prefs = await SharedPreferences.getInstance();
     final int hour = prefs.getInt('notif_hour') ?? 21;
+    final int minute = prefs.getInt('notif_minute') ?? 0;
     final bool enabled = prefs.getBool('notif_enabled') ?? true;
 
     if (!enabled) return;
@@ -55,6 +56,7 @@ class EventosProvider with ChangeNotifier {
         type: evento.tipo,
         date: evento.fecha,
         hour: hour,
+        minute: minute,
       );
     }
   }
@@ -80,6 +82,7 @@ class EventosProvider with ChangeNotifier {
 
     final prefs = await SharedPreferences.getInstance();
     final int hour = prefs.getInt('notif_hour') ?? 21;
+    final int minute = prefs.getInt('notif_minute') ?? 0;
     if (prefs.getBool('notif_enabled') ?? true) {
       await _notificationService.scheduleEventNotifications(
         id: evento.id,
@@ -87,6 +90,7 @@ class EventosProvider with ChangeNotifier {
         type: evento.tipo,
         date: evento.fecha,
         hour: hour,
+        minute: minute,
       );
     }
   }

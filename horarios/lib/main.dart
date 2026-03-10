@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 import 'package:intl/date_symbol_data_local.dart';
 import 'providers/horario_provider.dart';
 import 'providers/materias_provider.dart';
@@ -21,33 +22,43 @@ import 'services/notification_service.dart';
 //  Vinculado con la UNGS me gustaria poder expandirlo a su universidad
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await NotificationService().init();
-  await initializeDateFormatting('es', null);
 
-  final localDatasource = LocalDatasource();
-  await localDatasource.prepopulateDemoData();
+  // Run everything in a guarded zone to catch early initialization crashes
+  runZonedGuarded(
+    () async {
+      await NotificationService().init();
+      await initializeDateFormatting('es', null);
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => MateriasProvider()),
-        ChangeNotifierProvider(
-          create: (_) => HorarioProvider(
-            repository: HorarioRepository(localDatasource: localDatasource),
-          ),
+      final localDatasource = LocalDatasource();
+      await localDatasource.prepopulateDemoData();
+
+      runApp(
+        MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => MateriasProvider()),
+            ChangeNotifierProvider(
+              create: (_) => HorarioProvider(
+                repository: HorarioRepository(localDatasource: localDatasource),
+              ),
+            ),
+            ChangeNotifierProvider(create: (_) => PerfilProvider()),
+            ChangeNotifierProvider(create: (_) => ThemeProvider()),
+            ChangeNotifierProvider(create: (_) => EventosProvider()),
+            ChangeNotifierProvider(create: (_) => CalificacionesProvider()),
+            ChangeNotifierProvider(create: (_) => ProfesoresProvider()),
+            ChangeNotifierProvider(create: (_) => GrabacionesProvider()),
+            ChangeNotifierProvider(create: (_) => DonacionesProvider()),
+            ChangeNotifierProvider(create: (_) => FotosProvider()),
+            ChangeNotifierProvider(create: (_) => VersionProvider()),
+          ],
+          child: const MyApp(),
         ),
-        ChangeNotifierProvider(create: (_) => PerfilProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => EventosProvider()),
-        ChangeNotifierProvider(create: (_) => CalificacionesProvider()),
-        ChangeNotifierProvider(create: (_) => ProfesoresProvider()),
-        ChangeNotifierProvider(create: (_) => GrabacionesProvider()),
-        ChangeNotifierProvider(create: (_) => DonacionesProvider()),
-        ChangeNotifierProvider(create: (_) => FotosProvider()),
-        ChangeNotifierProvider(create: (_) => VersionProvider()),
-      ],
-      child: const MyApp(),
-    ),
+      );
+    },
+    (error, stack) {
+      debugPrint('UNHANDLED ERROR: $error');
+      debugPrint(stack.toString());
+    },
   );
 }
 

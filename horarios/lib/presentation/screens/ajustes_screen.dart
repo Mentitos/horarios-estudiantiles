@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:async';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,6 +16,7 @@ import '../../providers/version_provider.dart';
 import '../../providers/calificaciones_provider.dart';
 import 'materias_aprobadas_screen.dart';
 import 'gestionar_materias_locales_screen.dart' as file_gestionar;
+import '../../services/notification_service.dart';
 
 //   Solo con que ayude a alguien a sobrellevar sus estudios me siento realizado
 //   Mucha gente llego a usar Finanzas Libre, tuve mensajes de gente desconocida
@@ -30,11 +32,56 @@ class AjustesScreen extends StatefulWidget {
 class _AjustesScreenState extends State<AjustesScreen> {
   bool _notifEnabled = true;
   int _notifHour = 21;
+  int _notifMinute = 0;
+  DateTime? _proximaNotif;
+  Timer? _countdownTimer;
 
   @override
   void initState() {
     super.initState();
     _loadNotifSettings();
+    _startCountdownTimer();
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startCountdownTimer() {
+    _countdownTimer = Timer.periodic(const Duration(minutes: 1), (timer) {
+      if (mounted) _updateProximaNotif();
+    });
+  }
+
+  void _updateProximaNotif() {
+    if (!_notifEnabled) {
+      setState(() => _proximaNotif = null);
+      return;
+    }
+    final next = NotificationService().getNextDailySummaryTime(
+      _notifHour,
+      _notifMinute,
+    );
+    setState(() => _proximaNotif = next);
+  }
+
+  String _calcularTiempoRestante() {
+    if (_proximaNotif == null) return '';
+    final now = DateTime.now();
+    final difference = _proximaNotif!.difference(now);
+
+    if (difference.isNegative) return 'En cualquier momento';
+
+    final horas = difference.inHours;
+    final minutos = difference.inMinutes % 60;
+
+    if (horas > 0) {
+      return '$horas h y $minutos min';
+    } else {
+      return '$minutos min';
+    }
   }
 
   Future<void> _loadNotifSettings() async {
@@ -42,7 +89,9 @@ class _AjustesScreenState extends State<AjustesScreen> {
     setState(() {
       _notifEnabled = prefs.getBool('notif_enabled') ?? true;
       _notifHour = prefs.getInt('notif_hour') ?? 21;
+      _notifMinute = prefs.getInt('notif_minute') ?? 0;
     });
+    _updateProximaNotif();
   }
 
   Future<void> _saveNotifEnabled(bool value) async {
@@ -57,12 +106,15 @@ class _AjustesScreenState extends State<AjustesScreen> {
     }
   }
 
-  Future<void> _saveNotifHour(int hour) async {
+  Future<void> _saveNotifTime(int hour, int minute) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('notif_hour', hour);
+    await prefs.setInt('notif_minute', minute);
     setState(() {
       _notifHour = hour;
+      _notifMinute = minute;
     });
+    _updateProximaNotif();
     if (mounted) {
       context.read<EventosProvider>().actualizarNotificaciones();
       context.read<HorarioProvider>().actualizarNotificaciones();
@@ -72,7 +124,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
   Future<void> _mostrarSelectorHora(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay(hour: _notifHour, minute: 0),
+      initialTime: TimeOfDay(hour: _notifHour, minute: _notifMinute),
       helpText: 'Seleccionar hora de notificación',
       builder: (context, child) {
         return MediaQuery(
@@ -83,7 +135,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
     );
 
     if (picked != null) {
-      await _saveNotifHour(picked.hour);
+      await _saveNotifTime(picked.hour, picked.minute);
     }
   }
 
@@ -340,11 +392,23 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     ListTile(
                       title: const Text('Hora de notificación'),
                       subtitle: Text(
-                        '${_notifHour.toString().padLeft(2, '0')}:00 hs',
+                        '${_notifHour.toString().padLeft(2, '0')}:${_notifMinute.toString().padLeft(2, '0')} hs',
                       ),
                       trailing: const Icon(Icons.access_time),
                       onTap: () => _mostrarSelectorHora(context),
                     ),
+                    if (_proximaNotif != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Text(
+                          'Próxima notificación en: ${_calcularTiempoRestante()}',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(
@@ -354,6 +418,41 @@ class _AjustesScreenState extends State<AjustesScreen> {
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
+                    ),
+                    const SizedBox(height: 16),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      alignment: WrapAlignment.center,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () =>
+                              NotificationService().showTestNotification(),
+                          icon: const Icon(Icons.notifications_active_outlined),
+                          label: const Text('Probar ahora'),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: () => NotificationService()
+                              .scheduleTestNotification5s(),
+                          icon: const Icon(Icons.timer_outlined),
+                          label: const Text('Probar en 5s'),
+                        ),
+                        TextButton.icon(
+                          onPressed: () =>
+                              NotificationService().requestPermissions(),
+                          icon: const Icon(Icons.security),
+                          label: const Text('Pedir permisos'),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Si no recibís la notificación de prueba, revisá que la app tenga permiso de notificaciones y que no esté restringida por el ahorro de batería.',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontStyle: FontStyle.italic,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ],

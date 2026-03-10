@@ -20,8 +20,14 @@ class NotificationService {
       return;
     }
 
-    tz.initializeTimeZones();
-    tz.setLocalLocation(tz.getLocation('America/Argentina/Buenos_Aires'));
+    try {
+      tz.initializeTimeZones();
+      // Small delay to ensure tz is ready (defensive)
+      await Future.delayed(const Duration(milliseconds: 100));
+      tz.setLocalLocation(tz.getLocation('America/Argentina/Buenos_Aires'));
+    } catch (e) {
+      debugPrint('NotificationService: Error inicializando timezones: $e');
+    }
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -29,22 +35,26 @@ class NotificationService {
     const InitializationSettings initializationSettings =
         InitializationSettings(android: initializationSettingsAndroid);
 
-    await _notificationsPlugin.initialize(
-      settings: initializationSettings,
-      onDidReceiveNotificationResponse: (details) {},
-    );
+    try {
+      await _notificationsPlugin.initialize(
+        settings: initializationSettings,
+        onDidReceiveNotificationResponse: (details) {},
+      );
 
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.requestNotificationsPermission();
+      await _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.requestNotificationsPermission();
 
-    await _notificationsPlugin
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.requestExactAlarmsPermission();
+      await _notificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.requestExactAlarmsPermission();
+    } catch (e) {
+      debugPrint('NotificationService: Error inicializando plugin: $e');
+    }
   }
 
   Future<void> scheduleEventNotifications({
@@ -53,6 +63,7 @@ class NotificationService {
     required String type,
     required DateTime date,
     required int hour,
+    required int minute,
   }) async {
     if (!Platform.isAndroid) return;
     final int baseId = id.hashCode.abs();
@@ -62,7 +73,7 @@ class NotificationService {
       id: baseId + 1,
       title: '¡Evento en una semana!',
       body: 'Tu $type "$title" es en 7 días.',
-      scheduledDate: _nextInstanceOfTime(oneWeekBefore, hour),
+      scheduledDate: _nextInstanceOfTime(oneWeekBefore, hour, minute),
     );
 
     final DateTime oneDayBefore = date.subtract(const Duration(days: 1));
@@ -70,39 +81,76 @@ class NotificationService {
       id: baseId + 2,
       title: '¡Evento mañana!',
       body: 'Mañana tenés tu $type "$title".',
-      scheduledDate: _nextInstanceOfTime(oneDayBefore, hour),
+      scheduledDate: _nextInstanceOfTime(oneDayBefore, hour, minute),
     );
   }
 
   Future<void> scheduleDailySummary({
     required List<String> subjects,
     required int hour,
+    required int minute,
   }) async {
     if (!Platform.isAndroid) return;
-    if (subjects.isEmpty) {
-      await _notificationsPlugin.cancel(id: 0);
-      return;
-    }
 
-    final String body = 'Hoy cursás: ${subjects.join(", ")}';
+    final String body = subjects.isEmpty
+        ? 'Hoy estás libre de cursada.'
+        : 'Hoy cursás: ${subjects.join(", ")}';
 
-    await _notificationsPlugin.zonedSchedule(
-      id: 0,
-      title: 'Tu día de cursada',
-      body: body,
-      scheduledDate: _nextInstanceOfTime(DateTime.now(), hour),
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'daily_summary_channel',
-          'Resumen Diario',
-          channelDescription: 'Notificación diaria con las materias a cursar',
-          importance: Importance.low,
-          priority: Priority.low,
+    try {
+      await _notificationsPlugin.zonedSchedule(
+        id: 0,
+        title: 'Tu día de cursada',
+        body: body,
+        scheduledDate: _nextInstanceOfTime(DateTime.now(), hour, minute),
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'daily_summary_channel',
+            'Resumen Diario',
+            channelDescription: 'Notificación diaria con las materias a cursar',
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
         ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    } catch (e) {
+      debugPrint('Error al programar resumen diario: $e');
+    }
+  }
+
+  Future<void> scheduleTomorrowSummary({
+    required List<String> subjects,
+    required int hour,
+    required int minute,
+  }) async {
+    if (!Platform.isAndroid) return;
+
+    final String body = subjects.isEmpty
+        ? 'Mañana estás libre de cursada.'
+        : 'Mañana cursás: ${subjects.join(", ")}';
+
+    try {
+      await _notificationsPlugin.zonedSchedule(
+        id: 1,
+        title: 'Tu cursada de mañana',
+        body: body,
+        scheduledDate: _nextInstanceOfTime(DateTime.now(), hour, minute),
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'daily_summary_channel',
+            'Resumen Diario',
+            channelDescription: 'Notificación diaria con las materias a cursar',
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
+        ),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    } catch (e) {
+      debugPrint('Error al programar resumen de mañana: $e');
+    }
   }
 
   Future<void> cancelEventNotifications(String id) async {
@@ -117,6 +165,73 @@ class NotificationService {
     await _notificationsPlugin.cancelAll();
   }
 
+  Future<void> showTestNotification() async {
+    if (!Platform.isAndroid) return;
+
+    await _notificationsPlugin.show(
+      id: 999,
+      title: 'Prueba de Notificación',
+      body: '¡Si ves esto, las notificaciones están funcionando!',
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'test_channel',
+          'Pruebas',
+          channelDescription: 'Canal para probar notificaciones',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+    );
+  }
+
+  Future<void> scheduleTestNotification5s() async {
+    if (!Platform.isAndroid) return;
+
+    final scheduledDate = tz.TZDateTime.now(
+      tz.local,
+    ).add(const Duration(seconds: 5));
+
+    try {
+      await _notificationsPlugin.zonedSchedule(
+        id: 998,
+        title: 'Prueba Programada (5s)',
+        body:
+            'Esta notificación fue programada para 5 segundos después del toque.',
+        scheduledDate: scheduledDate,
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'test_channel',
+            'Pruebas',
+            channelDescription: 'Canal para probar notificaciones',
+            importance: Importance.max,
+            priority: Priority.high,
+          ),
+        ),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+    } catch (e) {
+      debugPrint('Error al programar prueba de 5s: $e');
+    }
+  }
+
+  Future<void> requestPermissions() async {
+    if (!Platform.isAndroid) return;
+    await _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.requestNotificationsPermission();
+    await _notificationsPlugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.requestExactAlarmsPermission();
+  }
+
+  tz.TZDateTime getNextDailySummaryTime(int hour, int minute) {
+    return _nextInstanceOfTime(DateTime.now(), hour, minute);
+  }
+
   Future<void> _scheduleNotification({
     required int id,
     required String title,
@@ -125,33 +240,46 @@ class NotificationService {
   }) async {
     if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) return;
 
-    await _notificationsPlugin.zonedSchedule(
-      id: id,
-      title: title,
-      body: body,
-      scheduledDate: scheduledDate,
-      notificationDetails: const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'events_channel',
-          'Eventos del Calendario',
-          channelDescription: 'Recordatorios de exámenes y entregas',
-          importance: Importance.high,
-          priority: Priority.high,
+    try {
+      await _notificationsPlugin.zonedSchedule(
+        id: id,
+        title: title,
+        body: body,
+        scheduledDate: scheduledDate,
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'events_channel',
+            'Eventos del Calendario',
+            channelDescription: 'Recordatorios de exámenes y entregas',
+            importance: Importance.high,
+            priority: Priority.high,
+          ),
         ),
-      ),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-    );
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      );
+    } catch (e) {
+      debugPrint('Error al programar notificación de evento ($id): $e');
+    }
   }
 
-  tz.TZDateTime _nextInstanceOfTime(DateTime date, int hour) {
+  tz.TZDateTime _nextInstanceOfTime(DateTime date, int hour, int minute) {
     tz.TZDateTime scheduledDate = tz.TZDateTime(
       tz.local,
       date.year,
       date.month,
       date.day,
       hour,
+      minute,
       0,
     );
+
+    final now = tz.TZDateTime.now(tz.local);
+    if (scheduledDate.isBefore(now) &&
+        date.year == now.year &&
+        date.month == now.month &&
+        date.day == now.day) {
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
+    }
 
     return scheduledDate;
   }

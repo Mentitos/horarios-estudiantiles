@@ -39,26 +39,40 @@ class HorarioProvider extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     final bool enabled = prefs.getBool('notif_enabled') ?? true;
     final int hour = prefs.getInt('notif_hour') ?? 21;
+    final int minute = prefs.getInt('notif_minute') ?? 0;
 
     if (!enabled) {
-      await _notificationService.scheduleDailySummary(subjects: [], hour: hour);
+      await _notificationService.cancelAll();
       return;
     }
 
     final now = DateTime.now();
+    final tomorrow = now.add(const Duration(days: 1));
     final String todayName = _getDiaSemana(now.weekday);
+    final String tomorrowName = _getDiaSemana(tomorrow.weekday);
 
     final List<String> subjectsToday = [];
+    final List<String> subjectsTomorrow = [];
+
     for (var materia in horario!.materiasSeleccionadas) {
-      final bool cursaHoy = materia.bloques.any((b) => b.dia == todayName);
-      if (cursaHoy) {
+      if (materia.bloques.any((b) => b.dia == todayName)) {
         subjectsToday.add(materia.materiaNombre ?? 'Materia');
+      }
+      if (materia.bloques.any((b) => b.dia == tomorrowName)) {
+        subjectsTomorrow.add(materia.materiaNombre ?? 'Materia');
       }
     }
 
     await _notificationService.scheduleDailySummary(
       subjects: subjectsToday,
       hour: hour,
+      minute: minute,
+    );
+
+    await _notificationService.scheduleTomorrowSummary(
+      subjects: subjectsTomorrow,
+      hour: hour,
+      minute: minute,
     );
   }
 
