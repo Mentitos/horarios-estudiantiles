@@ -48,26 +48,15 @@ class HorarioProvider extends ChangeNotifier {
 
     final now = DateTime.now();
     final tomorrow = now.add(const Duration(days: 1));
-    final String todayName = _getDiaSemana(now.weekday);
     final String tomorrowName = _getDiaSemana(tomorrow.weekday);
 
-    final List<String> subjectsToday = [];
     final List<String> subjectsTomorrow = [];
 
     for (var materia in horario!.materiasSeleccionadas) {
-      if (materia.bloques.any((b) => b.dia == todayName)) {
-        subjectsToday.add(materia.materiaNombre ?? 'Materia');
-      }
       if (materia.bloques.any((b) => b.dia == tomorrowName)) {
         subjectsTomorrow.add(materia.materiaNombre ?? 'Materia');
       }
     }
-
-    await _notificationService.scheduleDailySummary(
-      subjects: subjectsToday,
-      hour: hour,
-      minute: minute,
-    );
 
     await _notificationService.scheduleTomorrowSummary(
       subjects: subjectsTomorrow,

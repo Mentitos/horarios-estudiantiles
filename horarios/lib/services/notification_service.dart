@@ -22,7 +22,6 @@ class NotificationService {
 
     try {
       tz.initializeTimeZones();
-      // Small delay to ensure tz is ready (defensive)
       await Future.delayed(const Duration(milliseconds: 100));
       tz.setLocalLocation(tz.getLocation('America/Argentina/Buenos_Aires'));
     } catch (e) {
@@ -83,40 +82,15 @@ class NotificationService {
       body: 'Mañana tenés tu $type "$title".',
       scheduledDate: _nextInstanceOfTime(oneDayBefore, hour, minute),
     );
-  }
 
-  Future<void> scheduleDailySummary({
-    required List<String> subjects,
-    required int hour,
-    required int minute,
-  }) async {
-    if (!Platform.isAndroid) return;
-
-    final String body = subjects.isEmpty
-        ? 'Hoy estás libre de cursada.'
-        : 'Hoy cursás: ${subjects.join(", ")}';
-
-    try {
-      await _notificationsPlugin.zonedSchedule(
-        id: 0,
-        title: 'Tu día de cursada',
-        body: body,
-        scheduledDate: _nextInstanceOfTime(DateTime.now(), hour, minute),
-        notificationDetails: const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'daily_summary_channel',
-            'Resumen Diario',
-            channelDescription: 'Notificación diaria con las materias a cursar',
-            importance: Importance.high,
-            priority: Priority.high,
-          ),
-        ),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.time,
-      );
-    } catch (e) {
-      debugPrint('Error al programar resumen diario: $e');
-    }
+    final DateTime oneDayAfter = date.add(const Duration(days: 1));
+    await _scheduleNotification(
+      id: baseId + 3,
+      title: '¿Cómo te fue?',
+      body:
+          '¿Cómo te fue en tu $type "$title"? ¡No te olvides de anotar tu nota!',
+      scheduledDate: _nextInstanceOfTime(oneDayAfter, 10, 0),
+    );
   }
 
   Future<void> scheduleTomorrowSummary({
@@ -158,6 +132,7 @@ class NotificationService {
     final int baseId = id.hashCode.abs();
     await _notificationsPlugin.cancel(id: baseId + 1);
     await _notificationsPlugin.cancel(id: baseId + 2);
+    await _notificationsPlugin.cancel(id: baseId + 3);
   }
 
   Future<void> cancelAll() async {

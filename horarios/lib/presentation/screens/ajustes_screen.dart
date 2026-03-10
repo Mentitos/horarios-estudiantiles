@@ -41,6 +41,10 @@ class _AjustesScreenState extends State<AjustesScreen> {
     super.initState();
     _loadNotifSettings();
     _startCountdownTimer();
+    // Refrescar donaciones automáticamente al entrar
+    Future.microtask(() {
+      if (mounted) context.read<DonacionesProvider>().refrescar();
+    });
   }
 
   @override
@@ -412,7 +416,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       child: Text(
-                        'Se te notificará 1 semana y 1 día antes de cada evento, y todas las mañanas con tu cursada.',
+                        'Se te notificará 1 semana y 1 día antes de cada evento, y todas las mañanas con tu cursada del día siguiente.',
                         style: TextStyle(
                           fontSize: 12,
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -420,40 +424,6 @@ class _AjustesScreenState extends State<AjustesScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      alignment: WrapAlignment.center,
-                      children: [
-                        OutlinedButton.icon(
-                          onPressed: () =>
-                              NotificationService().showTestNotification(),
-                          icon: const Icon(Icons.notifications_active_outlined),
-                          label: const Text('Probar ahora'),
-                        ),
-                        OutlinedButton.icon(
-                          onPressed: () => NotificationService()
-                              .scheduleTestNotification5s(),
-                          icon: const Icon(Icons.timer_outlined),
-                          label: const Text('Probar en 5s'),
-                        ),
-                        TextButton.icon(
-                          onPressed: () =>
-                              NotificationService().requestPermissions(),
-                          icon: const Icon(Icons.security),
-                          label: const Text('Pedir permisos'),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Si no recibís la notificación de prueba, revisá que la app tenga permiso de notificaciones y que no esté restringida por el ahorro de batería.',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
                   ],
                 ],
               ),
@@ -945,10 +915,27 @@ class _AjustesScreenState extends State<AjustesScreen> {
                   const SizedBox(height: 16),
                   Consumer<DonacionesProvider>(
                     builder: (context, donacionesProv, child) {
+                      final status = donacionesProv.status;
+
+                      Color? statusColor;
+                      switch (status) {
+                        case SyncStatus.success:
+                          statusColor = Colors.green.withOpacity(0.2);
+                          break;
+                        case SyncStatus.noChanges:
+                          statusColor = Colors.blue.withOpacity(0.2);
+                          break;
+                        case SyncStatus.error:
+                          statusColor = Colors.red.withOpacity(0.2);
+                          break;
+                        case SyncStatus.idle:
+                          statusColor = null;
+                      }
+
                       final titulo = donacionesProv.titulo;
                       final montoActual = donacionesProv.montoActual;
                       final metas = donacionesProv.metas;
-                      final proxima = donacionesProv.metaProxima;
+                      final goalFinal = donacionesProv.metaFinal;
                       final porcentaje = donacionesProv.porcentaje;
                       final porcentajeTexto = (porcentaje * 100)
                           .toStringAsFixed(1);
@@ -969,16 +956,50 @@ class _AjustesScreenState extends State<AjustesScreen> {
                                 titulo,
                                 style: const TextStyle(
                                   fontSize: 13,
-                                  fontWeight: FontWeight.w500,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
+                              if (donacionesProv.ultimaActualizacion != null)
+                                InkWell(
+                                  onTap: () => donacionesProv.limpiarMensajes(),
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: statusColor,
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      'Act: ${DateFormat('HH:mm:ss').format(donacionesProv.ultimaActualizacion!)}',
+                                      style: const TextStyle(
+                                        fontSize: 10,
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               if (donacionesProv.cargando)
                                 const SizedBox(
-                                  width: 12,
-                                  height: 12,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
+                                  width: 24,
+                                  height: 24,
+                                  child: Padding(
+                                    padding: EdgeInsets.all(4.0),
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
                                   ),
+                                )
+                              else
+                                IconButton(
+                                  icon: const Icon(Icons.refresh, size: 20),
+                                  onPressed: () =>
+                                      donacionesProv.refrescar(force: true),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(),
+                                  tooltip: 'Actualizar donaciones',
                                 ),
                             ],
                           ),
@@ -1004,8 +1025,8 @@ class _AjustesScreenState extends State<AjustesScreen> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        proxima?.nombre ??
-                                            '¡Todas las metas alcanzadas!',
+                                        goalFinal?.nombre ??
+                                            '¡Metas de la Comunidad!',
                                         style: const TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
@@ -1050,9 +1071,9 @@ class _AjustesScreenState extends State<AjustesScreen> {
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                    if (proxima != null)
+                                    if (goalFinal != null)
                                       Text(
-                                        'Meta: ${nFormat.format(proxima.monto)}',
+                                        'Meta final: ${nFormat.format(goalFinal.monto)}',
                                         style: const TextStyle(
                                           fontSize: 11,
                                           fontWeight: FontWeight.w500,
@@ -1123,6 +1144,97 @@ class _AjustesScreenState extends State<AjustesScreen> {
                                     fontStyle: FontStyle.italic,
                                   ),
                                 ),
+                                if (donacionesProv.topDonantes.isNotEmpty) ...[
+                                  const Divider(height: 32),
+                                  const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.emoji_events_outlined,
+                                        size: 18,
+                                        color: Colors.amber,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Top Donantes',
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest
+                                          .withOpacity(0.5),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Column(
+                                      children: List.generate(
+                                        donacionesProv.topDonantes.length,
+                                        (index) {
+                                          final d =
+                                              donacionesProv.topDonantes[index];
+                                          final medalColor = index == 0
+                                              ? Colors.amber
+                                              : index == 1
+                                              ? const Color(0xFFC0C0C0)
+                                              : const Color(0xFFCD7F32);
+
+                                          return Padding(
+                                            padding: EdgeInsets.only(
+                                              bottom:
+                                                  index <
+                                                      donacionesProv
+                                                              .topDonantes
+                                                              .length -
+                                                          1
+                                                  ? 8.0
+                                                  : 0,
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                if (index < 3)
+                                                  Icon(
+                                                    Icons.workspace_premium,
+                                                    size: 16,
+                                                    color: medalColor,
+                                                  )
+                                                else
+                                                  const SizedBox(width: 16),
+                                                const SizedBox(width: 8),
+                                                Expanded(
+                                                  child: Text(
+                                                    d.nombre,
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  nFormat.format(d.monto),
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Theme.of(
+                                                      context,
+                                                    ).colorScheme.primary,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),

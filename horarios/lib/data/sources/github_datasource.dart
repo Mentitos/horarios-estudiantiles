@@ -12,12 +12,28 @@ class GithubDatasource {
   Future<({List<Materia> materias, List<Carrera> carreras})>
   fetchDatos() async {
     try {
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final random = DateTime.now().microsecondsSinceEpoch;
       final responses = await Future.wait([
         _dio.get(
-          'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/materias.json',
+          'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/materias.json?v=$timestamp$random',
+          options: Options(
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0',
+            },
+          ),
         ),
         _dio.get(
-          'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/carreras.json',
+          'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/carreras.json?v=$timestamp$random',
+          options: Options(
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0',
+            },
+          ),
         ),
       ]);
 
@@ -118,8 +134,17 @@ class GithubDatasource {
 
   Future<Map<String, dynamic>> fetchDonaciones() async {
     try {
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final random = DateTime.now().microsecondsSinceEpoch;
       final response = await _dio.get(
-        'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/donaciones.json',
+        'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/donaciones.json?v=$timestamp$random',
+        options: Options(
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+          },
+        ),
       );
 
       final rawData = response.data;
@@ -142,6 +167,36 @@ class GithubDatasource {
         'monto_actual': 0,
         'metas': [],
       };
+    }
+  }
+
+  Future<List<dynamic>> fetchTopDonantes() async {
+    try {
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final random = DateTime.now().microsecondsSinceEpoch;
+      final response = await _dio.get(
+        'https://raw.githubusercontent.com/Mentitos/materiasungsporcentaje/main/donantes_top.json?v=$timestamp$random',
+        options: Options(
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+          },
+        ),
+      );
+
+      final rawData = response.data;
+      if (rawData == null || (rawData is String && rawData.trim().isEmpty)) {
+        return [];
+      }
+
+      if (rawData is String) {
+        return jsonDecode(rawData) as List<dynamic>;
+      }
+      return rawData as List<dynamic>;
+    } catch (e) {
+      debugPrint('Error al buscar top donantes: $e');
+      return [];
     }
   }
 }
