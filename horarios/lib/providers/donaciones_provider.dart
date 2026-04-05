@@ -91,7 +91,7 @@ class DonacionesProvider extends ChangeNotifier {
   }
 
   double get porcentaje {
-    final goal = metaFinal;
+    final goal = metaProxima;
     if (goal == null || goal.monto == 0) return 0.0;
     return (_montoActual / goal.monto).clamp(0.0, 1.0);
   }

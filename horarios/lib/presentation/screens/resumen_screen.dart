@@ -75,51 +75,12 @@ class ResumenScreen extends StatelessWidget {
                       .toList()
                     ..sort((a, b) => a.fecha.compareTo(b.fecha));
 
-              final ahoraMinutosTotal = ahora.hour * 60 + ahora.minute;
-
-              dynamic proximaMateria;
-              dynamic proximoBloque;
-
-              for (var m in materiasHoy) {
-                for (var b in m.bloques) {
-                  if (b.dia == diaHoy) {
-                    final partes = b.horaInicio!.split(':');
-                    final h = int.parse(partes[0]);
-                    final min = int.parse(partes[1]);
-                    final mTotal = h * 60 + min;
-                    if (mTotal > ahoraMinutosTotal) {
-                      if (proximoBloque == null ||
-                          mTotal <
-                              (int.parse(
-                                        proximoBloque.horaInicio!.split(':')[0],
-                                      ) *
-                                      60 +
-                                  int.parse(
-                                    proximoBloque.horaInicio!.split(':')[1],
-                                  ))) {
-                        proximaMateria = m;
-                        proximoBloque = b;
-                      }
-                    }
-                  }
-                }
-              }
-
               return ListView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 12,
                 ),
                 children: [
-                  if (proximaMateria != null) ...[
-                    _ProximaClaseHeader(
-                      materia: proximaMateria.materiaNombre ?? '',
-                      hora: proximoBloque.horaInicio ?? '',
-                      aula: proximoBloque.aula,
-                      color: Color(proximaMateria.colorARGB ?? 0xFF1E88E5),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
                   SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
                     scrollDirection: Axis.horizontal,
@@ -195,7 +156,7 @@ class ResumenScreen extends StatelessWidget {
                           nombre: materia.materiaNombre ?? '',
                           horaInicio: bloque.horaInicio ?? '',
                           horaFin: bloque.horaFin ?? '',
-                          aula: bloque.aula,
+                          aula: bloque.aula?.isNotEmpty == true ? bloque.aula : materia.aula,
                           color: Color(materia.colorARGB ?? 0xFF1E88E5),
                         ),
                       );
@@ -279,107 +240,6 @@ class _SectionHeader extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class _ProximaClaseHeader extends StatelessWidget {
-  final String materia;
-  final String hora;
-  final String? aula;
-  final Color color;
-
-  const _ProximaClaseHeader({
-    required this.materia,
-    required this.hora,
-    this.aula,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [color.withValues(alpha: 0.8), color.withValues(alpha: 1.0)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  'PRÓXIMA CLASE',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              const Icon(Icons.timer_outlined, color: Colors.white, size: 20),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            materia,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(
-                Icons.access_time_filled,
-                color: Colors.white70,
-                size: 16,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                hora,
-                style: const TextStyle(color: Colors.white70, fontSize: 14),
-              ),
-              if (aula?.isNotEmpty == true) ...[
-                const SizedBox(width: 16),
-                const Icon(Icons.room, color: Colors.white70, size: 16),
-                const SizedBox(width: 6),
-                Text(
-                  'Aula $aula',
-                  style: const TextStyle(color: Colors.white70, fontSize: 14),
-                ),
-              ],
-            ],
-          ),
-        ],
-      ),
     );
   }
 }

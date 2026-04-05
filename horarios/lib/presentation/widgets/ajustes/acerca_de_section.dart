@@ -252,7 +252,7 @@ class AcercaDeSection extends StatelessWidget {
                 final titulo = donacionesProv.titulo;
                 final montoActual = donacionesProv.montoActual;
                 final metas = donacionesProv.metas;
-                final goalFinal = donacionesProv.metaFinal;
+                final metaActiva = donacionesProv.metaProxima;
                 final porcentaje = donacionesProv.porcentaje;
                 final porcentajeTexto = (porcentaje * 100).toStringAsFixed(1);
 
@@ -389,7 +389,7 @@ class AcercaDeSection extends StatelessWidget {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    goalFinal?.nombre ??
+                                    metaActiva?.nombre ??
                                         '¡Metas de la Comunidad!',
                                     style: const TextStyle(
                                       fontSize: 12,
@@ -434,9 +434,9 @@ class AcercaDeSection extends StatelessWidget {
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                                if (goalFinal != null)
+                                if (metaActiva != null)
                                   Text(
-                                    'Meta final: ${nFormat.format(goalFinal.monto)}',
+                                    'Meta de la etapa: ${nFormat.format(metaActiva.monto)}',
                                     style: const TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w500,

@@ -553,6 +553,7 @@ class HorarioScreen extends StatelessWidget {
 
     TimeOfDay inicio = const TimeOfDay(hour: 8, minute: 0);
     TimeOfDay fin = const TimeOfDay(hour: 10, minute: 0);
+    String aulaBloque = bloqueOriginal?.aula ?? '';
 
     if (bloqueOriginal != null) {
       final partesI = bloqueOriginal.horaInicio!.split(':');
@@ -661,6 +662,18 @@ class HorarioScreen extends StatelessWidget {
                         }
                       },
                     ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      initialValue: aulaBloque,
+                      decoration: const InputDecoration(
+                        labelText: 'Aula (Opcional)',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.room),
+                      ),
+                      onChanged: (val) {
+                        aulaBloque = val;
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -676,7 +689,7 @@ class HorarioScreen extends StatelessWidget {
                       ..dia = diaSeleccionado
                       ..horaInicio = formatoHora(inicio)
                       ..horaFin = formatoHora(fin)
-                      ..aula = bloqueOriginal?.aula ?? '';
+                      ..aula = aulaBloque;
 
                     try {
                       if (indexEdit == null) {
