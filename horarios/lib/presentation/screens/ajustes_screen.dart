@@ -28,7 +28,6 @@ class _AjustesScreenState extends State<AjustesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Configuración'), centerTitle: true),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: const [

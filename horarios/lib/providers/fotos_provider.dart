@@ -69,31 +69,36 @@ class FotosProvider extends ChangeNotifier {
 
   Future<void> seleccionarDeGaleria() async {
     try {
-      final XFile? image = await _picker.pickImage(
-        source: ImageSource.gallery,
+      final List<XFile> images = await _picker.pickMultiImage(
         imageQuality: 85,
       );
 
-      if (image != null) {
+      if (images.isNotEmpty) {
         final appDir = await getApplicationDocumentsDirectory();
-        final String nombreArchivo = 'foto_galeria_${DateTime.now().millisecondsSinceEpoch}.jpg';
-        final String path = '${appDir.path}/$nombreArchivo';
+        final now = DateTime.now().millisecondsSinceEpoch;
         
-        await File(image.path).copy(path);
+        for (int i = 0; i < images.length; i++) {
+          final image = images[i];
+          final String nombreArchivo = 'foto_galeria_${now}_$i.jpg';
+          final String path = '${appDir.path}/$nombreArchivo';
+          
+          await File(image.path).copy(path);
 
-        final nuevaFoto = Foto(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          pathArchivo: path,
-          fecha: DateTime.now(),
-        );
+          final nuevaFoto = Foto(
+            id: '${now}_$i',
+            pathArchivo: path,
+            fecha: DateTime.now().add(Duration(seconds: i)),
+          );
 
-        _fotos.add(nuevaFoto);
+          _fotos.add(nuevaFoto);
+        }
+
         _ordenarFotos();
         await _repository.guardarFotos(_fotos);
         notifyListeners();
       }
     } catch (e) {
-      debugPrint("Error al seleccionar foto: $e");
+      debugPrint("Error al seleccionar fotos: $e");
     }
   }
 

@@ -20,15 +20,41 @@ class GaleriaScreen extends StatelessWidget {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 0,
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Todas'),
-              Tab(text: 'Materias'),
-            ],
-          ),
-        ),
+        appBar: isSelectionMode
+            ? AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => provider.clearSelection(),
+                ),
+                title: Text('${provider.selectedIds.length} seleccionadas', style: const TextStyle(fontSize: 18)),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.link),
+                    tooltip: 'Vincular a materia',
+                    onPressed: () => _mostrarDialogoVincularSeleccion(context, provider),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    tooltip: 'Eliminar seleccionadas',
+                    onPressed: () => _mostrarDialogoEliminarSeleccionadas(context, provider),
+                  ),
+                ],
+                bottom: const TabBar(
+                  tabs: [
+                    Tab(text: 'Todas'),
+                    Tab(text: 'Materias'),
+                  ],
+                ),
+              )
+            : AppBar(
+                toolbarHeight: 0,
+                bottom: const TabBar(
+                  tabs: [
+                    Tab(text: 'Todas'),
+                    Tab(text: 'Materias'),
+                  ],
+                ),
+              ),
         body: TabBarView(
           children: [
             _buildTodasTab(context, provider),
@@ -464,5 +490,69 @@ class GaleriaScreen extends StatelessWidget {
     } catch (e) {
       debugPrint("Error al compartir: $e");
     }
+  }
+
+  void _mostrarDialogoVincularSeleccion(BuildContext context, FotosProvider provider) {
+    final materias =
+        context.read<HorarioProvider>().horario?.materiasSeleccionadas ?? [];
+
+    if (materias.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No tenés materias agregadas aún.')),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Vincular a materia'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: materias.length,
+            itemBuilder: (c, i) {
+              final mat = materias[i];
+              return ListTile(
+                title: Text(mat.materiaNombre ?? 'Sin nombre'),
+                onTap: () {
+                  provider.vincularSeleccionadas(mat.materiaId);
+                  Navigator.pop(ctx);
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _mostrarDialogoEliminarSeleccionadas(BuildContext context, FotosProvider provider) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Eliminar seleccionadas'),
+        content: Text(
+          '¿Estás seguro de que deseas eliminar las ${provider.selectedIds.length} fotos seleccionadas de tu galería?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () {
+              provider.eliminarSeleccionadas();
+              Navigator.pop(ctx);
+            },
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+            ),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
   }
 }
