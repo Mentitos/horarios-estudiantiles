@@ -41,28 +41,40 @@ class HorarioProvider extends ChangeNotifier {
     final int hour = prefs.getInt('notif_hour') ?? 21;
     final int minute = prefs.getInt('notif_minute') ?? 0;
 
+    await _notificationService.cancelDailySummaries();
+
     if (!enabled) {
       await _notificationService.cancelAll();
       return;
     }
 
     final now = DateTime.now();
-    final tomorrow = now.add(const Duration(days: 1));
-    final String tomorrowName = _getDiaSemana(tomorrow.weekday);
 
-    final List<String> subjectsTomorrow = [];
-
-    for (var materia in horario!.materiasSeleccionadas) {
-      if (materia.bloques.any((b) => b.dia == tomorrowName)) {
-        subjectsTomorrow.add(materia.materiaNombre ?? 'Materia');
+    for (int i = 1; i <= 14; i++) {
+      final targetDate = now.add(Duration(days: i));
+      final String dayName = _getDiaSemana(targetDate.weekday);
+      
+      final List<String> subjects = [];
+      for (var materia in horario!.materiasSeleccionadas) {
+        if (materia.bloques.any((b) => b.dia == dayName)) {
+          subjects.add(materia.materiaNombre ?? 'Materia');
+        }
       }
+      
+      final String body = subjects.isEmpty
+          ? 'Mañana no tenés que cursar, ¡estás libre!'
+          : 'Mañana cursás: ${subjects.join(", ")}';
+          
+      final notifyDate = targetDate.subtract(const Duration(days: 1));
+      
+      await _notificationService.scheduleDailySummary(
+        id: 100 + i,
+        body: body,
+        notifyDate: notifyDate,
+        hour: hour,
+        minute: minute,
+      );
     }
-
-    await _notificationService.scheduleTomorrowSummary(
-      subjects: subjectsTomorrow,
-      hour: hour,
-      minute: minute,
-    );
   }
 
   String _getDiaSemana(int weekday) {

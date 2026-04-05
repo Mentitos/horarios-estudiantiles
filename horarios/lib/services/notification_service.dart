@@ -93,23 +93,35 @@ class NotificationService {
     );
   }
 
-  Future<void> scheduleTomorrowSummary({
-    required List<String> subjects,
+  Future<void> scheduleDailySummary({
+    required int id,
+    required String body,
+    required DateTime notifyDate,
     required int hour,
     required int minute,
   }) async {
     if (!Platform.isAndroid) return;
 
-    final String body = subjects.isEmpty
-        ? 'Mañana estás libre de cursada.'
-        : 'Mañana cursás: ${subjects.join(", ")}';
+    final tz.TZDateTime scheduledDate = tz.TZDateTime(
+      tz.local,
+      notifyDate.year,
+      notifyDate.month,
+      notifyDate.day,
+      hour,
+      minute,
+      0,
+    );
+
+    if (scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
+      return;
+    }
 
     try {
       await _notificationsPlugin.zonedSchedule(
-        id: 1,
+        id: id,
         title: 'Tu cursada de mañana',
         body: body,
-        scheduledDate: _nextInstanceOfTime(DateTime.now(), hour, minute),
+        scheduledDate: scheduledDate,
         notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             'daily_summary_channel',
@@ -120,10 +132,16 @@ class NotificationService {
           ),
         ),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.time,
       );
     } catch (e) {
-      debugPrint('Error al programar resumen de mañana: $e');
+      debugPrint('Error al programar resumen diario $id: $e');
+    }
+  }
+
+  Future<void> cancelDailySummaries() async {
+    if (!Platform.isAndroid) return;
+    for (int i = 101; i <= 120; i++) {
+      await _notificationsPlugin.cancel(id: i);
     }
   }
 

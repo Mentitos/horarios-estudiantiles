@@ -1,5 +1,4 @@
 import 'package:isar/isar.dart';
-
 import '../models/materia.dart';
 import '../models/horario_usuario.dart';
 import '../models/materia_notas.dart';
