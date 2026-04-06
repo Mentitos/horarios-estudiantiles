@@ -14,6 +14,7 @@ import 'grabaciones_screen.dart';
 import 'galeria_screen.dart';
 import '../../providers/perfil_provider.dart';
 import 'calculadora_notas_screen.dart';
+import 'vista_previa_grilla_screen.dart';
 
 // Te imaginas qeu a mucha gente de la ungs le guste o que vea un compañero
 // usandola y dija "JIJI yo la hice"
@@ -243,18 +244,36 @@ class HomeScreenState extends State<HomeScreen> {
               checked: _mostrarSabado,
               child: const Text('Mostrar Sábado'),
             ),
+            const PopupMenuItem(
+              value: 'compartir',
+              child: Row(
+                children: [
+                  Icon(Icons.ios_share_rounded, size: 20),
+                  SizedBox(width: 12),
+                  Text('Compartir horario'),
+                ],
+              ),
+            ),
           ],
           onSelected: (val) {
-            setState(() {
-              if (val == 'sabado') {
+            if (val == 'sabado') {
+              setState(() {
                 _mostrarSabado = !_mostrarSabado;
                 _guardarPreferencia('mostrar_sabado', _mostrarSabado);
-              }
-              if (val == 'domingo') {
+              });
+            } else if (val == 'domingo') {
+              setState(() {
                 _mostrarDomingo = !_mostrarDomingo;
                 _guardarPreferencia('mostrar_domingo', _mostrarDomingo);
-              }
-            });
+              });
+            } else if (val == 'compartir') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const VistaPreviaGrillaScreen(),
+                ),
+              );
+            }
           },
         ),
       ];

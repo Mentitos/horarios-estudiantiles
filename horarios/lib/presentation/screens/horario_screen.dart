@@ -15,7 +15,7 @@ import '../widgets/color_picker_hsv.dart';
 
 //   Por que las empresas no me llaman? todavia no me tengo que preocupar tanto
 //   este proyecto vuelve al portafolio y vender paginas web mmmm no se cuanto dure
-class HorarioScreen extends StatelessWidget {
+class HorarioScreen extends StatefulWidget {
   final bool mostrarSabado;
   final bool mostrarDomingo;
 
@@ -24,6 +24,35 @@ class HorarioScreen extends StatelessWidget {
     this.mostrarSabado = false,
     this.mostrarDomingo = false,
   });
+
+  @override
+  State<HorarioScreen> createState() => _HorarioScreenState();
+}
+
+class _HorarioScreenState extends State<HorarioScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  final GlobalKey<GrillaSemanalState> _grillaKey = GlobalKey<GrillaSemanalState>();
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      // Tab 1 = Calendario Semanal
+      if (_tabController.index == 1 && !_tabController.indexIsChanging) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _grillaKey.currentState?.scrollToFirstBlock();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   Future<void> _mostrarBottomSheetBloques(
     BuildContext context,
@@ -149,25 +178,81 @@ class HorarioScreen extends StatelessWidget {
                         initialValue:
                             materiasDisponibles.any((m) => m.nombre == nombre)
                             ? nombre
-                            : null,
+                            : (nombre != null && nombre!.isNotEmpty ? nombre : null),
                         isExpanded: true,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: 'Materia',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.class_),
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.class_),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.edit, size: 20),
+                            tooltip: 'Renombrar localmente',
+                            onPressed: () async {
+                              final ctrl = TextEditingController(text: nombre);
+                              final nuevoNombre = await showDialog<String>(
+                                context: context,
+                                builder: (ctx) => AlertDialog(
+                                  title: const Text('Renombrar materia'),
+                                  content: TextField(
+                                    controller: ctrl,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Nuevo nombre',
+                                    ),
+                                    autofocus: true,
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(ctx),
+                                      child: const Text('Cancelar'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () => Navigator.pop(ctx, ctrl.text.trim()),
+                                      child: const Text('Guardar'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              if (nuevoNombre != null && nuevoNombre.isNotEmpty) {
+                                // Evitar que rompa el dropdown agregando al vuelo
+                                if (!materiasDisponibles.any((m) => m.nombre == nuevoNombre)) {
+                                  materiasDisponibles.add(Materia()..nombre = nuevoNombre);
+                                }
+                                setStateSheet(() {
+                                  nombre = nuevoNombre;
+                                });
+                                horarioProvider.actualizarMateria(
+                                  materiaActualizada.materiaId!,
+                                  nombre!,
+                                  listaProfesores,
+                                  aula,
+                                  comision,
+                                  colorElegido,
+                                );
+                              }
+                            },
+                          ),
                         ),
-                        items: materiasDisponibles.map((m) {
-                          return DropdownMenuItem<String>(
-                            value: m.nombre,
-                            child: Text(
-                              m.nombre ?? '',
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        }).toList(),
+                        items: (() {
+                          // Asegurar que 'nombre' (si no es null) exista en las opciones del dropdown
+                          final list = materiasDisponibles.toList();
+                          if (nombre != null && nombre!.isNotEmpty && !list.any((m) => m.nombre == nombre)) {
+                            list.add(Materia()..nombre = nombre);
+                          }
+                          return list.map((m) {
+                            return DropdownMenuItem<String>(
+                              value: m.nombre,
+                              child: Text(
+                                m.nombre ?? '',
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          }).toList();
+                        })(),
                         onChanged: (val) {
                           if (val != null) {
-                            nombre = val;
+                            setStateSheet(() {
+                              nombre = val;
+                            });
                             horarioProvider.actualizarMateria(
                               materiaActualizada.materiaId!,
                               nombre!,
@@ -725,30 +810,29 @@ class HorarioScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          toolbarHeight: 0,
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Gestor de Clases'),
-              Tab(text: 'Calendario Semanal'),
-            ],
-          ),
-        ),
-        body: TabBarView(
-          children: [
-            _buildGestorDeClases(context),
-            _buildCalendarioSemanal(context),
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        toolbarHeight: 0,
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Gestor de Clases'),
+            Tab(text: 'Calendario Semanal'),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          heroTag: 'fab_horario',
-          child: const Icon(Icons.add),
-          onPressed: () => _iniciarFlujoAgregarMateria(context),
-        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildGestorDeClases(context),
+          _buildCalendarioSemanal(context),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: 'fab_horario',
+        child: const Icon(Icons.add),
+        onPressed: () => _iniciarFlujoAgregarMateria(context),
       ),
     );
   }
@@ -990,9 +1074,10 @@ class HorarioScreen extends StatelessWidget {
           );
         }
         return GrillaSemanal(
+          key: _grillaKey,
           horario: horario,
-          mostrarSabado: mostrarSabado,
-          mostrarDomingo: mostrarDomingo,
+          mostrarSabado: widget.mostrarSabado,
+          mostrarDomingo: widget.mostrarDomingo,
         );
       },
     );

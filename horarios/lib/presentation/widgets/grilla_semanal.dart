@@ -18,10 +18,10 @@ class GrillaSemanal extends StatefulWidget {
   });
 
   @override
-  State<GrillaSemanal> createState() => _GrillaSemanalState();
+  State<GrillaSemanal> createState() => GrillaSemanalState();
 }
 
-class _GrillaSemanalState extends State<GrillaSemanal> {
+class GrillaSemanalState extends State<GrillaSemanal> {
   double _alturaFranja = 52.0;
   static const double _alturaMin = 28.0;
   static const double _alturaMax = 100.0;
@@ -45,6 +45,32 @@ class _GrillaSemanalState extends State<GrillaSemanal> {
   void dispose() {
     _verticalScrollController.dispose();
     super.dispose();
+  }
+
+  /// Scrollea animadamente al primer bloque horario del alumnó.
+  /// Si no hay bloques, va a las 7:00.
+  void scrollToFirstBlock() {
+    int minutosMasTemprano = 7 * 60; // default 7:00
+    bool hayBloques = false;
+
+    for (final materia in widget.horario.materiasSeleccionadas) {
+      for (final bloque in materia.bloques) {
+        final mins = _parseMinutos(bloque.horaInicio ?? '');
+        if (!hayBloques || mins < minutosMasTemprano) {
+          minutosMasTemprano = mins;
+          hayBloques = true;
+        }
+      }
+    }
+
+    final offset = (minutosMasTemprano / 60.0) * _alturaFranja - 16;
+    if (_verticalScrollController.hasClients) {
+      _verticalScrollController.animateTo(
+        offset.clamp(0.0, _verticalScrollController.position.maxScrollExtent),
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   String _abreviarDia(String dia) {

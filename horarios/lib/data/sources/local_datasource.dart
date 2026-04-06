@@ -147,4 +147,14 @@ class LocalDatasource {
       debugPrint('Error al pre-cargar datos de demo: $e');
     }
   }
+
+  Future<bool> cerrarConexion() async {
+    try {
+      final isar = await db;
+      return await isar.close();
+    } catch (e) {
+      debugPrint('Error al cerrar Isar: $e');
+      return false;
+    }
+  }
 }

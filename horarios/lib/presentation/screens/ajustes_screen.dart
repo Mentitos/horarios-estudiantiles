@@ -5,6 +5,7 @@ import '../widgets/ajustes/carrera_section.dart';
 import '../widgets/ajustes/notificaciones_section.dart';
 import '../widgets/ajustes/progreso_academico_section.dart';
 import '../widgets/ajustes/actualizar_datos_section.dart';
+import '../widgets/ajustes/backup_section.dart';
 import '../widgets/ajustes/avanzado_section.dart';
 import '../widgets/ajustes/acerca_de_section.dart';
 import '../../providers/donaciones_provider.dart';
@@ -39,6 +40,7 @@ class _AjustesScreenState extends State<AjustesScreen> {
           SizedBox(height: 16),
           ProgresoAcademicoSection(),
           ActualizarDatosSection(),
+          BackupSection(),
           AvanzadoSection(),
           SizedBox(height: 16),
           AcercaDeSection(),
