@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:home_widget/home_widget.dart';
 import '../data/models/horario_usuario.dart';
 import '../data/models/materia.dart';
 import '../data/repositories/horario_repository.dart';
@@ -29,6 +30,7 @@ class HorarioProvider extends ChangeNotifier {
     } finally {
       cargando = false;
       await actualizarNotificaciones();
+      await actualizarWidget();
       _safeNotify();
     }
   }
@@ -77,6 +79,43 @@ class HorarioProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> actualizarWidget() async {
+    if (horario == null) return;
+    
+    final now = DateTime.now();
+    final String dayName = _getDiaSemana(now.weekday);
+    final List<String> subjects = [];
+    
+    for (var materia in horario!.materiasSeleccionadas) {
+      if (materia.bloques.any((b) => b.dia == dayName)) {
+        final block = materia.bloques.firstWhere((b) => b.dia == dayName);
+        final timeStr = block.horaInicio ?? '??:??';
+        final aulaStr = block.aula?.isNotEmpty == true || materia.aula?.isNotEmpty == true
+            ? ' (Aula ${block.aula?.isNotEmpty == true ? block.aula : materia.aula})'
+            : '';
+        subjects.add('$timeStr - ${materia.materiaNombre}$aulaStr');
+      }
+    }
+    
+    subjects.sort();
+    
+    final String widgetData = subjects.isEmpty 
+        ? 'Hoy no tenés clases programadas' 
+        : subjects.join('\n');
+        
+    try {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        await HomeWidget.saveWidgetData<String>('widget_content', widgetData);
+        await HomeWidget.updateWidget(
+          name: 'HorarioWidgetProvider',
+          androidName: 'HorarioWidgetProvider', 
+        );
+      }
+    } catch (e) {
+      debugPrint('Error actualizando widget: $e');
+    }
+  }
+
   String _getDiaSemana(int weekday) {
     switch (weekday) {
       case DateTime.monday:
@@ -107,6 +146,7 @@ class HorarioProvider extends ChangeNotifier {
       await _repository.agregarMateria(materia);
       horario = await _repository.obtenerHorario();
       await actualizarNotificaciones();
+      await actualizarWidget();
       notifyListeners();
     } catch (e) {
       error = e.toString();
@@ -119,6 +159,7 @@ class HorarioProvider extends ChangeNotifier {
       await _repository.eliminarMateria(materiaId);
       horario = await _repository.obtenerHorario();
       await actualizarNotificaciones();
+      await actualizarWidget();
       notifyListeners();
     } catch (e) {
       error = e.toString();
@@ -130,6 +171,8 @@ class HorarioProvider extends ChangeNotifier {
     try {
       await _repository.agregarBloque(materiaId, bloque);
       horario = await _repository.obtenerHorario();
+      await actualizarNotificaciones();
+      await actualizarWidget();
       notifyListeners();
     } catch (e) {
       error = e.toString();
@@ -142,6 +185,8 @@ class HorarioProvider extends ChangeNotifier {
     try {
       await _repository.eliminarBloque(materiaId, indice);
       horario = await _repository.obtenerHorario();
+      await actualizarNotificaciones();
+      await actualizarWidget();
       notifyListeners();
     } catch (e) {
       error = e.toString();
@@ -158,6 +203,8 @@ class HorarioProvider extends ChangeNotifier {
     try {
       await _repository.actualizarBloque(materiaId, indice, nuevoBloque);
       horario = await _repository.obtenerHorario();
+      await actualizarNotificaciones();
+      await actualizarWidget();
       notifyListeners();
     } catch (e) {
       error = e.toString();
@@ -176,6 +223,7 @@ class HorarioProvider extends ChangeNotifier {
       await _repository.eliminarHorario();
       horario = await _repository.crearHorarioVacio('Mi Horario');
       await actualizarNotificaciones();
+      await actualizarWidget();
       notifyListeners();
     } catch (e) {
       error = e.toString();
@@ -201,6 +249,8 @@ class HorarioProvider extends ChangeNotifier {
         nuevoColorARGB,
       );
       horario = await _repository.obtenerHorario();
+      await actualizarNotificaciones();
+      await actualizarWidget();
       notifyListeners();
     } catch (e) {
       error = e.toString();
