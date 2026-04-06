@@ -3,34 +3,39 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="#2E2E2E">
+    android:background="#2A2A2A"
+    android:layout_marginBottom="4dp">
 
-    <ImageView
-        android:id="@+id/item_color"
+    <TextView
+        android:id="@+id/item_color_bar"
         android:layout_width="6dp"
         android:layout_height="match_parent"
+        android:text=""
         android:background="#1565C0" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="8dp">
+        android:paddingLeft="8dp"
+        android:paddingTop="6dp"
+        android:paddingRight="8dp"
+        android:paddingBottom="6dp">
 
         <TextView
             android:id="@+id/item_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#AAAAAA"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:text="10:00" />
-            
+
         <TextView
             android:id="@+id/item_subject"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#FFFFFF"
-            android:textSize="14sp"
+            android:textSize="13sp"
             android:textStyle="bold"
             android:text="Materia" />
 
@@ -39,8 +44,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#888888"
-            android:textSize="12sp"
-            android:text="Aula" />
-            
+            android:textSize="11sp"
+            android:text="" />
+
     </LinearLayout>
 </LinearLayout>
