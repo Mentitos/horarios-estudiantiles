@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:home_widget/home_widget.dart';
+import 'dart:convert';
 import '../data/models/horario_usuario.dart';
 import '../data/models/materia.dart';
 import '../data/repositories/horario_repository.dart';
@@ -55,20 +56,20 @@ class HorarioProvider extends ChangeNotifier {
     for (int i = 1; i <= 14; i++) {
       final targetDate = now.add(Duration(days: i));
       final String dayName = _getDiaSemana(targetDate.weekday);
-      
+
       final List<String> subjects = [];
       for (var materia in horario!.materiasSeleccionadas) {
         if (materia.bloques.any((b) => b.dia == dayName)) {
           subjects.add(materia.materiaNombre ?? 'Materia');
         }
       }
-      
+
       final String body = subjects.isEmpty
           ? 'Mañana no tenés que cursar, ¡estás libre!'
           : 'Mañana cursás: ${subjects.join(", ")}';
-          
+
       final notifyDate = targetDate.subtract(const Duration(days: 1));
-      
+
       await _notificationService.scheduleDailySummary(
         id: 100 + i,
         body: body,
@@ -81,34 +82,49 @@ class HorarioProvider extends ChangeNotifier {
 
   Future<void> actualizarWidget() async {
     if (horario == null) return;
-    
-    final now = DateTime.now();
-    final String dayName = _getDiaSemana(now.weekday);
-    final List<String> subjects = [];
-    
+
+    final Map<String, List<Map<String, dynamic>>> scheduleByDay = {
+      'Lunes': [],
+      'Martes': [],
+      'Miércoles': [],
+      'Jueves': [],
+      'Viernes': [],
+      'Sábado': [],
+      'Domingo': [],
+    };
+
     for (var materia in horario!.materiasSeleccionadas) {
-      if (materia.bloques.any((b) => b.dia == dayName)) {
-        final block = materia.bloques.firstWhere((b) => b.dia == dayName);
-        final timeStr = block.horaInicio ?? '??:??';
-        final aulaStr = block.aula?.isNotEmpty == true || materia.aula?.isNotEmpty == true
-            ? ' (Aula ${block.aula?.isNotEmpty == true ? block.aula : materia.aula})'
-            : '';
-        subjects.add('$timeStr - ${materia.materiaNombre}$aulaStr');
+      for (var block in materia.bloques) {
+        final day = block.dia ?? '';
+        if (day.isEmpty || !scheduleByDay.containsKey(day)) continue;
+
+        scheduleByDay[day]!.add({
+          'time': block.horaInicio ?? '??:??',
+          'subject': materia.materiaNombre ?? '',
+          'room': block.aula?.isNotEmpty == true
+              ? block.aula
+              : materia.aula ?? '',
+          'color': materia.colorARGB ?? 0xFF1565C0,
+        });
       }
     }
-    
-    subjects.sort();
-    
-    final String widgetData = subjects.isEmpty 
-        ? 'Hoy no tenés clases programadas' 
-        : subjects.join('\n');
-        
+
+    // Ordenar por horario por dia de abajo hacia arriba :3c
+    for (var day in scheduleByDay.keys) {
+      scheduleByDay[day]!.sort(
+        (a, b) => (a['time'] as String).compareTo(b['time'] as String),
+      );
+    }
+
     try {
       if (defaultTargetPlatform == TargetPlatform.android) {
-        await HomeWidget.saveWidgetData<String>('widget_content', widgetData);
+        await HomeWidget.saveWidgetData<String>(
+          'widget_schedule',
+          jsonEncode(scheduleByDay),
+        );
         await HomeWidget.updateWidget(
           name: 'HorarioWidgetProvider',
-          androidName: 'HorarioWidgetProvider', 
+          androidName: 'HorarioWidgetProvider',
         );
       }
     } catch (e) {
