@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../providers/perfil_provider.dart';
 import '../../providers/materias_provider.dart';
+import '../../data/models/materia.dart';
 import 'home_screen.dart';
 
 //   Me gustan las cosas que se hacen con las manos, cubos rubiks, cuchillos mariposas
@@ -545,6 +546,7 @@ class _ListaAprobadasOnboarding extends StatefulWidget {
 
 class _ListaAprobadasOnboardingState extends State<_ListaAprobadasOnboarding> {
   late Future<List<dynamic>> _futureMaterias;
+  final Map<int, Materia> _opcionSeleccionadaCompuesta = {};
 
   @override
   void initState() {
@@ -560,29 +562,106 @@ class _ListaAprobadasOnboardingState extends State<_ListaAprobadasOnboarding> {
     return FutureBuilder<List<dynamic>>(
       future: _futureMaterias,
       builder: (context, snapshot) {
-        if (!snapshot.hasData) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No se encontraron materias'));
+        }
+        
         final materias = snapshot.data!;
         return ListView.builder(
           itemCount: materias.length,
-          itemBuilder: (context, i) {
-            final item = materias[i];
-            final id = (item as dynamic).materiaId as String?;
-            if (id == null) return const SizedBox.shrink();
-            final aprobada = perfilProvider.estaAprobada(id);
-            return CheckboxListTile(
-              title: Text(
-                item.nombre ?? '',
-                style: TextStyle(
-                  fontSize: 16,
-                  decoration: aprobada ? TextDecoration.lineThrough : null,
-                  color: aprobada ? Colors.grey : null,
+          itemBuilder: (context, index) {
+            final item = materias[index];
+
+            if (item is Materia) {
+              final id = item.materiaId;
+              if (id == null) return const SizedBox.shrink();
+              final aprobada = perfilProvider.estaAprobada(id);
+              
+              return CheckboxListTile(
+                title: Text(
+                  item.nombre ?? '',
+                  style: TextStyle(
+                    fontSize: 16,
+                    decoration: aprobada ? TextDecoration.lineThrough : null,
+                    color: aprobada ? Colors.grey : null,
+                  ),
                 ),
-              ),
-              value: aprobada,
-              onChanged: (_) => perfilProvider.toggleMateriaAprobada(id),
-            );
+                value: aprobada,
+                onChanged: (_) => perfilProvider.toggleMateriaAprobada(id),
+              );
+            } else if (item is List<Materia>) {
+              final materiaSel =
+                  _opcionSeleccionadaCompuesta[index] ?? item.first;
+
+              bool algunaAprobada = false;
+              for (var m in item) {
+                if (perfilProvider.estaAprobada(m.materiaId!)) {
+                  algunaAprobada = true;
+                  break;
+                }
+              }
+
+              return ListTile(
+                title: DropdownButton<Materia>(
+                  isExpanded: true,
+                  value: materiaSel,
+                  style: TextStyle(
+                    fontSize: 16,
+                    decoration: algunaAprobada
+                        ? TextDecoration.lineThrough
+                        : null,
+                    color: algunaAprobada
+                        ? Colors.grey
+                        : Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                  items: item.map((Materia m) {
+                    return DropdownMenuItem<Materia>(
+                      value: m,
+                      child: Text(
+                        m.nombre ?? '',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: algunaAprobada
+                      ? null
+                      : (val) {
+                          if (val != null) {
+                            setState(() {
+                              _opcionSeleccionadaCompuesta[index] = val;
+                            });
+                          }
+                        },
+                ),
+                trailing: Checkbox(
+                  value: algunaAprobada,
+                  onChanged: (val) async {
+                    if (val != null) {
+                      if (!algunaAprobada) {
+                        await perfilProvider.toggleMateriaAprobada(
+                          materiaSel.materiaId!,
+                        );
+                      } else {
+                        for (var m in item) {
+                          if (perfilProvider.estaAprobada(m.materiaId!)) {
+                            await perfilProvider.toggleMateriaAprobada(
+                              m.materiaId!,
+                            );
+                          }
+                        }
+                      }
+                    }
+                  },
+                ),
+              );
+            }
+            return const SizedBox.shrink();
           },
         );
       },
