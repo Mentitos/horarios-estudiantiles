@@ -115,7 +115,8 @@ class _BackupSectionState extends State<BackupSection> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Guardá o recuperá tus materias, notas y configuraciones. (No incluye archivos de audio)',
+              'Guardá o recuperá tus materias, notas y configuraciones. (No incluye archivos de audio)\n'
+              'También podés tocar un archivo ".horarios" desde WhatsApp o tu gestor de archivos para restaurarlo.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),

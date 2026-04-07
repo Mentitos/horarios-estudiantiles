@@ -17,7 +17,7 @@ class BackupService {
 
       final tempDir = await getTemporaryDirectory();
       final copyFile = File(
-        '${tempDir.path}/Copia_Seguridad_Horarios_UNGS.bak',
+        '${tempDir.path}/Mis_Horarios.horarios',
       );
       await dbFile.copy(copyFile.path);
 
@@ -33,7 +33,7 @@ class BackupService {
   Future<String> importarBackup() async {
     try {
       const XTypeGroup typeGroup = XTypeGroup(
-        label: 'Archivos de base de datos Isar (.bak, .isar)',
+        label: 'Copias de seguridad de Horarios (.horarios, .bak, .isar)',
       );
       final XFile? file = await openFile(acceptedTypeGroups: [typeGroup]);
 
@@ -49,10 +49,7 @@ class BackupService {
       if (await sourceFile.length() < 100) {
         return 'El archivo es demasiado pequeño para ser una base de datos válida';
       }
-      final cerrado = await LocalDatasource().cerrarConexion();
-      if (!cerrado) {
-        return 'No se pudo cerrar la base de datos actual para reemplazarla.';
-      }
+      await LocalDatasource().cerrarConexion();
 
       final dir = await getApplicationDocumentsDirectory();
       final targetFile = File('${dir.path}/default.isar');
@@ -63,6 +60,30 @@ class BackupService {
       return 'OK';
     } catch (e) {
       return 'Error al restaurar: $e';
+    }
+  }
+
+  Future<String> importarBackupDesdePath(String filePath) async {
+    try {
+      final sourceFile = File(filePath);
+      if (!await sourceFile.exists()) {
+        return 'El archivo seleccionado no existe';
+      }
+
+      if (await sourceFile.length() < 100) {
+        return 'El archivo es demasiado pequeño para ser una base de datos válida';
+      }
+      await LocalDatasource().cerrarConexion();
+
+      final dir = await getApplicationDocumentsDirectory();
+      final targetFile = File('${dir.path}/default.isar');
+
+      await sourceFile.copy(targetFile.path);
+
+      SystemNavigator.pop();
+      return 'OK';
+    } catch (e) {
+      return 'Error al restaurar desde archivo: $e';
     }
   }
 }

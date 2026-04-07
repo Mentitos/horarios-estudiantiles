@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
+import 'dart:io';
+import 'package:app_links/app_links.dart';
+import 'package:uri_to_file/uri_to_file.dart';
+import '../../services/backup_service.dart';
 import '../../providers/calificaciones_provider.dart';
 import 'resumen_screen.dart';
 import 'horario_screen.dart';
@@ -35,10 +40,84 @@ class HomeScreenState extends State<HomeScreen> {
   final GlobalKey<CalendarioEventosScreenState> _calendarioKey =
       GlobalKey<CalendarioEventosScreenState>();
 
+  late AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
+
   @override
   void initState() {
     super.initState();
     _cargarPreferencias();
+    _initAppLinks();
+  }
+
+  void _initAppLinks() {
+    _appLinks = AppLinks();
+    
+    _appLinks.getInitialLink().then((uri) {
+      if (uri != null) _procesarUri(uri);
+    });
+
+    _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+      _procesarUri(uri);
+    });
+  }
+
+  Future<void> _procesarUri(Uri uri) async {
+    try {
+      final File file = await toFile(uri.toString());
+      if (mounted) {
+        _preguntarImportar(file.path);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('No se pudo leer el archivo: $e'),
+            duration: const Duration(seconds: 4),
+          ),
+        );
+      }
+      debugPrint('Error al procesar URI de archivo: $e');
+    }
+  }
+
+  void _preguntarImportar(String filePath) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('⚠️ Advertencia'),
+        content: const Text(
+          'Se detectó un archivo de copia de seguridad.\n\n'
+          'Restaurar esta copia sobrescribirá TODOS tus datos actuales.\n\n'
+          'La app se cerrará sola al finalizar.\n\n¿Estás seguro de que querés continuar?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Sobrescribir datos'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      final result = await BackupService().importarBackupDesdePath(filePath);
+      if (mounted) {
+        if (result != 'OK' && result != 'Cancelado por el usuario') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(result)),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _cargarPreferencias() async {
@@ -61,6 +140,12 @@ class HomeScreenState extends State<HomeScreen> {
         _history.add(index);
       });
     }
+  }
+
+  @override
+  void dispose() {
+    _linkSubscription?.cancel();
+    super.dispose();
   }
 
   static const List<String> _titles = [
