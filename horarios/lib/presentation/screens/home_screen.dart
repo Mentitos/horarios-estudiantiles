@@ -20,7 +20,7 @@ import 'galeria_screen.dart';
 import '../../providers/perfil_provider.dart';
 import 'calculadora_notas_screen.dart';
 import 'vista_previa_grilla_screen.dart';
-
+import 'pomodoro_screen.dart';
 // Te imaginas qeu a mucha gente de la ungs le guste o que vea un compañero
 // usandola y dija "JIJI yo la hice"
 class HomeScreen extends StatefulWidget {
@@ -154,6 +154,7 @@ class HomeScreenState extends State<HomeScreen> {
     'Calendario',
     'Calificaciones',
     'Profesores',
+    'Pomodoro',
     'Grabaciones',
     'Galería',
     'Ajustes',
@@ -168,6 +169,7 @@ class HomeScreenState extends State<HomeScreen> {
   static const List<_DrawerItem> _drawerItemsStudy = [
     _DrawerItem(icon: Icons.note_alt_rounded, label: 'Calificaciones'),
     _DrawerItem(icon: Icons.person_search_rounded, label: 'Profesores'),
+    _DrawerItem(icon: Icons.timer_rounded, label: 'Pomodoro'),
     _DrawerItem(icon: Icons.mic_rounded, label: 'Grabaciones'),
     _DrawerItem(icon: Icons.collections_rounded, label: 'Galería'),
   ];
@@ -189,6 +191,7 @@ class HomeScreenState extends State<HomeScreen> {
       CalendarioEventosScreen(key: _calendarioKey),
       const CalificacionesScreen(),
       const ProfesoresScreen(),
+      const PomodoroScreen(),
       const GrabacionesScreen(),
       const GaleriaScreen(),
       const AjustesScreen(),

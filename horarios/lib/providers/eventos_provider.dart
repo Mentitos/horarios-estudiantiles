@@ -41,7 +41,11 @@ class EventosProvider with ChangeNotifier {
   }
 
   Future<void> actualizarNotificaciones() async {
-    await _notificationService.cancelAll();
+    // Cancelar SOLO las notificaciones de eventos (no el resumen diario del horario)
+    for (var evento in _eventos) {
+      await _notificationService.cancelEventNotifications(evento.id);
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final int hour = prefs.getInt('notif_hour') ?? 21;
     final int minute = prefs.getInt('notif_minute') ?? 0;

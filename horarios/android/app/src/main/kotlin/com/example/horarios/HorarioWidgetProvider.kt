@@ -12,33 +12,52 @@ import org.json.JSONObject
 import java.util.Calendar
 
 class HorarioWidgetProvider : HomeWidgetProvider() {
+    // Para mi anterior app queria hacer un widget pero era muy molesto con lo mal que andaba
+    // Mi computadora y el emulador de android para probarlo comodamente, ahora con esta app
+    // Son solo datos planos que no tienen ninguna retroalimentacion del widget a la app
+    // Entonces es mas facil poder hacerlo aunque ande lento en el debug
+
 
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action == "com.example.horarios.WIDGET_PREV" || intent.action == "com.example.horarios.WIDGET_NEXT") {
-            val widgetPrefs = context.getSharedPreferences("WidgetStorage", Context.MODE_PRIVATE)
-            var offset = widgetPrefs.getInt("widget_day_offset", 0)
-            if (intent.action == "com.example.horarios.WIDGET_PREV") {
-                offset -= 1
-            } else {
-                offset += 1
+        when (intent.action) {
+            "com.example.horarios.WIDGET_PREV", "com.example.horarios.WIDGET_NEXT" -> {
+                val widgetPrefs = context.getSharedPreferences("WidgetStorage", Context.MODE_PRIVATE)
+                var offset = widgetPrefs.getInt("widget_day_offset", 0)
+                if (intent.action == "com.example.horarios.WIDGET_PREV") {
+                    offset -= 1
+                } else {
+                    offset += 1
+                }
+                widgetPrefs.edit().putInt("widget_day_offset", offset).apply()
+
+                val appWidgetManager = AppWidgetManager.getInstance(context)
+                val componentName = android.content.ComponentName(context, HorarioWidgetProvider::class.java)
+                val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
+
+                val homeWidgetData = es.antonborri.home_widget.HomeWidgetPlugin.getData(context)
+                val scheduleJson = homeWidgetData.getString("widget_schedule", "{}")
+                widgetPrefs.edit().putString("widget_schedule", scheduleJson).apply()
+
+                onUpdate(context, appWidgetManager, appWidgetIds, homeWidgetData)
             }
-            widgetPrefs.edit().putInt("widget_day_offset", offset).apply()
-
-            val appWidgetManager = AppWidgetManager.getInstance(context)
-            val componentName = android.content.ComponentName(context, HorarioWidgetProvider::class.java)
-            val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
-
-            // Para mi anterior app queria hacer un widget pero era muy molesto con lo mal que andaba
-            // Mi computadora y el emulador de android para probarlo comodamente, ahora con esta app
-            // Son solo datos planos que no tienen ninguna retroalimentacion del widget a la app
-            // Entonces es mas facil poder hacerlo aunque ande lento en el debug
-            val homeWidgetData = es.antonborri.home_widget.HomeWidgetPlugin.getData(context)
-            val scheduleJson = homeWidgetData.getString("widget_schedule", "{}")
-            widgetPrefs.edit().putString("widget_schedule", scheduleJson).apply()
-
-            onUpdate(context, appWidgetManager, appWidgetIds, homeWidgetData)
-        } else {
-            super.onReceive(context, intent)
+            "com.example.horarios.WIDGET_MIDNIGHT_UPDATE", Intent.ACTION_DATE_CHANGED, Intent.ACTION_TIME_CHANGED -> {
+                val widgetPrefs = context.getSharedPreferences("WidgetStorage", Context.MODE_PRIVATE)
+                val currentDayOfYear = Calendar.getInstance().get(Calendar.DAY_OF_YEAR)
+                val lastDay = widgetPrefs.getInt("widget_last_update_day", -1)
+                if (lastDay != currentDayOfYear) {
+                    widgetPrefs.edit()
+                        .putInt("widget_day_offset", 0)
+                        .putInt("widget_last_update_day", currentDayOfYear)
+                        .apply()
+                    val appWidgetManager = AppWidgetManager.getInstance(context)
+                    val componentName = android.content.ComponentName(context, HorarioWidgetProvider::class.java)
+                    val appWidgetIds = appWidgetManager.getAppWidgetIds(componentName)
+                    val homeWidgetData = es.antonborri.home_widget.HomeWidgetPlugin.getData(context)
+                    onUpdate(context, appWidgetManager, appWidgetIds, homeWidgetData)
+                }
+                scheduleMidnightUpdate(context)
+            }
+            else -> super.onReceive(context, intent)
         }
     }
 
@@ -100,6 +119,8 @@ class HorarioWidgetProvider : HomeWidgetProvider() {
 
             appWidgetManager.updateAppWidget(widgetId, views)
         }
+        
+        scheduleMidnightUpdate(context)
     }
 
     private fun getPendingIntent(context: Context, action: String, widgetId: Int): PendingIntent {
@@ -112,6 +133,42 @@ class HorarioWidgetProvider : HomeWidgetProvider() {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+    }
+
+    private fun scheduleMidnightUpdate(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+        val intent = Intent(context, HorarioWidgetProvider::class.java).apply {
+            action = "com.example.horarios.WIDGET_MIDNIGHT_UPDATE"
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = System.currentTimeMillis()
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+            add(Calendar.DAY_OF_YEAR, 1)
+        }
+
+        try {
+            alarmManager.setExact(
+                android.app.AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
+        } catch (e: SecurityException) {
+            alarmManager.set(
+                android.app.AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
+        }
     }
 
     private fun getDayShort(offset: Int): String {

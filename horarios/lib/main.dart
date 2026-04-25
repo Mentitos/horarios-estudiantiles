@@ -17,6 +17,18 @@ import 'data/sources/local_datasource.dart';
 import 'data/repositories/horario_repository.dart';
 import 'presentation/screens/splash_screen.dart';
 import 'services/notification_service.dart';
+import 'presentation/overlay/pomodoro_overlay.dart';
+
+@pragma("vm:entry-point")
+void overlayMain() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(
+    const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: PomodoroOverlay(),
+    ),
+  );
+}
 
 //  Me gusta mucho mi mujer, si bien este proyecto esta ampliamente
 //  Vinculado con la UNGS me gustaria poder expandirlo a su universidad

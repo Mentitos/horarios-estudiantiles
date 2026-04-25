@@ -35,7 +35,8 @@ class _BackupSectionState extends State<BackupSection> {
       builder: (ctx) => AlertDialog(
         title: const Text('⚠️ Advertencia'),
         content: const Text(
-          'Restaurar una copia de seguridad sobrescribirá TODOS tus datos actuales (materias, notas, etc.).\n\n'
+          'Restaurar una copia de seguridad sobrescribirá TODOS tus datos actuales '
+          '(materias, notas, eventos del calendario, etc.).\n\n'
           'La app se cerrará sola al finalizar.\n\n¿Estás seguro de que querés continuar?',
         ),
         actions: [
@@ -73,6 +74,8 @@ class _BackupSectionState extends State<BackupSection> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     if (_isWorking) {
       return const Card(
         margin: EdgeInsets.symmetric(vertical: 8),
@@ -102,7 +105,7 @@ class _BackupSectionState extends State<BackupSection> {
               children: [
                 Icon(
                   Icons.save_rounded,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -115,10 +118,32 @@ class _BackupSectionState extends State<BackupSection> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Guardá o recuperá tus materias, notas y configuraciones. (No incluye archivos de audio)\n'
-              'También podés tocar un archivo ".horarios" desde WhatsApp o tu gestor de archivos para restaurarlo.',
+              'Guardá o recuperá tus datos. La copia incluye:',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 6),
+            // Lista de qué incluye el backup
+            ...const [
+              _BackupIncludeItem(icon: Icons.grid_view_rounded, label: 'Materias y horario'),
+              _BackupIncludeItem(icon: Icons.calendar_month_rounded, label: 'Eventos del calendario (parciales, TPs)'),
+              _BackupIncludeItem(icon: Icons.people_alt_rounded, label: 'Directorio de profesores'),
+              _BackupIncludeItem(icon: Icons.note_alt_rounded, label: 'Calificaciones y progreso'),
+              _BackupIncludeItem(icon: Icons.tune_rounded, label: 'Configuraciones'),
+            ],
+            const SizedBox(height: 4),
+            Text(
+              '⚠ No incluye grabaciones de audio ni fotos.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'También podés tocar un archivo ".horarios" desde WhatsApp o tu gestor de archivos para restaurarlo.',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
                   ),
             ),
             const SizedBox(height: 16),
@@ -128,7 +153,7 @@ class _BackupSectionState extends State<BackupSection> {
                   child: OutlinedButton.icon(
                     onPressed: _exportar,
                     icon: const Icon(Icons.upload_file_rounded),
-                    label: const Text('Exportar BD'),
+                    label: const Text('Exportar'),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -136,13 +161,37 @@ class _BackupSectionState extends State<BackupSection> {
                   child: OutlinedButton.icon(
                     onPressed: _importar,
                     icon: const Icon(Icons.download_rounded),
-                    label: const Text('Restaurar BD'),
+                    label: const Text('Restaurar'),
                   ),
                 ),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _BackupIncludeItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _BackupIncludeItem({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: colorScheme.primary),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(fontSize: 13, color: colorScheme.onSurfaceVariant),
+          ),
+        ],
       ),
     );
   }

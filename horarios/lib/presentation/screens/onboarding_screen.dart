@@ -223,12 +223,13 @@ class _PaginaCarreraState extends State<_PaginaCarrera> {
               ),
               const SizedBox(height: 16),
               const Text(
-                '¿Qué carrera cursás?',
+                '¿En qué institución estudiás?',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 4),
               Text(
-                'Podés elegir hasta 3 carreras.',
+                'Seleccioná hasta 3 carreras de la UNGS, o activá el modo personalizado para cargar las tuyas.',
+
                 style: TextStyle(
                   color: Theme.of(
                     context,
@@ -239,11 +240,11 @@ class _PaginaCarreraState extends State<_PaginaCarrera> {
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
                 title: const Text(
-                  'Soy alumno de otra universidad',
+                  'Hacer mi propia carrera independiente',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 subtitle: const Text(
-                  'Usar la app sin datos de la UNGS',
+                  'Para alumnos de otra institución o planes propios',
                   style: TextStyle(fontSize: 12),
                 ),
                 value: widget.esAlumnoExterno,
@@ -252,9 +253,9 @@ class _PaginaCarreraState extends State<_PaginaCarrera> {
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (ctx) => AlertDialog(
-                        title: const Text('Alumno de otra universidad'),
+                        title: const Text('Carrera independiente'),
                         content: const Text(
-                          'Si elegís esta opción, no verás las carreras ni materias de la UNGS.\n\nPodrás cargar el nombre de tu carrera y tus propias materias manualmente desde el menú de Ajustes > Gestionar Materias.',
+                          'Con esta opción podés salirte de los planes predefinidos de la UNGS y hacer la tuya.\n\nVas a poder poner el nombre de tu propia carrera, cargar tus materias, y la app tomará eso como tu progreso académico que se verá en el resumen de inicio.',
                         ),
                         actions: [
                           TextButton(
